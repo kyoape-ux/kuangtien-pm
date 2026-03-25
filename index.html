@@ -161,7 +161,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 /* ── LIST HEADER ── */
 .list-header{
-  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px;
+  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px 40px;
   padding:7px 20px;gap:10px;font-size:10px;color:var(--text-dim);font-weight:700;
   text-transform:uppercase;letter-spacing:.6px;margin:0 24px 4px;
   border-bottom:1px solid var(--border);
@@ -178,7 +178,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .project-card.archived{opacity:.55;border-style:dashed}
 .project-card.archived:hover{opacity:.8}
 .project-row{
-  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px;
+  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px 40px;
   align-items:center;padding:13px 20px;gap:10px;cursor:pointer;
 }
 .toggle-icon{
@@ -215,13 +215,21 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 /* ── SUBTASKS ── */
 .subtask-list{border-top:1px solid var(--border);background:#FAFAFA}
 .subtask-row{
-  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px;
+  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px 40px;
   align-items:center;padding:9px 20px;gap:10px;
   border-bottom:1px solid rgba(28,35,64,.04);font-size:12px;
 }
 .subtask-row:last-child{border-bottom:none}
 .st-indent{display:flex;align-items:center;gap:7px}
 .st-line{width:12px;height:1px;background:var(--text-dim);flex-shrink:0}
+.btn-edit{
+  width:28px;height:28px;border-radius:7px;border:1px solid var(--border);
+  background:var(--surface2);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);transition:all .15s;font-family:sans-serif;
+  flex-shrink:0;
+}
+.btn-edit:hover{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);color:#3B82F6;transform:scale(1.1)}
 
 /* ── GANTT ── */
 .gantt-container{padding:0 24px 40px;overflow-x:auto}
@@ -471,7 +479,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 <!-- FILTER TOOLBAR -->
 <div class="toolbar">
-  <button onclick="openAddModal()" style="padding:7px 16px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s" onmouseover="this.style.background='var(--teal2)'" onmouseout="this.style.background='var(--teal)'">＋ 新增任務</button>
+  <button onclick="openAddModal()" style="padding:7px 16px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s" onmouseover="this.style.background='var(--teal2)'" onmouseout="this.style.background='var(--teal)'">＋ 新增項目</button>
   <select class="fsel" id="filter-status" onchange="renderAll()">
     <option value="">全部狀態</option>
     <option value="pending">未開始</option>
@@ -497,7 +505,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   <div class="list-header">
     <div></div><div>專案名稱</div>
     <div>負責人</div><div>開始日期</div><div>預計完成</div>
-    <div>狀態</div><div>進度</div>
+    <div>狀態</div><div>進度</div><div></div>
   </div>
   <div class="project-list" id="project-list"></div>
 </div>
@@ -569,11 +577,11 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 <div id="add-modal" onclick="if(event.target===this)closeAddModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:18px;padding:32px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div id="add-modal-title" style="font-size:18px;font-weight:700;color:var(--navy)">＋ 新增任務</div>
+      <div id="add-modal-title" style="font-size:18px;font-weight:700;color:var(--navy)">＋ 新增項目</div>
       <button onclick="closeAddModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted)">✕</button>
     </div>
     <div id="add-parent-banner" style="display:none;background:#EEF7FF;border:1px solid #BFDFFF;border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#2563EB">
-      <span style="font-weight:700">父任務：</span><span id="add-parent-title-text"></span>
+      <span style="font-weight:700">主任務：</span><span id="add-parent-title-text"></span>
     </div>
     <form id="add-form" onsubmit="submitAddTask(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -703,6 +711,80 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 <div id="toast"></div>
 
+<!-- EDIT MODAL -->
+<div id="edit-modal" onclick="if(event.target===this)closeEditModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;padding:32px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div id="edit-modal-title" style="font-size:18px;font-weight:700;color:var(--navy)">✏️ 編輯項目</div>
+      <button onclick="closeEditModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted)">✕</button>
+    </div>
+    <form id="edit-form" onsubmit="submitEditTask(event)">
+      <input type="hidden" id="ef-id">
+      <input type="hidden" id="ef-parentId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">項目名稱 *</label>
+          <input id="ef-title" required placeholder="請輸入項目名稱" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">類別</label>
+          <select id="ef-category" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+            <option value="">請選擇類別</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">負責人</label>
+          <input id="ef-assignee" placeholder="負責人姓名" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">申請單位</label>
+          <input id="ef-unit" placeholder="申請單位名稱" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">開始日期</label>
+          <input id="ef-startDate" type="date" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">預計完成</label>
+          <input id="ef-endDate" type="date" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">狀態</label>
+          <select id="ef-status" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white">
+            <option value="pending">未開始</option>
+            <option value="in-progress">執行中</option>
+            <option value="discussion">討論中</option>
+            <option value="completed">已完成</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">進度（0–100）</label>
+          <input id="ef-progress" type="number" min="0" max="100" placeholder="0" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">來源</label>
+          <select id="ef-sourceType" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white">
+            <option value="self">🟢 自主專案</option>
+            <option value="ticket">🔵 支援單接案</option>
+          </select>
+        </div>
+        <div id="ef-supnum-wrap" style="display:none">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">支援單號</label>
+          <input id="ef-supNum" placeholder="支援單號" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">備註</label>
+          <textarea id="ef-note" rows="2" placeholder="備註說明（選填）" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;resize:vertical" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+        <button type="button" onclick="closeEditModal()" style="padding:9px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">取消</button>
+        <button type="submit" id="ef-submit-btn" style="padding:9px 24px;background:#3B82F6;color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif">儲存更新</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 /* ══ CONSTANTS ══ */
 const STATUS = {
@@ -711,13 +793,13 @@ const STATUS = {
   discussion:{label:'討論中',cls:'s-discussion'},
   completed:{label:'已完成',cls:'s-completed'}
 };
-const DESIGN_CATS = ['節慶專案','醫院形象','平面設計','數位資產','品牌規範','影片製作','教育訓練','社群貼文','其他'];
+const DESIGN_CATS = ['影片製作','平面設計','指標工程','節慶專案','形象攝影','醫院形象','社群媒體','網頁製作','其他'];
 const MEDIA_CATS  = ['系列節目','時令季節/形象/促銷','服務流程','院核心/形象/衛教','員工活動','教學','其他'];
 const BAR_COLOR   = {pending:'#6B7494','in-progress':'#FFB547',discussion:'#A78BFA',completed:'#4ade80'};
 const CHART_PALETTE = ['#00BFA6','#60A5FA','#A78BFA','#FFB547','#FF6B6B','#34D399','#F472B6','#FBBF24','#818CF8','#FB923C'];
 const CAT_COLOR = {
-  '節慶專案':'#FF8A65','醫院形象':'#60A5FA','平面設計':'#A78BFA','數位資產':'#00BFA6',
-  '品牌規範':'#FF6B6B','影片製作':'#4ade80','教育訓練':'#FFB547','社群貼文':'#F472B6',
+  '影片製作':'#4ade80','平面設計':'#A78BFA','指標工程':'#60A5FA','節慶專案':'#FF8A65',
+  '形象攝影':'#F472B6','醫院形象':'#3B82F6','社群媒體':'#FFB547','網頁製作':'#00BFA6',
   '系列節目':'#42A5F5','時令季節/形象/促銷':'#FF8A65','服務流程':'#4ade80',
   '院核心/形象/衛教':'#AB47BC','員工活動':'#FFB547','教學':'#00BFA6','其他':'#78909C'
 };
@@ -731,6 +813,8 @@ let _cache = { design:null, media:null };
 let _chartInstances = {};
 let _addParentId = '';
 let _addParentTitle = '';
+let _itemMap = {};
+let _editItem = null;
 
 /* ══ SETUP ══ */
 function saveSetup() {
@@ -754,7 +838,9 @@ function openAddModal(parentId, parentTitle) {
   const modal = document.getElementById('add-modal');
   modal.style.display = 'flex';
   // 更新標題與父任務提示
-  document.getElementById('add-modal-title').textContent = _addParentId ? '＋ 新增子任務' : '＋ 新增任務';
+  document.getElementById('add-modal-title').textContent = _addParentId ? '＋ 新增子任務' : '＋ 新增項目';
+  // 動態類別選項
+  updateCategoryOptions('af-category');
   const banner = document.getElementById('add-parent-banner');
   if (_addParentId) {
     document.getElementById('add-parent-title-text').textContent = _addParentTitle;
@@ -994,14 +1080,29 @@ function updateFilters(projects) {
   if (csel) { const cur=csel.value; csel.innerHTML='<option value="">全部類別</option>'+cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join(''); }
 }
 
+/* ══ CATEGORY OPTIONS ══ */
+function updateCategoryOptions(selectId, currentVal) {
+  const cats = currentGroup === 'media' ? MEDIA_CATS : DESIGN_CATS;
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">請選擇類別</option>' +
+    cats.map(c => `<option value="${c}"${c===(currentVal||'')?' selected':''}>${c}</option>`).join('');
+}
+
 /* ══ LIST VIEW ══ */
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function renderList(allProjects) {
+  // 建立 id → item 對照表，供編輯功能使用
+  _itemMap = {};
+  allProjects.forEach(p => {
+    _itemMap[p.id] = p;
+    (p.subtasks||[]).forEach(s => { _itemMap[s.id] = s; });
+  });
   const projects = filtered(allProjects);
   const el = document.getElementById('project-list');
   const today = new Date(); today.setHours(0,0,0,0);
   if (!projects.length) {
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">目前沒有符合條件的項目<br><span style="font-size:11px;color:var(--text-dim)">請至 Google Sheets 新增資料，再按 🔄 重新整理</span></div></div>`;
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">目前沒有符合條件的項目<br><span style="font-size:11px;color:var(--text-dim)">可點左上角「＋ 新增項目」建立第一筆資料，或切換篩選條件</span></div></div>`;
     return;
   }
   el.innerHTML = projects.map(p => {
@@ -1025,6 +1126,7 @@ function renderList(allProjects) {
         <div class="col-val" style="font-size:11px">${sOd?`<span class="overdue-badge">⚠️ 逾期</span>`:s.endDate||'—'}</div>
         <div><span class="sbadge ${sst.cls}">${sst.label}</span></div>
         <div><div style="display:flex;align-items:center;gap:6px"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:${s.progress||0}%"></div></div><span class="prog-label">${s.progress||0}%</span></div></div>
+        <div style="display:flex;justify-content:center"><button class="btn-edit" onclick="event.stopPropagation();openEditModal('${s.id}')" title="編輯子任務">✏️</button></div>
       </div>`;
     }).join('') : '';
     return `<div class="project-card${p.status==='completed'?' archived':''}">
@@ -1044,6 +1146,7 @@ function renderList(allProjects) {
         <div class="col-val" style="font-size:11px">${p.endDate||'—'}</div>
         <div><span class="sbadge ${st.cls}">${st.label}</span></div>
         <div><div style="display:flex;align-items:center;gap:6px"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:${p.progress||0}%"></div></div><span class="prog-label">${p.progress||0}%</span></div></div>
+        <div style="display:flex;justify-content:center"><button class="btn-edit" onclick="event.stopPropagation();openEditModal('${p.id}')" title="編輯項目">✏️</button></div>
       </div>
       ${hasSubs ? `<div class="subtask-list" id="sl-${p.id}" style="display:none">${subRows}</div>` : ''}
     </div>`;
@@ -1299,6 +1402,84 @@ async function confirmRestore(group,index){
     if(result.ok){_cache[group]=null;closeRestoreModal();await renderAll();showToast('✅ 還原成功！');}
     else showToast('❌ 還原失敗');
   }catch(e){showToast('❌ 錯誤：'+e.message);}
+}
+
+/* ══ EDIT MODAL ══ */
+function openEditModal(id) {
+  const item = _itemMap[id];
+  if (!item) { showToast('❌ 找不到項目資料'); return; }
+  _editItem = item;
+  // 更新類別下拉
+  updateCategoryOptions('ef-category', item.category);
+  // 填入資料
+  document.getElementById('ef-id').value         = item.id;
+  document.getElementById('ef-parentId').value   = item.parentId || '';
+  document.getElementById('ef-title').value       = item.title || '';
+  document.getElementById('ef-assignee').value   = item.assignee || '';
+  document.getElementById('ef-unit').value        = item.unit || '';
+  document.getElementById('ef-startDate').value  = item.startDate || '';
+  document.getElementById('ef-endDate').value    = item.endDate || '';
+  document.getElementById('ef-status').value     = item.status || 'pending';
+  document.getElementById('ef-progress').value   = item.progress || 0;
+  document.getElementById('ef-sourceType').value = item.sourceType || 'self';
+  document.getElementById('ef-supNum').value     = item.supNum || '';
+  document.getElementById('ef-note').value       = item.note || '';
+  // 支援單號顯示控制
+  document.getElementById('ef-supnum-wrap').style.display = (item.sourceType==='ticket') ? '' : 'none';
+  document.getElementById('ef-sourceType').onchange = function() {
+    document.getElementById('ef-supnum-wrap').style.display = this.value==='ticket' ? '' : 'none';
+  };
+  // 標題提示是否為子任務
+  const isSubtask = !!item.parentId;
+  document.getElementById('edit-modal-title').textContent = isSubtask ? '✏️ 編輯子任務' : '✏️ 編輯項目';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+  document.getElementById('edit-form').reset();
+  document.getElementById('ef-supnum-wrap').style.display = 'none';
+  _editItem = null;
+}
+async function submitEditTask(e) {
+  e.preventDefault();
+  if (!API_URL) { showToast('❌ 尚未設定 API 網址'); return; }
+  const btn = document.getElementById('ef-submit-btn');
+  btn.textContent = '更新中…'; btn.disabled = true;
+  const progress = parseInt(document.getElementById('ef-progress').value) || 0;
+  const item = {
+    id:        document.getElementById('ef-id').value,
+    parentId:  document.getElementById('ef-parentId').value,
+    category:  document.getElementById('ef-category').value,
+    title:     document.getElementById('ef-title').value.trim(),
+    assignee:  document.getElementById('ef-assignee').value.trim(),
+    unit:      document.getElementById('ef-unit').value.trim(),
+    startDate: document.getElementById('ef-startDate').value,
+    endDate:   document.getElementById('ef-endDate').value,
+    status:    document.getElementById('ef-status').value,
+    progress:  String(Math.min(100, Math.max(0, progress))),
+    sourceType:document.getElementById('ef-sourceType').value,
+    supNum:    document.getElementById('ef-supNum').value.trim(),
+    note:      document.getElementById('ef-note').value.trim()
+  };
+  try {
+    const res = await fetch(API_URL, {
+      method:'POST', mode:'cors',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'update', group: currentGroup, item })
+    });
+    const result = await res.json();
+    if (result.ok) {
+      closeEditModal();
+      _cache[currentGroup] = null;
+      await renderAll();
+      showToast('✅ 項目已更新！');
+    } else {
+      showToast('❌ ' + (result.error||'更新失敗'));
+    }
+  } catch(err) {
+    showToast('❌ 網路錯誤：' + err.message);
+  }
+  btn.textContent = '儲存更新'; btn.disabled = false;
 }
 
 /* ══ TOAST ══ */
