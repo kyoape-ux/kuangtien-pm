@@ -231,6 +231,12 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 }
 .btn-edit:hover{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);color:#3B82F6;transform:scale(1.1)}
 
+/* ── DRAG & DROP ── */
+.project-card[draggable=true]{cursor:grab}
+.project-card[draggable=true]:active{cursor:grabbing}
+.project-card.dragging{opacity:.35;border-style:dashed;border-color:var(--teal)}
+.project-card.drag-over{border-color:var(--teal);box-shadow:0 0 0 2px rgba(0,191,166,.25);transform:scale(1.005)}
+
 /* ── GANTT ── */
 .gantt-container{padding:0 24px 40px;overflow-x:auto}
 .gantt-wrap{min-width:900px;background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden}
@@ -450,15 +456,22 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 <!-- CALENDAR PANEL -->
 <div id="cal-panel" style="display:none">
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;gap:20px">
-    <div style="font-size:48px">📅</div>
-    <div style="font-size:18px;font-weight:700;color:var(--navy)">Google 工作行事曆</div>
-    <div style="font-size:13px;color:var(--text-muted)">點下方按鈕在新分頁開啟 Google Calendar</div>
-    <a href="https://calendar.google.com/calendar/u/0/r" target="_blank"
-      style="padding:12px 32px;background:var(--teal);color:white;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .2s"
-      onmouseover="this.style.background='var(--teal2)'" onmouseout="this.style.background='var(--teal)'">
-      📅 開啟 Google Calendar
-    </a>
+  <div style="padding:16px 24px 0">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="cal-nav" onclick="calPrev()">‹</button>
+      <div class="cal-month-title" id="cal-title"></div>
+      <button class="cal-nav" onclick="calNext()">›</button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <a href="https://calendar.google.com/calendar/u/0/r" target="_blank"
+          style="padding:6px 14px;background:var(--teal);color:white;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all .2s"
+          onmouseover="this.style.background='var(--teal2)'" onmouseout="this.style.background='var(--teal)'">
+          📅 Google Calendar ↗
+        </a>
+      </div>
+    </div>
+    <div class="cal-wrap">
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
   </div>
 </div>
 
@@ -815,6 +828,7 @@ let _addParentId = '';
 let _addParentTitle = '';
 let _itemMap = {};
 let _editItem = null;
+let _dragSrcId = null;
 
 /* ══ SETUP ══ */
 function saveSetup() {
@@ -1080,6 +1094,51 @@ function updateFilters(projects) {
   if (csel) { const cur=csel.value; csel.innerHTML='<option value="">全部類別</option>'+cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join(''); }
 }
 
+/* ══ DRAG & DROP ORDER ══ */
+function _saveOrder(group, projects) {
+  localStorage.setItem('pm_order_'+group, JSON.stringify(projects.map(p=>p.id)));
+}
+function _applyOrder(projects) {
+  const saved = JSON.parse(localStorage.getItem('pm_order_'+currentGroup)||'null');
+  if (!saved || !saved.length) return projects;
+  const idx = {};
+  saved.forEach((id,i) => idx[id]=i);
+  return [...projects].sort((a,b) => (idx[a.id]??9999)-(idx[b.id]??9999));
+}
+function dragStart(e, id) {
+  _dragSrcId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(()=>{ const el=document.querySelector(`.project-card[data-id="${id}"]`); if(el) el.classList.add('dragging'); }, 0);
+}
+function dragOver(e, id) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.project-card.drag-over').forEach(el=>el.classList.remove('drag-over'));
+  const el = document.querySelector(`.project-card[data-id="${id}"]`);
+  if (el && id !== _dragSrcId) el.classList.add('drag-over');
+}
+function dragDrop(e, targetId) {
+  e.preventDefault();
+  if (!_dragSrcId || _dragSrcId === targetId) return;
+  const projects = _cache[currentGroup] || [];
+  const ordered = _applyOrder(projects);
+  const si = ordered.findIndex(p=>p.id===_dragSrcId);
+  const ti = ordered.findIndex(p=>p.id===targetId);
+  if (si===-1||ti===-1) return;
+  const newOrder = ordered.map(p=>p.id);
+  const [moved] = newOrder.splice(si,1);
+  newOrder.splice(ti,0,moved);
+  localStorage.setItem('pm_order_'+currentGroup, JSON.stringify(newOrder));
+  _dragSrcId = null;
+  renderAll();
+}
+function dragEnd(e) {
+  _dragSrcId = null;
+  document.querySelectorAll('.project-card.dragging,.project-card.drag-over').forEach(el=>{
+    el.classList.remove('dragging','drag-over');
+  });
+}
+
 /* ══ CATEGORY OPTIONS ══ */
 function updateCategoryOptions(selectId, currentVal) {
   const cats = currentGroup === 'media' ? MEDIA_CATS : DESIGN_CATS;
@@ -1098,7 +1157,9 @@ function renderList(allProjects) {
     _itemMap[p.id] = p;
     (p.subtasks||[]).forEach(s => { _itemMap[s.id] = s; });
   });
-  const projects = filtered(allProjects);
+  // 套用拖曳排序（本機 localStorage）
+  const ordered = _applyOrder(allProjects);
+  const projects = filtered(ordered);
   const el = document.getElementById('project-list');
   const today = new Date(); today.setHours(0,0,0,0);
   if (!projects.length) {
@@ -1119,7 +1180,7 @@ function renderList(allProjects) {
       return `<div class="subtask-row">
         <div></div>
         <div class="st-indent"><span class="st-line"></span>
-          <div><div style="font-size:12px;color:var(--text-muted)">${esc(s.title)}</div></div>
+          <div><div style="font-size:12px;font-weight:500;color:var(--navy)">${esc(s.title)}</div></div>
         </div>
         <div class="col-val">${esc(s.assignee||'—')}</div>
         <div class="col-val" style="font-size:11px">${s.startDate||'—'}</div>
@@ -1129,7 +1190,7 @@ function renderList(allProjects) {
         <div style="display:flex;justify-content:center"><button class="btn-edit" onclick="event.stopPropagation();openEditModal('${s.id}')" title="編輯子任務">✏️</button></div>
       </div>`;
     }).join('') : '';
-    return `<div class="project-card${p.status==='completed'?' archived':''}">
+    return `<div class="project-card${p.status==='completed'?' archived':''}" data-id="${p.id}" draggable="true" ondragstart="dragStart(event,'${p.id}')" ondragover="dragOver(event,'${p.id}')" ondrop="dragDrop(event,'${p.id}')" ondragend="dragEnd(event)">
       <div class="project-row" onclick="toggleSub('sl-${p.id}','ti-${p.id}')">
         <div class="toggle-icon${hasSubs?'':' hidden'} " id="ti-${p.id}">▶</div>
         <div>
