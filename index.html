@@ -562,6 +562,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 <!-- FILTER TOOLBAR -->
 <div class="toolbar">
   <button onclick="openAddModal()" style="padding:7px 18px;background:#F97316;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s;box-shadow:0 2px 8px rgba(249,115,22,.35)" onmouseover="this.style.background='#EA6C0A'" onmouseout="this.style.background='#F97316'">＋ 新增項目</button>
+  <button onclick="openImportModal()" style="padding:7px 14px;background:rgba(59,130,246,.12);color:#3B82F6;border:1.5px solid rgba(59,130,246,.3);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .18s" onmouseover="this.style.background='rgba(59,130,246,.22)'" onmouseout="this.style.background='rgba(59,130,246,.12)'">📥 匯入業務支援單</button>
   <select class="fsel" id="filter-status" onchange="renderAll()">
     <option value="">全部狀態</option>
     <option value="pending">未開始</option>
@@ -750,6 +751,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
           <input id="af-supNum" placeholder="支援單號" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
         </div>
         <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:700;color:var(--purple);display:block;margin-bottom:5px">👥 協同人員</label>
+          <input id="af-collab" placeholder="協同人員姓名（選填，多人以逗號分隔，例如：企劃王小明）" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--purple)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="grid-column:1/-1">
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">備註</label>
           <textarea id="af-note" rows="2" placeholder="備註說明（選填）" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;resize:vertical" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'"></textarea>
         </div>
@@ -820,6 +825,67 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 <div id="toast"></div>
 
+<!-- IMPORT MODAL -->
+<div id="import-modal" onclick="if(event.target===this)closeImportModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto">
+  <div style="background:#fff;border-radius:18px;padding:32px;width:700px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.3);margin-bottom:40px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:18px;font-weight:700;color:var(--navy)">📥 匯入業務支援單 Excel</div>
+      <button onclick="closeImportModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted)">✕</button>
+    </div>
+    <!-- STEP 1: Upload -->
+    <div id="import-step1">
+      <div style="background:rgba(59,130,246,.06);border:1.5px dashed rgba(59,130,246,.35);border-radius:12px;padding:24px;text-align:center;margin-bottom:16px">
+        <div style="font-size:32px;margin-bottom:8px">📊</div>
+        <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:6px">選擇 Excel 檔案（.xlsx / .xls）</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">支援醫院系統匯出的業務支援單報表，自動辨識欄位</div>
+        <input type="file" id="import-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="importFileSelected(event)">
+        <button onclick="document.getElementById('import-file-input').click()" style="padding:9px 22px;background:#3B82F6;color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif">選擇檔案</button>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px 16px;font-size:11px;color:var(--text-muted)">
+        <div style="font-weight:700;color:var(--text);margin-bottom:8px">💡 欄位自動辨識支援以下標頭關鍵字：</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+          <div>• <strong>單號</strong>：支援單號、單號、No、申請單號</div>
+          <div>• <strong>標題</strong>：主旨、說明、項目名稱、工作內容</div>
+          <div>• <strong>申請單位</strong>：申請單位、部門、單位</div>
+          <div>• <strong>負責人</strong>：負責人、承辦、執行人員</div>
+          <div>• <strong>開始日期</strong>：開始日期、接案日、收件日</div>
+          <div>• <strong>截止日期</strong>：完成日、截止、到期、預計完成</div>
+          <div>• <strong>類別</strong>：類別、案件類型、服務類別</div>
+          <div>• <strong>狀態</strong>：狀態、進度、處理狀態</div>
+          <div>• <strong>備註</strong>：備註、說明、需求說明</div>
+        </div>
+      </div>
+    </div>
+    <!-- STEP 2: Preview & Map -->
+    <div id="import-step2" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--navy)" id="import-file-name"></div>
+        <button onclick="resetImport()" style="padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;font-size:11px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">← 重新選擇</button>
+      </div>
+      <!-- Column Mapping -->
+      <div style="background:var(--surface2);border-radius:10px;padding:14px 16px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">欄位對應設定</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="import-col-map-grid"></div>
+      </div>
+      <!-- Preview Table -->
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">預覽資料（前 5 筆）</div>
+      <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);margin-bottom:16px;max-height:220px;overflow-y:auto">
+        <table id="import-preview-table" style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead id="import-preview-head" style="position:sticky;top:0;background:var(--surface2)"></thead>
+          <tbody id="import-preview-body"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="font-size:12px;color:var(--text-muted)">共 <strong id="import-total-count">0</strong> 筆資料將匯入為 <span style="color:#3B82F6;font-weight:700">🔵 支援單</span> 類型</div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button onclick="closeImportModal()" style="padding:9px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">取消</button>
+          <button onclick="executeImport()" id="import-execute-btn" style="padding:9px 24px;background:#3B82F6;color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif">📥 確認匯入</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- EDIT MODAL -->
 <div id="edit-modal" onclick="if(event.target===this)closeEditModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:18px;padding:32px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
@@ -880,6 +946,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
         <div id="ef-supnum-wrap" style="display:none">
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">支援單號</label>
           <input id="ef-supNum" placeholder="支援單號" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:700;color:var(--purple);display:block;margin-bottom:5px">👥 協同人員</label>
+          <input id="ef-collab" placeholder="協同人員姓名（選填，多人以逗號分隔，例如：企劃王小明）" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--purple)'" onblur="this.style.borderColor='var(--border)'">
         </div>
         <div style="grid-column:1/-1">
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">備註</label>
@@ -992,6 +1062,7 @@ async function submitAddTask(e) {
     progress: '0',
     sourceType:document.getElementById('af-sourceType').value,
     supNum:   document.getElementById('af-supNum')?.value.trim()||'',
+    collab:   document.getElementById('af-collab').value.trim(),
     note:     document.getElementById('af-note').value.trim()
   };
   try {
@@ -1268,7 +1339,7 @@ function renderList(allProjects) {
     const isOd = p.endDate && new Date(p.endDate)<today && p.status!=='completed';
     const hasSubs = p.subtasks && p.subtasks.length;
     const srcBadge = p.sourceType==='ticket'
-      ? `<span class="src-ticket">🔵 支援單${p.supNum?` ${p.supNum}`:''}</span>`
+      ? `<span class="src-ticket">🔵 支援單</span>${p.supNum?`<span style="background:#1e3a8a22;color:#3B82F6;border:1px solid #3B82F644;border-radius:5px;font-size:10px;font-weight:700;padding:1px 7px;font-family:monospace;letter-spacing:.5px">${esc(p.supNum)}</span>`:''}`
       : `<span class="src-self">🟢 自主</span>`;
     const subRows = hasSubs ? (p.subtasks||[]).map(s => {
       const sst = STATUS[s.status]||{label:s.status||'—',cls:'s-pending'};
@@ -1294,6 +1365,7 @@ function renderList(allProjects) {
           <div class="project-note" style="display:flex;gap:5px;align-items:center;margin-top:4px">
             <span class="cat-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}44">${esc(p.category||'未分類')}</span>
             ${srcBadge}
+            ${p.collab?`<span style="background:rgba(139,92,246,.12);color:var(--purple);border:1px solid rgba(139,92,246,.3);border-radius:5px;font-size:10px;font-weight:600;padding:1px 7px">👥 ${esc(p.collab)}</span>`:''}
             ${p.note?`<span style="color:var(--text-dim);font-size:10px">${esc(p.note)}</span>`:''}
             <button onclick="event.stopPropagation();openAddModal('${p.id.replace(/'/g,"\\'")}','${esc(p.title).replace(/'/g,"\\'")}');" style="margin-left:4px;padding:2px 8px;background:rgba(0,191,166,.12);border:1px solid rgba(0,191,166,.35);border-radius:5px;font-size:10px;font-weight:600;color:var(--teal2);cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;transition:all .15s" onmouseover="this.style.background='rgba(0,191,166,.25)'" onmouseout="this.style.background='rgba(0,191,166,.12)'">＋ 子任務</button>
           </div>
@@ -1719,6 +1791,7 @@ function openEditModal(id) {
   document.getElementById('ef-progress').value   = item.progress || 0;
   document.getElementById('ef-sourceType').value = item.sourceType || 'self';
   document.getElementById('ef-supNum').value     = item.supNum || '';
+  document.getElementById('ef-collab').value     = item.collab || '';
   document.getElementById('ef-note').value       = item.note || '';
   // 支援單號顯示控制
   document.getElementById('ef-supnum-wrap').style.display = (item.sourceType==='ticket') ? '' : 'none';
@@ -1755,6 +1828,7 @@ async function submitEditTask(e) {
     progress:  String(Math.min(100, Math.max(0, progress))),
     sourceType:document.getElementById('ef-sourceType').value,
     supNum:    document.getElementById('ef-supNum').value.trim(),
+    collab:    document.getElementById('ef-collab').value.trim(),
     note:      document.getElementById('ef-note').value.trim()
   };
   try {
@@ -1776,6 +1850,213 @@ async function submitEditTask(e) {
     showToast('❌ 網路錯誤：' + err.message);
   }
   btn.textContent = '儲存更新'; btn.disabled = false;
+}
+
+/* ══ IMPORT ══ */
+let _importRows = [];
+let _importHeaders = [];
+let _importColMap = {};
+
+// 欄位關鍵字辨識表
+const IMPORT_COL_ALIASES = {
+  supNum:    ['支援單號','單號','申請單號','no','單號','工單號','案號','編號'],
+  title:     ['主旨','說明','項目名稱','工作內容','案件說明','需求名稱','項目','名稱'],
+  unit:      ['申請單位','部門','單位','發包單位','申請者單位'],
+  assignee:  ['負責人','承辦','執行人員','承辦人','執行者','指定人員'],
+  startDate: ['開始日期','接案日','收件日','起始日','開始','接案日期'],
+  endDate:   ['完成日','截止','到期','預計完成','預計完成日','完成日期','截止日期','到期日'],
+  category:  ['類別','案件類型','服務類別','服務類型'],
+  status:    ['狀態','進度','處理狀態','執行狀態'],
+  collab:    ['協同','協辦','協作','協力人員','協同人員','搭配'],
+  note:      ['備註','說明','需求說明','附記','描述']
+};
+
+function openImportModal() {
+  resetImport();
+  document.getElementById('import-modal').style.display = 'flex';
+}
+function closeImportModal() {
+  document.getElementById('import-modal').style.display = 'none';
+  resetImport();
+}
+function resetImport() {
+  _importRows = []; _importHeaders = []; _importColMap = {};
+  document.getElementById('import-step1').style.display = '';
+  document.getElementById('import-step2').style.display = 'none';
+  document.getElementById('import-file-input').value = '';
+}
+
+function importFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let rows = [];
+      if (file.name.endsWith('.csv')) {
+        const text = new TextDecoder('utf-8').decode(e.target.result);
+        rows = text.split('\n').map(r => r.split(',').map(c => c.replace(/^"|"$/g,'').trim()));
+      } else {
+        const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+      }
+      if (!rows || rows.length < 2) { showToast('❌ 檔案內容為空或格式不符'); return; }
+      // Find header row (first non-empty row)
+      let hdrIdx = 0;
+      for (let i = 0; i < Math.min(5, rows.length); i++) {
+        if (rows[i].some(c => c && String(c).trim())) { hdrIdx = i; break; }
+      }
+      _importHeaders = rows[hdrIdx].map(h => String(h||'').trim());
+      _importRows = rows.slice(hdrIdx + 1).filter(r => r.some(c => c && String(c).trim()));
+      _importColMap = autoMapColumns(_importHeaders);
+      document.getElementById('import-file-name').textContent = `📄 ${file.name}（${_importRows.length} 筆）`;
+      document.getElementById('import-total-count').textContent = _importRows.length;
+      buildColMapUI();
+      buildPreviewTable();
+      document.getElementById('import-step1').style.display = 'none';
+      document.getElementById('import-step2').style.display = '';
+    } catch(err) { showToast('❌ 解析失敗：' + err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function autoMapColumns(headers) {
+  const map = {};
+  headers.forEach((h, i) => {
+    const lh = h.toLowerCase();
+    for (const [field, aliases] of Object.entries(IMPORT_COL_ALIASES)) {
+      if (!map[field] && aliases.some(a => lh.includes(a.toLowerCase()))) {
+        map[field] = i;
+      }
+    }
+  });
+  return map;
+}
+
+function buildColMapUI() {
+  const fields = [
+    {key:'supNum',label:'支援單號',required:false},
+    {key:'title',label:'標題／主旨 *',required:true},
+    {key:'unit',label:'申請單位',required:false},
+    {key:'assignee',label:'負責人',required:false},
+    {key:'startDate',label:'開始日期',required:false},
+    {key:'endDate',label:'完成日期',required:false},
+    {key:'category',label:'類別',required:false},
+    {key:'collab',label:'協同人員',required:false},
+    {key:'note',label:'備註',required:false}
+  ];
+  const opts = '<option value="-1">（不匯入）</option>' +
+    _importHeaders.map((h,i)=>`<option value="${i}">${h||'欄位'+(i+1)}</option>`).join('');
+  document.getElementById('import-col-map-grid').innerHTML = fields.map(f => {
+    const cur = _importColMap[f.key] !== undefined ? _importColMap[f.key] : -1;
+    const selOpts = opts.replace(`value="${cur}"`, `value="${cur}" selected`);
+    return `<div><label style="font-size:10px;font-weight:700;color:${f.required?'var(--coral)':'var(--text-muted)'};display:block;margin-bottom:3px">${f.label}</label>
+      <select data-field="${f.key}" onchange="_importColMap[this.dataset.field]=parseInt(this.value)" style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:11px;font-family:'Noto Sans TC',sans-serif;outline:none">${selOpts}</select></div>`;
+  }).join('');
+}
+
+function buildPreviewTable() {
+  const fields = ['supNum','title','unit','assignee','startDate','endDate','category','collab','note'];
+  const labels = ['單號','標題','申請單位','負責人','開始','截止','類別','協同','備註'];
+  const thead = document.getElementById('import-preview-head');
+  const tbody = document.getElementById('import-preview-body');
+  thead.innerHTML = `<tr>${labels.map(l=>`<th style="padding:6px 10px;text-align:left;font-size:10px;color:var(--text-muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap">${l}</th>`).join('')}</tr>`;
+  const preview = _importRows.slice(0, 5);
+  tbody.innerHTML = preview.map(row => {
+    const cells = fields.map(f => {
+      const idx = _importColMap[f];
+      let val = idx !== undefined && idx >= 0 ? String(row[idx]||'') : '';
+      if ((f==='startDate'||f==='endDate') && val) val = parseImportDate(val);
+      return `<td style="padding:6px 10px;font-size:11px;border-bottom:1px solid var(--border);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(val)}">${esc(val)||'<span style="color:var(--text-dim)">—</span>'}</td>`;
+    }).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('');
+}
+
+function parseImportDate(val) {
+  if (!val) return '';
+  // Already YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+  // YYYY/MM/DD or YYYY.MM.DD
+  if (/^\d{4}[\/\.]\d{1,2}[\/\.]\d{1,2}$/.test(val)) {
+    const parts = val.split(/[\/\.]/);
+    return `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
+  }
+  // JS Date object from XLSX (serialNumber or Date)
+  if (val instanceof Date) return val.toISOString().slice(0,10);
+  // Try numeric serial (Excel date number)
+  const num = parseFloat(val);
+  if (!isNaN(num) && num > 40000 && num < 60000) {
+    const d = new Date(Math.round((num - 25569) * 86400 * 1000));
+    return d.toISOString().slice(0,10);
+  }
+  // Try generic date parse
+  const d = new Date(val);
+  if (!isNaN(d)) return d.toISOString().slice(0,10);
+  return String(val);
+}
+
+async function executeImport() {
+  if (!API_URL) { showToast('❌ 尚未設定 API 網址'); return; }
+  const titleIdx = _importColMap['title'];
+  if (titleIdx === undefined || titleIdx < 0) { showToast('❌ 請至少設定「標題」欄位對應'); return; }
+  const btn = document.getElementById('import-execute-btn');
+  btn.textContent = '匯入中…'; btn.disabled = true;
+  let success = 0, fail = 0;
+  const cats = currentGroup === 'media' ? MEDIA_CATS : DESIGN_CATS;
+  for (const row of _importRows) {
+    const title = String(row[titleIdx]||'').trim();
+    if (!title) continue;
+    function getCol(f) {
+      const idx = _importColMap[f];
+      return (idx !== undefined && idx >= 0) ? String(row[idx]||'').trim() : '';
+    }
+    // Map status from Chinese
+    let status = 'pending';
+    const rawStatus = getCol('status').toLowerCase();
+    if (rawStatus.includes('執行')||rawStatus.includes('進行')||rawStatus.includes('處理中')) status = 'in-progress';
+    else if (rawStatus.includes('完成')||rawStatus.includes('結案')) status = 'completed';
+    else if (rawStatus.includes('討論')||rawStatus.includes('待確認')) status = 'discussion';
+    // Map category
+    let category = getCol('category');
+    if (category && !cats.includes(category)) {
+      const match = cats.find(c => category.includes(c) || c.includes(category));
+      category = match || '其他';
+    }
+    const item = {
+      id: 'IMP' + Date.now() + Math.random().toString(36).slice(2,6),
+      parentId: '',
+      category: category || '其他',
+      title,
+      assignee: getCol('assignee'),
+      unit:     getCol('unit'),
+      startDate:parseImportDate(getCol('startDate')),
+      endDate:  parseImportDate(getCol('endDate')),
+      status,
+      progress: '0',
+      sourceType: 'ticket',
+      supNum:   getCol('supNum'),
+      collab:   getCol('collab'),
+      note:     getCol('note')
+    };
+    try {
+      const res = await fetch(API_URL, {
+        method:'POST', mode:'cors',
+        headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({ action:'add', group: currentGroup, item })
+      });
+      const result = await res.json();
+      if (result.ok) success++; else fail++;
+    } catch(e) { fail++; }
+    // Small delay to avoid rate limiting
+    await new Promise(r => setTimeout(r, 120));
+  }
+  btn.textContent = '確認匯入'; btn.disabled = false;
+  closeImportModal();
+  _cache[currentGroup] = null;
+  await renderAll();
+  showToast(`✅ 匯入完成！成功 ${success} 筆${fail?`，失敗 ${fail} 筆`:''}`);
 }
 
 /* ══ TOAST ══ */
