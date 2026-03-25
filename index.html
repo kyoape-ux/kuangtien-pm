@@ -376,6 +376,74 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
 .empty-msg{font-size:13px;line-height:1.7}
 
+/* ── GANTT RESIZE ── */
+.g-bar{display:flex!important;align-items:center!important;padding:0!important;overflow:hidden!important}
+.g-bar-label{flex:1;overflow:hidden;text-overflow:ellipsis;padding:0 6px;pointer-events:none;white-space:nowrap}
+.g-resize-l,.g-resize-r{width:8px;height:100%;flex-shrink:0;cursor:ew-resize;background:rgba(255,255,255,.25);transition:background .15s;z-index:2}
+.g-resize-l{border-radius:4px 0 0 4px}.g-resize-r{border-radius:0 4px 4px 0}
+.g-resize-l:hover,.g-resize-r:hover{background:rgba(255,255,255,.55)}
+
+/* ── GANTT CONFIRM MODAL ── */
+#gantt-confirm{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:none;align-items:center;justify-content:center}
+#gantt-confirm .gcm-box{background:#fff;border-radius:14px;padding:28px;width:360px;max-width:92vw;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.gcm-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px}
+.gcm-row{font-size:12px;color:var(--text-muted);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.gcm-arrow{color:var(--teal);font-weight:700}
+.gcm-new{color:var(--navy);font-weight:700}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:640px){
+  .header{height:auto;min-height:54px;padding:8px 14px;flex-wrap:wrap;gap:6px}
+  .brand-icon{width:32px;height:32px;font-size:14px}
+  .brand-name{font-size:14px}
+  .brand-sub{display:none}
+  .header-right{gap:4px}
+  .conn-pill{display:none}
+  .hbtn span:not(:first-child){display:none}
+
+  .nav-bar{overflow-x:auto;padding:0 14px;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav-bar::-webkit-scrollbar{display:none}
+  .group-tab{padding:12px 14px;font-size:12px;white-space:nowrap}
+  .view-toggle .vbtn{font-size:10px;padding:5px 8px}
+
+  .mode-bar{padding:7px 14px;gap:5px;flex-wrap:wrap;top:auto!important;position:relative!important}
+  .mode-pill{font-size:10px;padding:4px 10px}
+  #active-hint{display:none}
+  #sheets-link-btn{display:none!important}
+
+  .summary-bar{overflow-x:auto;flex-wrap:nowrap;padding:10px 14px 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .summary-bar::-webkit-scrollbar{display:none}
+  .summary-card{min-width:70px;padding:10px 12px;flex-shrink:0}
+  .summary-num{font-size:22px}
+
+  .toolbar{padding:8px 14px;gap:6px;flex-wrap:wrap}
+  .fsel{font-size:11px;padding:6px 8px}
+
+  .list-header{display:none!important}
+  .project-list{padding:0 14px 40px}
+  .project-row{grid-template-columns:22px 1fr 90px 34px;padding:11px 14px}
+  .project-row>div:nth-child(3),.project-row>div:nth-child(4),
+  .project-row>div:nth-child(5),.project-row>div:nth-child(7){display:none}
+  .subtask-row{grid-template-columns:22px 1fr 90px 34px;padding:8px 14px}
+  .subtask-row>div:nth-child(3),.subtask-row>div:nth-child(4),
+  .subtask-row>div:nth-child(5),.subtask-row>div:nth-child(7){display:none}
+  .project-title{font-size:12px}
+  .project-note{white-space:normal}
+
+  .chart-grid{grid-template-columns:1fr!important}
+  .chart-card-wide{grid-column:1!important}
+  #stats-view{padding:14px 14px 40px}
+
+  .gantt-container{padding:0 14px 40px}
+
+  #add-modal,#edit-modal{align-items:flex-end!important}
+  #add-modal>div,#edit-modal>div{
+    width:100%!important;max-width:100%!important;
+    border-radius:18px 18px 0 0!important;
+    position:relative;margin:0!important;max-height:92vh!important
+  }
+}
+
 /* ── PRINT ── */
 @media print{
   #setup-banner,.hbtn,.mode-bar,.toolbar,.export-wrap,#log-modal,#restore-modal,#toast,#weekly-modal,.view-toggle,#sheets-link-btn{display:none!important}
@@ -433,7 +501,8 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
         <button onclick="exportExcel();closeExportMenu()">📊 匯出 Excel 表格</button>
         <button onclick="exportICS();closeExportMenu()">📅 匯出 Google 日曆 (.ics)</button>
         <hr>
-        <button onclick="printView();closeExportMenu()">🖨️ 列印 / 存成 PDF</button>
+        <button onclick="exportTextPDF();closeExportMenu()">📄 匯出精簡文字 PDF</button>
+        <button onclick="printView();closeExportMenu()">🖨️ 列印完整頁面</button>
       </div>
     </div>
     <button class="hbtn accent" onclick="manualRefresh()">🔄 重新整理</button>
@@ -492,7 +561,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 <!-- FILTER TOOLBAR -->
 <div class="toolbar">
-  <button onclick="openAddModal()" style="padding:7px 16px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s" onmouseover="this.style.background='var(--teal2)'" onmouseout="this.style.background='var(--teal)'">＋ 新增項目</button>
+  <button onclick="openAddModal()" style="padding:7px 18px;background:#F97316;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s;box-shadow:0 2px 8px rgba(249,115,22,.35)" onmouseover="this.style.background='#EA6C0A'" onmouseout="this.style.background='#F97316'">＋ 新增項目</button>
   <select class="fsel" id="filter-status" onchange="renderAll()">
     <option value="">全部狀態</option>
     <option value="pending">未開始</option>
@@ -582,6 +651,33 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     <div class="weekly-footer">
       <button class="btn btn-dim" onclick="closeWeekly()">關閉</button>
       <button class="btn btn-teal" onclick="copyWeekly()">📋 複製</button>
+    </div>
+  </div>
+</div>
+
+<!-- GANTT DATE CONFIRM MODAL -->
+<div id="gantt-confirm">
+  <div class="gcm-box">
+    <div class="gcm-title">📅 確認修改日期？</div>
+    <div id="gcm-item-name" style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:14px;padding:8px 12px;background:var(--surface2);border-radius:8px"></div>
+    <div class="gcm-row" id="gcm-start-row">
+      <span style="width:50px;color:var(--text-dim);font-size:11px;font-weight:700">開始</span>
+      <span id="gcm-old-start"></span>
+      <span class="gcm-arrow">→</span>
+      <span class="gcm-new" id="gcm-new-start-lbl"></span>
+    </div>
+    <div class="gcm-row" id="gcm-end-row">
+      <span style="width:50px;color:var(--text-dim);font-size:11px;font-weight:700">結束</span>
+      <span id="gcm-old-end"></span>
+      <span class="gcm-arrow">→</span>
+      <span class="gcm-new" id="gcm-new-end-lbl"></span>
+    </div>
+    <input type="hidden" id="gcm-id">
+    <input type="hidden" id="gcm-start-val">
+    <input type="hidden" id="gcm-end-val">
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button onclick="ganttCancelChange()" style="padding:8px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">取消</button>
+      <button onclick="ganttConfirmChange()" style="padding:8px 20px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif">確認更新</button>
     </div>
   </div>
 </div>
@@ -1009,13 +1105,13 @@ function switchView(v) {
   currentView = v;
   document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  ['list','gantt','stats'].forEach(n => document.getElementById(n+'-view').style.display = v===n ? '' : 'none');
-  document.getElementById('cal-panel').style.display = v==='cal' ? '' : 'none';
+  ['list','gantt','stats'].forEach(n => document.getElementById(n+'-view').style.display = v===n ? 'block' : 'none');
+  document.getElementById('cal-panel').style.display = v==='cal' ? 'block' : 'none';
   const hideBar = v==='stats' || v==='cal';
-  document.getElementById('mode-bar').style.display     = hideBar ? 'none' : '';
-  document.querySelector('.toolbar').style.display      = (v==='stats'||v==='cal') ? 'none' : '';
-  document.querySelector('.list-header').style.display  = hideBar ? 'none' : '';
-  document.querySelector('.summary-bar').style.display  = hideBar ? 'none' : '';
+  document.getElementById('mode-bar').style.display     = hideBar ? 'none' : 'flex';
+  document.querySelector('.toolbar').style.display      = (v==='stats'||v==='cal') ? 'none' : 'flex';
+  document.querySelector('.list-header').style.display  = hideBar ? 'none' : 'grid';
+  document.querySelector('.summary-bar').style.display  = hideBar ? 'none' : 'flex';
   renderAll();
 }
 function setMode(m) {
@@ -1222,6 +1318,7 @@ function toggleSub(slId, tiId) {
 }
 
 /* ══ GANTT ══ */
+let _ganttCtx = { start:null, end:null, totalMs:0 };
 function renderGantt(allProjects) {
   if (currentView !== 'gantt') return;
   const projects = filtered(allProjects);
@@ -1231,11 +1328,20 @@ function renderGantt(allProjects) {
   const months = Array.from({length:12},(_,i)=>new Date(yr,i,1));
   const start = months[0], end = new Date(yr,11,31);
   const totalMs = end - start;
+  _ganttCtx = { start, end, totalMs };
   function pct(d){ if(!d) return null; const dt=new Date(d); if(isNaN(dt)) return null; return Math.max(0,Math.min(100,(dt-start)/totalMs*100)); }
   const todayPct = pct(now.toISOString().slice(0,10));
   const MNAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
   const gridCells = MNAMES.map((_,i)=>`<div class="g-grid-cell${i===now.getMonth()?' current':''}"></div>`).join('');
   const header = `<div class="gantt-head"><div class="g-label-col">專案名稱</div><div class="g-months">${MNAMES.map((m,i)=>`<div class="g-month${i===now.getMonth()?' current':''}">${m}</div>`).join('')}</div></div>`;
+  function barHtml(id, s0, e0, bc, label, extra='') {
+    if (s0===null||e0===null||e0<=s0) return '';
+    return `<div class="g-bar${extra}" data-gid="${id}" style="left:${s0}%;width:${e0-s0}%;background:${bc}">
+      <div class="g-resize-l" onmousedown="ganttResizeStart(event,'${id}','start',${s0},${e0})"></div>
+      <span class="g-bar-label">${label}</span>
+      <div class="g-resize-r" onmousedown="ganttResizeStart(event,'${id}','end',${s0},${e0})"></div>
+    </div>`;
+  }
   let rows = '';
   projects.forEach(p => {
     const s0=pct(p.startDate), e0=pct(p.endDate), bc=BAR_COLOR[p.status]||'#6B7494';
@@ -1244,18 +1350,92 @@ function renderGantt(allProjects) {
       <div class="g-timeline">
         <div class="g-grid">${gridCells}</div>
         <div class="g-today" style="left:${todayPct}%"></div>
-        ${s0!==null&&e0!==null&&e0>s0?`<div class="g-bar" style="left:${s0}%;width:${e0-s0}%;background:${bc}">${esc(p.title)}</div>`:''}
+        ${barHtml(p.id,s0,e0,bc,esc(p.title))}
       </div></div>`;
     (p.subtasks||[]).forEach(t=>{
       const ts0=pct(t.startDate),te0=pct(t.endDate),tbc=BAR_COLOR[t.status]||'#6B7494';
       rows+=`<div class="g-row">
         <div class="g-row-label" style="padding-left:28px"><div class="g-row-title" style="font-weight:400;color:var(--text-muted);font-size:11px">└ ${esc(t.title)}</div></div>
         <div class="g-timeline"><div class="g-grid">${gridCells}</div><div class="g-today" style="left:${todayPct}%"></div>
-          ${ts0!==null&&te0!==null&&te0>ts0?`<div class="g-bar subtask" style="left:${ts0}%;width:${te0-ts0}%;background:${tbc}">${esc(t.title)}</div>`:''}
+          ${barHtml(t.id,ts0,te0,tbc,esc(t.title),' subtask')}
         </div></div>`;
     });
   });
   wrap.innerHTML = !projects.length ? `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-msg">尚無資料</div></div>` : header+rows;
+}
+
+/* ══ GANTT DRAG RESIZE ══ */
+let _ganttDrag = null;
+function ganttResizeStart(e, id, type, origS0, origE0) {
+  e.stopPropagation(); e.preventDefault();
+  const tl = e.currentTarget.closest('.g-timeline');
+  if (!tl) return;
+  const rect = tl.getBoundingClientRect();
+  _ganttDrag = { id, type, startX: e.clientX, origS0, origE0, cLeft: rect.left, cWidth: rect.width, curS0: origS0, curE0: origE0 };
+  document.addEventListener('mousemove', _ganttMove);
+  document.addEventListener('mouseup', _ganttUp);
+  document.body.style.cursor = 'ew-resize';
+  document.body.style.userSelect = 'none';
+}
+function _ganttMove(e) {
+  if (!_ganttDrag) return;
+  const dPct = (e.clientX - _ganttDrag.startX) / _ganttDrag.cWidth * 100;
+  let s = _ganttDrag.origS0, en = _ganttDrag.origE0;
+  if (_ganttDrag.type === 'start') s = Math.max(0, Math.min(s + dPct, en - 1));
+  else en = Math.min(100, Math.max(en + dPct, s + 1));
+  _ganttDrag.curS0 = s; _ganttDrag.curE0 = en;
+  const bar = document.querySelector(`.g-bar[data-gid="${_ganttDrag.id}"]`);
+  if (bar) { bar.style.left = s + '%'; bar.style.width = (en - s) + '%'; }
+}
+function _ganttUp() {
+  document.removeEventListener('mousemove', _ganttMove);
+  document.removeEventListener('mouseup', _ganttUp);
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+  if (!_ganttDrag) return;
+  const drag = _ganttDrag; _ganttDrag = null;
+  if (Math.abs(drag.curS0 - drag.origS0) < 0.3 && Math.abs(drag.curE0 - drag.origE0) < 0.3) return;
+  const { start, end, totalMs } = _ganttCtx;
+  function pctToDate(p) {
+    return new Date(start.getTime() + p/100*totalMs).toISOString().slice(0,10);
+  }
+  const item = _itemMap[drag.id]; if (!item) return;
+  const newStart = drag.type==='start' ? pctToDate(drag.curS0) : (item.startDate||'');
+  const newEnd   = drag.type==='end'   ? pctToDate(drag.curE0) : (item.endDate||'');
+  document.getElementById('gcm-item-name').textContent = item.title;
+  document.getElementById('gcm-id').value      = drag.id;
+  document.getElementById('gcm-start-val').value = newStart;
+  document.getElementById('gcm-end-val').value   = newEnd;
+  document.getElementById('gcm-old-start').textContent = item.startDate||'—';
+  document.getElementById('gcm-new-start-lbl').textContent = newStart;
+  document.getElementById('gcm-old-end').textContent   = item.endDate||'—';
+  document.getElementById('gcm-new-end-lbl').textContent = newEnd;
+  document.getElementById('gcm-start-row').style.opacity = drag.type==='start' ? '1' : '.4';
+  document.getElementById('gcm-end-row').style.opacity   = drag.type==='end'   ? '1' : '.4';
+  document.getElementById('gantt-confirm').style.display = 'flex';
+}
+function ganttCancelChange() {
+  document.getElementById('gantt-confirm').style.display = 'none';
+  renderAll();
+}
+async function ganttConfirmChange() {
+  document.getElementById('gantt-confirm').style.display = 'none';
+  const id = document.getElementById('gcm-id').value;
+  const newStart = document.getElementById('gcm-start-val').value;
+  const newEnd   = document.getElementById('gcm-end-val').value;
+  const item = _itemMap[id]; if (!item) return;
+  const updatedItem = {...item, startDate: newStart, endDate: newEnd};
+  if (!API_URL) {
+    item.startDate = newStart; item.endDate = newEnd;
+    renderAll(); showToast('✅ 日期已更新（本機）'); return;
+  }
+  try {
+    const res = await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'update', group: currentGroup, item: updatedItem }) });
+    const result = await res.json();
+    if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('✅ 日期已更新！'); }
+    else { showToast('❌ '+(result.error||'更新失敗')); renderAll(); }
+  } catch(err) { showToast('❌ 網路錯誤'); renderAll(); }
 }
 
 /* ══ CALENDAR ══ */
@@ -1420,6 +1600,61 @@ async function exportICS(){
   const a=document.createElement('a');a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);a.download='視覺組專案.ics';a.click();
 }
 function printView(){closeExportMenu();setTimeout(()=>window.print(),100);}
+async function exportTextPDF(){
+  closeExportMenu();
+  const projects = await getProjects();
+  const GN={design:'美編組',media:'多媒體組'};
+  const ST={pending:'未開始','in-progress':'執行中',discussion:'討論中',completed:'已完成'};
+  const SC={self:'自主',ticket:'支援單'};
+  const byStatus={'in-progress':[],'discussion':[],'pending':[],'completed':[]};
+  projects.forEach(p=>byStatus[p.status]?.push(p));
+  const sections=[{k:'in-progress',l:'🔶 執行中'},{k:'discussion',l:'💬 討論中'},{k:'pending',l:'⬜ 未開始'},{k:'completed',l:'✅ 已完成'}];
+  let body='';
+  sections.forEach(sec=>{
+    const items=byStatus[sec.k]; if(!items.length) return;
+    body+=`<h2>${sec.l}（${items.length} 件）</h2>`;
+    items.forEach(p=>{
+      const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'截止：'+p.endDate:'',p.progress?p.progress+'%':'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
+      body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
+      (p.subtasks||[]).forEach(s=>{
+        body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST[s.status]||''}</em></div>`;
+      });
+      if(p.note) body+=`<div class="note">備註：${p.note}</div>`;
+      body+='</div>';
+    });
+  });
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>專案報告・${GN[currentGroup]}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Noto Sans TC','Hiragino Sans','Microsoft JhengHei',sans-serif;font-size:12px;color:#1C2340;padding:28px 32px;max-width:780px;margin:auto}
+  .hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;border-bottom:2px solid #1C2340;padding-bottom:12px}
+  .hd h1{font-size:17px;font-weight:700}
+  .hd .meta{font-size:10px;color:#666;margin-top:4px}
+  h2{font-size:12px;font-weight:700;color:#1C2340;background:#F4F5F7;padding:5px 10px;border-radius:5px;margin:18px 0 8px;border-left:3px solid #1C2340}
+  .item{padding:7px 0;border-bottom:1px solid #eee}
+  .ititle{font-weight:700;font-size:13px;margin-bottom:3px}
+  .imeta{font-size:10px;color:#666}
+  .sub{font-size:11px;color:#444;padding:2px 0 2px 12px}
+  .sub em{font-style:normal;background:#eee;border-radius:3px;padding:0 4px;font-size:9px;font-weight:700;margin-left:4px}
+  .note{font-size:10px;color:#888;padding:2px 0 0 12px;font-style:italic}
+  .print-btn{display:flex;gap:8px;margin-bottom:16px}
+  .print-btn button{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:700}
+  .btn-p{background:#1C2340;color:white}
+  .btn-c{background:#eee;color:#333}
+  @media print{.print-btn{display:none}}
+</style>
+</head><body>
+<div class="print-btn">
+  <button class="btn-p" onclick="window.print()">🖨️ 列印 / 存成 PDF</button>
+  <button class="btn-c" onclick="window.close()">✕ 關閉</button>
+</div>
+<div class="hd">
+  <div><h1>視覺多媒體設計組 · 專案報告</h1><div class="meta">${GN[currentGroup]}　${new Date().toLocaleDateString('zh-TW')}　共 ${projects.length} 件主任務</div></div>
+</div>${body}</body></html>`;
+  const w=window.open('','_blank','width=820,height=700');
+  if(w){w.document.write(html);w.document.close();}
+}
 
 /* ══ LOG ══ */
 function openLogModal(){document.getElementById('log-modal').style.display='flex';loadLog();}
