@@ -471,6 +471,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 <!-- FILTER TOOLBAR -->
 <div class="toolbar">
+  <button onclick="openAddModal()" style="padding:7px 16px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s" onmouseover="this.style.background='var(--teal2)'" onmouseout="this.style.background='var(--teal)'">＋ 新增任務</button>
   <select class="fsel" id="filter-status" onchange="renderAll()">
     <option value="">全部狀態</option>
     <option value="pending">未開始</option>
@@ -489,7 +490,6 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   <select class="fsel" id="filter-cat" onchange="renderAll()">
     <option value="">全部類別</option>
   </select>
-  <button onclick="openAddModal()" style="padding:7px 16px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s" onmouseover="this.style.background='var(--teal2)'" onmouseout="this.style.background='var(--teal)'">＋ 新增任務</button>
 </div>
 
 <!-- LIST VIEW -->
@@ -580,7 +580,18 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
         </div>
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">類別</label>
-          <input id="af-category" placeholder="例：設計、影片、活動…" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+          <select id="af-category" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+            <option value="">請選擇類別</option>
+            <option value="影片製作">影片製作</option>
+            <option value="平面設計">平面設計</option>
+            <option value="指標工程">指標工程</option>
+            <option value="節慶專案">節慶專案</option>
+            <option value="形象攝影">形象攝影</option>
+            <option value="醫院形象">醫院形象</option>
+            <option value="社群媒體">社群媒體</option>
+            <option value="網頁製作">網頁製作</option>
+            <option value="其他">其他</option>
+          </select>
         </div>
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">負責人</label>
