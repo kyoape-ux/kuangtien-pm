@@ -400,10 +400,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 <!-- HEADER -->
 <div class="header">
   <div class="header-brand">
-    <div class="brand-icon">🎨</div>
+    <img src="./icon.png" alt="光田醫院" style="width:40px;height:40px;border-radius:10px;object-fit:cover">
     <div>
       <div class="brand-name">視覺多媒體設計組</div>
-      <div class="brand-sub">115年度 · 專案進度控管系統</div>
+      <div class="brand-sub">光田醫院 · 115年度 · 專案進度控管系統</div>
     </div>
   </div>
   <div class="header-right">
@@ -441,16 +441,24 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 </div>
 
 <!-- CALENDAR PANEL -->
-<div id="cal-panel">
-  <div class="cal-wrap">
-    <div class="cal-header">
-      <button class="cal-nav" onclick="calPrev()">‹</button>
-      <div class="cal-month-title" id="cal-title"></div>
-      <button class="cal-nav" onclick="calNext()">›</button>
-      <span style="font-size:11px;color:var(--text-muted);margin-left:8px">● 截止日期標記</span>
+<div id="cal-panel" style="display:none">
+  <div style="display:flex;gap:0;height:calc(100vh - 160px);min-height:520px">
+    <iframe id="gcal-frame"
+      src="https://calendar.google.com/calendar/embed?src=ktghvideo%40gmail.com&ctz=Asia%2FTaipei&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&hl=zh_TW&bgcolor=%23FFFFFF&color=%230B8043"
+      style="border:0;width:100%;height:100%" frameborder="0" scrolling="no">
+    </iframe>
+  </div>
+  <!-- 隱藏的原本專案月曆（備用） -->
+  <div id="cal-wrap-orig" style="display:none">
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calPrev()">‹</button>
+        <div class="cal-month-title" id="cal-title"></div>
+        <button class="cal-nav" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div id="cal-legend" style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap"></div>
     </div>
-    <div class="cal-grid" id="cal-grid"></div>
-    <div id="cal-legend" style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap"></div>
   </div>
 </div>
 
@@ -489,7 +497,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   <select class="fsel" id="filter-cat" onchange="renderAll()">
     <option value="">全部類別</option>
   </select>
-  <div class="toolbar-hint">✏️ 請至 Google Sheets 修改資料，再按 🔄 重新整理</div>
+  <button onclick="openAddModal()" style="padding:7px 16px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .18s" onmouseover="this.style.background='var(--teal2)'" onmouseout="this.style.background='var(--teal)'">＋ 新增任務</button>
 </div>
 
 <!-- LIST VIEW -->
@@ -562,6 +570,72 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
       <button class="btn btn-dim" onclick="closeWeekly()">關閉</button>
       <button class="btn btn-teal" onclick="copyWeekly()">📋 複製</button>
     </div>
+  </div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div id="add-modal" onclick="if(event.target===this)closeAddModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;padding:32px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:18px;font-weight:700;color:var(--navy)">＋ 新增任務</div>
+      <button onclick="closeAddModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted)">✕</button>
+    </div>
+    <form id="add-form" onsubmit="submitAddTask(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">任務名稱 *</label>
+          <input id="af-title" required placeholder="請輸入任務名稱" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">類別</label>
+          <input id="af-category" placeholder="例：設計、影片、活動…" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">負責人</label>
+          <input id="af-assignee" placeholder="負責人姓名" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">申請單位</label>
+          <input id="af-unit" placeholder="申請單位名稱" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">開始日期</label>
+          <input id="af-startDate" type="date" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">預計完成</label>
+          <input id="af-endDate" type="date" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">狀態</label>
+          <select id="af-status" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white">
+            <option value="pending">未開始</option>
+            <option value="in-progress">執行中</option>
+            <option value="discussion">討論中</option>
+            <option value="completed">已完成</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">來源</label>
+          <select id="af-sourceType" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white">
+            <option value="self">🟢 自主專案</option>
+            <option value="ticket">🔵 支援單接案</option>
+          </select>
+        </div>
+        <div id="af-supnum-wrap" style="display:none">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">支援單號</label>
+          <input id="af-supNum" placeholder="支援單號" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">備註</label>
+          <textarea id="af-note" rows="2" placeholder="備註說明（選填）" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;resize:vertical" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+        <button type="button" onclick="closeAddModal()" style="padding:9px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">取消</button>
+        <button type="submit" id="af-submit-btn" style="padding:9px 24px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif">新增</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -665,6 +739,64 @@ function saveSetup() {
   _cache = { design:null, media:null };
   init();
 }
+/* ══ ADD TASK MODAL ══ */
+function openAddModal() {
+  const modal = document.getElementById('add-modal');
+  modal.style.display = 'flex';
+  // 預設日期：今天
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('af-startDate').value = today;
+  // 支援單號顯示控制
+  document.getElementById('af-sourceType').onchange = function() {
+    document.getElementById('af-supnum-wrap').style.display = this.value==='ticket' ? '' : 'none';
+  };
+}
+function closeAddModal() {
+  document.getElementById('add-modal').style.display = 'none';
+  document.getElementById('add-form').reset();
+  document.getElementById('af-supnum-wrap').style.display = 'none';
+}
+async function submitAddTask(e) {
+  e.preventDefault();
+  if (!API_URL) { showToast('❌ 尚未設定 API 網址'); return; }
+  const btn = document.getElementById('af-submit-btn');
+  btn.textContent = '新增中…'; btn.disabled = true;
+  const id = 'T' + Date.now();
+  const item = {
+    id, parentId:'',
+    category: document.getElementById('af-category').value.trim(),
+    title:    document.getElementById('af-title').value.trim(),
+    assignee: document.getElementById('af-assignee').value.trim(),
+    unit:     document.getElementById('af-unit').value.trim(),
+    startDate:document.getElementById('af-startDate').value,
+    endDate:  document.getElementById('af-endDate').value,
+    status:   document.getElementById('af-status').value,
+    progress: '0',
+    sourceType:document.getElementById('af-sourceType').value,
+    supNum:   document.getElementById('af-supNum')?.value.trim()||'',
+    note:     document.getElementById('af-note').value.trim()
+  };
+  try {
+    const res = await fetch(API_URL, {
+      method:'POST', mode:'cors',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'add', group: currentGroup, item })
+    });
+    const result = await res.json();
+    if (result.ok) {
+      closeAddModal();
+      _cache[currentGroup] = null;
+      await renderAll();
+      showToast('✅ 任務已新增！');
+    } else {
+      showToast('❌ ' + (result.error||'新增失敗'));
+    }
+  } catch(err) {
+    showToast('❌ 網路錯誤：' + err.message);
+  }
+  btn.textContent = '新增'; btn.disabled = false;
+}
+
 function openSetup() {
   document.getElementById('setup-banner').style.display = 'flex';
   document.getElementById('api-url-input').value  = API_URL || '';
@@ -749,9 +881,9 @@ function switchView(v) {
   document.getElementById('view-'+v).classList.add('active');
   ['list','gantt','stats'].forEach(n => document.getElementById(n+'-view').style.display = v===n ? '' : 'none');
   document.getElementById('cal-panel').style.display = v==='cal' ? '' : 'none';
-  const hideBar = v==='stats';
+  const hideBar = v==='stats' || v==='cal';
   document.getElementById('mode-bar').style.display     = hideBar ? 'none' : '';
-  document.querySelector('.toolbar').style.display      = hideBar ? 'none' : '';
+  document.querySelector('.toolbar').style.display      = (v==='stats'||v==='cal') ? 'none' : '';
   document.querySelector('.list-header').style.display  = hideBar ? 'none' : '';
   document.querySelector('.summary-bar').style.display  = hideBar ? 'none' : '';
   renderAll();
