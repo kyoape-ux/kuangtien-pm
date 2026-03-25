@@ -374,9 +374,11 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 <body>
 
 <script>
-  let API_URL       = localStorage.getItem('pm_api_url') || '';
+  const _DEFAULT_API = 'https://script.google.com/macros/s/AKfycbxXyKligVJXL-pGZy4plU6dTw-X8bA-ksbzA07SjK6R202dgH5okaqZYKK-Q1N43LjHuA/exec';
+  const _DEFAULT_SHEETS = 'https://docs.google.com/spreadsheets/d/1ZZG1Xco0S8K2k1DxpG9y0bK-nKxG_A2GxmpVcf02p90/edit';
+  let API_URL       = localStorage.getItem('pm_api_url') || _DEFAULT_API;
   let OPERATOR      = localStorage.getItem('pm_operator') || '';
-  let SHEETS_URL    = localStorage.getItem('pm_sheets_url') || '';
+  let SHEETS_URL    = localStorage.getItem('pm_sheets_url') || _DEFAULT_SHEETS;
 </script>
 
 <!-- SETUP BANNER -->
