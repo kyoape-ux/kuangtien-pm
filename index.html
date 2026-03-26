@@ -529,8 +529,8 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 <!-- TABS -->
 <div class="nav-bar">
-  <div class="group-tab active" id="tab-design" onclick="switchGroup('design')">🎨 美編組</div>
-  <div class="group-tab" id="tab-media" onclick="switchGroup('media')">🎬 多媒體組</div>
+  <div class="group-tab active" id="tab-media" onclick="switchGroup('media')">🎬 多媒體組</div>
+  <div class="group-tab" id="tab-design" onclick="switchGroup('design')">🎨 美編組</div>
   <div class="nav-spacer"></div>
   <div class="view-toggle">
     <button class="vbtn active" id="view-list" onclick="switchView('list')">☰ 列表</button>
@@ -1084,7 +1084,7 @@ const CAT_COLOR = {
   '員工活動':'#FB923C','教學':'#00BFA6','形象攝影':'#F472B6','其他':'#78909C'
 };
 
-let currentGroup = 'design';
+let currentGroup = 'media';
 let currentView  = 'list';
 let currentMode  = 'active';
 let statsScope   = 'both';
