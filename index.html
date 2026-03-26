@@ -730,14 +730,11 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">類別</label>
           <select id="af-category" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
             <option value="">請選擇類別</option>
-            <option value="影片製作">影片製作</option>
             <option value="平面設計">平面設計</option>
             <option value="指標工程">指標工程</option>
             <option value="節慶專案">節慶專案</option>
-            <option value="形象攝影">形象攝影</option>
             <option value="醫院形象">醫院形象</option>
-            <option value="社群媒體">社群媒體</option>
-            <option value="網頁製作">網頁製作</option>
+            <option value="活動專案">活動專案</option>
             <option value="其他">其他</option>
           </select>
         </div>
@@ -1042,15 +1039,16 @@ const STATUS = {
   discussion:{label:'討論中',cls:'s-discussion'},
   completed:{label:'已完成',cls:'s-completed'}
 };
-const DESIGN_CATS = ['影片製作','平面設計','指標工程','節慶專案','形象攝影','醫院形象','社群媒體','網頁製作','其他'];
-const MEDIA_CATS  = ['系列節目','時令季節/形象/促銷','服務流程','院核心/形象/衛教','員工活動','教學','其他'];
+const DESIGN_CATS = ['平面設計','指標工程','節慶專案','醫院形象','活動專案','其他'];
+const MEDIA_CATS  = ['社群媒體','疾病衛教','特色醫療','新服務流程','醫院介紹/形象','員工活動','教學','其他','形象攝影'];
 const BAR_COLOR   = {pending:'#6B7494','in-progress':'#FFB547',discussion:'#A78BFA',completed:'#4ade80'};
 const CHART_PALETTE = ['#00BFA6','#60A5FA','#A78BFA','#FFB547','#FF6B6B','#34D399','#F472B6','#FBBF24','#818CF8','#FB923C'];
 const CAT_COLOR = {
-  '影片製作':'#4ade80','平面設計':'#A78BFA','指標工程':'#60A5FA','節慶專案':'#FF8A65',
-  '形象攝影':'#F472B6','醫院形象':'#3B82F6','社群媒體':'#FFB547','網頁製作':'#00BFA6',
-  '系列節目':'#42A5F5','時令季節/形象/促銷':'#FF8A65','服務流程':'#4ade80',
-  '院核心/形象/衛教':'#AB47BC','員工活動':'#FFB547','教學':'#00BFA6','其他':'#78909C'
+  '平面設計':'#A78BFA','指標工程':'#60A5FA','節慶專案':'#FF8A65',
+  '醫院形象':'#3B82F6','活動專案':'#F97316',
+  '社群媒體':'#FFB547','疾病衛教':'#42A5F5','特色醫療':'#AB47BC',
+  '新服務流程':'#4ade80','醫院介紹/形象':'#3B82F6',
+  '員工活動':'#FB923C','教學':'#00BFA6','形象攝影':'#F472B6','其他':'#78909C'
 };
 
 let currentGroup = 'design';
