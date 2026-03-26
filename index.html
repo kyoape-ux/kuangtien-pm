@@ -161,7 +161,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 /* ── LIST HEADER ── */
 .list-header{
-  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px 40px;
+  display:grid;grid-template-columns:24px 28px 1fr 80px 90px 90px 100px 100px 40px;
   padding:7px 20px;gap:10px;font-size:10px;color:var(--text-dim);font-weight:700;
   text-transform:uppercase;letter-spacing:.6px;margin:0 24px 4px;
   border-bottom:1px solid var(--border);
@@ -178,7 +178,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .project-card.archived{opacity:.55;border-style:dashed}
 .project-card.archived:hover{opacity:.8}
 .project-row{
-  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px 40px;
+  display:grid;grid-template-columns:24px 28px 1fr 80px 90px 90px 100px 100px 40px;
   align-items:center;padding:13px 20px;gap:10px;cursor:pointer;
 }
 .toggle-icon{
@@ -215,7 +215,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 /* ── SUBTASKS ── */
 .subtask-list{border-top:1px solid var(--border);background:#FAFAFA}
 .subtask-row{
-  display:grid;grid-template-columns:28px 1fr 80px 90px 90px 100px 100px 40px;
+  display:grid;grid-template-columns:24px 28px 1fr 80px 90px 90px 100px 100px 40px;
   align-items:center;padding:9px 20px;gap:10px;
   border-bottom:1px solid rgba(28,35,64,.04);font-size:12px;
 }
@@ -231,6 +231,20 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 }
 .btn-edit:hover{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);color:#3B82F6;transform:scale(1.1)}
 
+
+/* ── BULK SELECT ── */
+.row-cb{width:14px;height:14px;accent-color:var(--teal);cursor:pointer;flex-shrink:0}
+.project-card.selected>.project-row{background:rgba(0,191,166,.06)}
+.project-card.selected{border-color:rgba(0,191,166,.4)!important}
+#bulk-bar{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  background:var(--navy);color:white;border-radius:14px;
+  padding:10px 20px;display:none;align-items:center;gap:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.35);z-index:400;white-space:nowrap;
+  animation:slideUp .2s ease;
+}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bulk-btn{padding:6px 16px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s}
 /* ── DRAG & DROP ── */
 .project-card[draggable=true]{cursor:grab}
 .project-card[draggable=true]:active{cursor:grabbing}
@@ -422,11 +436,13 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   .list-header{display:none!important}
   .project-list{padding:0 14px 40px}
   .project-row{grid-template-columns:22px 1fr 90px 34px;padding:11px 14px}
-  .project-row>div:nth-child(3),.project-row>div:nth-child(4),
-  .project-row>div:nth-child(5),.project-row>div:nth-child(7){display:none}
-  .subtask-row{grid-template-columns:22px 1fr 90px 34px;padding:8px 14px}
-  .subtask-row>div:nth-child(3),.subtask-row>div:nth-child(4),
-  .subtask-row>div:nth-child(5),.subtask-row>div:nth-child(7){display:none}
+  .project-row>div:nth-child(1),
+  .project-row>div:nth-child(4),.project-row>div:nth-child(5),
+  .project-row>div:nth-child(6),.project-row>div:nth-child(8){display:none}
+  .subtask-row{grid-template-columns:1fr 90px 34px;padding:8px 14px}
+  .subtask-row>div:nth-child(1),.subtask-row>div:nth-child(2),
+  .subtask-row>div:nth-child(4),.subtask-row>div:nth-child(5),
+  .subtask-row>div:nth-child(6),.subtask-row>div:nth-child(8){display:none}
   .project-title{font-size:12px}
   .project-note{white-space:normal}
 
@@ -586,12 +602,23 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 <!-- LIST VIEW -->
 <div id="list-view">
   <div class="list-header">
+    <div style="text-align:center"><input type="checkbox" id="select-all-cb" onchange="selectAll(this.checked)" style="width:14px;height:14px;accent-color:var(--teal);cursor:pointer" title="全選／取消"></div>
     <div></div><div>專案名稱</div>
     <div>負責人</div><div>開始日期</div><div>預計完成</div>
     <div>狀態</div><div>進度</div><div></div>
   </div>
   <div class="project-list" id="project-list"></div>
 </div>
+
+<!-- BULK ACTION BAR -->
+<div id="bulk-bar">
+  <span style="font-size:12px">已選 <strong id="bulk-count" style="color:var(--teal);font-size:15px">0</strong> 筆</span>
+  <div style="width:1px;height:20px;background:rgba(255,255,255,.2)"></div>
+  <button class="bulk-btn" onclick="bulkCopy()" style="background:rgba(0,191,166,.25);color:#7ff3e4" onmouseover="this.style.background='rgba(0,191,166,.45)'" onmouseout="this.style.background='rgba(0,191,166,.25)'">📋 複製</button>
+  <button class="bulk-btn" onclick="bulkDelete()" style="background:rgba(255,107,107,.25);color:#ffaaaa" onmouseover="this.style.background='rgba(255,107,107,.45)'" onmouseout="this.style.background='rgba(255,107,107,.25)'">🗑 刪除</button>
+  <button onclick="clearSelection()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1" title="取消選取">✕</button>
+</div>
+
 
 <!-- GANTT VIEW -->
 <div id="gantt-view" style="display:none">
@@ -1424,6 +1451,7 @@ function renderList(allProjects) {
       const sOd = s.endDate && new Date(s.endDate)<today && s.status!=='completed';
       return `<div class="subtask-row">
         <div></div>
+        <div></div>
         <div class="st-indent"><span class="st-line"></span>
           <div><div style="font-size:12px;font-weight:500;color:var(--navy)">${esc(s.title)}</div></div>
         </div>
@@ -1435,8 +1463,9 @@ function renderList(allProjects) {
         <div style="display:flex;justify-content:center"><button class="btn-edit" onclick="event.stopPropagation();openEditModal('${s.id}')" title="編輯子任務">✏️</button></div>
       </div>`;
     }).join('') : '';
-    return `<div class="project-card${p.status==='completed'?' archived':''}" data-id="${p.id}" draggable="true" ondragstart="dragStart(event,'${p.id}')" ondragover="dragOver(event,'${p.id}')" ondrop="dragDrop(event,'${p.id}')" ondragend="dragEnd(event)">
-      <div class="project-row" onclick="toggleSub('sl-${p.id}','ti-${p.id}')">
+    return `<div class="project-card${p.status==='completed'?' archived':''}${_selectedIds.has(p.id)?' selected':''}" data-id="${p.id}" draggable="true" ondragstart="dragStart(event,'${p.id}')" ondragover="dragOver(event,'${p.id}')" ondrop="dragDrop(event,'${p.id}')" ondragend="dragEnd(event)">
+      <div class="project-row" onclick
+        <div onclick="event.stopPropagation()" style="display:flex;align-items:center;justify-content:center"><input type="checkbox" class="row-cb" id="cb-${p.id}" data-id="${p.id}" ${_selectedIds.has(p.id)?'checked':''} onchange="toggleSelect('${p.id}',this.checked)" style="width:14px;height:14px;accent-color:var(--teal);cursor:pointer"></div>="toggleSub('sl-${p.id}','ti-${p.id}')">
         <div class="toggle-icon${hasSubs?'':' hidden'} " id="ti-${p.id}">▶</div>
         <div>
           <div class="project-title">${esc(p.title)}${isOd?' <span class="overdue-badge">⚠️ 逾期</span>':''}</div>
@@ -2173,6 +2202,94 @@ async function executeBatchImport() {
       showToast('❌ 匯入失敗：'+(result.error||'未知錯誤'));
     }
   } catch(e){btn.textContent='確認批次匯入';btn.disabled=false;showToast('❌ 網路錯誤：'+e.message);}
+}
+
+/* ══ MULTI SELECT ══ */
+function toggleSelect(id, checked) {
+  if (checked) _selectedIds.add(id);
+  else _selectedIds.delete(id);
+  const card = document.querySelector('.project-card[data-id="'+id+'"]');
+  if (card) card.classList.toggle('selected', checked);
+  updateBulkBar();
+}
+function selectAll(checked) {
+  document.querySelectorAll('.row-cb').forEach(cb => {
+    cb.checked = checked;
+    const id = cb.dataset.id;
+    if (checked) _selectedIds.add(id); else _selectedIds.delete(id);
+    const card = document.querySelector('.project-card[data-id="'+id+'"]');
+    if (card) card.classList.toggle('selected', checked);
+  });
+  updateBulkBar();
+}
+function clearSelection() {
+  _selectedIds.clear();
+  document.querySelectorAll('.row-cb').forEach(cb => cb.checked = false);
+  document.querySelectorAll('.project-card.selected').forEach(el => el.classList.remove('selected'));
+  const sa = document.getElementById('select-all-cb'); if(sa) sa.checked = false;
+  updateBulkBar();
+}
+function updateBulkBar() {
+  const n = _selectedIds.size;
+  const bar = document.getElementById('bulk-bar');
+  if (!bar) return;
+  if (n > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulk-count').textContent = n;
+    const sa = document.getElementById('select-all-cb');
+    const total = document.querySelectorAll('.row-cb').length;
+    if (sa) sa.checked = (n === total && total > 0);
+  } else {
+    bar.style.display = 'none';
+  }
+}
+async function bulkDelete() {
+  const ids = [..._selectedIds];
+  if (!ids.length) return;
+  if (!confirm('確定要刪除選取的 ' + ids.length + ' 筆項目？\n此操作無法復原。')) return;
+  if (!API_URL) {
+    const cache = _cache[currentGroup];
+    if (cache) _cache[currentGroup] = cache.filter(p => !ids.includes(p.id));
+    clearSelection(); await renderAll();
+    showToast('🗑 已刪除 ' + ids.length + ' 筆（本機）'); return;
+  }
+  showToast('🗑 刪除中…');
+  try {
+    const res = await fetch(API_URL, {
+      method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'batchDelete', group:currentGroup, ids, operator:OPERATOR||'admin' })
+    });
+    const result = await res.json();
+    if (result.ok) {
+      clearSelection(); _cache[currentGroup]=null; await renderAll();
+      showToast('✅ 已刪除 ' + (result.deleted||ids.length) + ' 筆');
+    } else showToast('❌ ' + (result.error||'刪除失敗'));
+  } catch(e) { showToast('❌ 網路錯誤：'+e.message); }
+}
+async function bulkCopy() {
+  const ids = [..._selectedIds];
+  if (!ids.length) return;
+  if (!API_URL) { showToast('❌ 複製功能需要 API 連線'); return; }
+  const items = ids.map(id => {
+    const orig = _itemMap[id]; if (!orig) return null;
+    return Object.assign({}, orig, {
+      id: 'CPY'+Date.now()+Math.random().toString(36).slice(2,5),
+      parentId: '', title: '【複製】'+orig.title, status: 'pending', progress: '0'
+    });
+  }).filter(Boolean);
+  if (!items.length) return;
+  showToast('📋 複製中…');
+  try {
+    const res = await fetch(API_URL, {
+      method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'batchAdd', group:currentGroup, items, operator:OPERATOR||'admin' })
+    });
+    const result = await res.json();
+    if (result.ok) {
+      clearSelection(); _cache[currentGroup]=null; await renderAll();
+      showToast('✅ 已複製 ' + (result.added||items.length) + ' 筆，狀態重置為「未開始」');
+    } else showToast('❌ ' + (result.error||'複製失敗'));
+  } catch(e) { showToast('❌ 網路錯誤：'+e.message); }
 }
 
 /* ══ SUBTASK ROWS ══ */
