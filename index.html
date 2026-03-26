@@ -1782,7 +1782,7 @@ async function generateWeekly(){
   const STATUS_LINE={pending:'⬜ 待執行','in-progress':'🔶 執行中',discussion:'💬 討論中',review:'🔍 審核中',completed:'✅ 已完成'};
   if(style==='line'){
     let txt=`📋 本週工作摘要\n🗓 ${todayStr}\n${'─'.repeat(25)}\n`;
-    allP.forEach(({g,p})=>{if(!p.length)return;txt+=`\n${GNAME[g]}\n`;p.filter(x=>x.status!=='completed').forEach(x=>{txt+=`${STATUS_LINE[x.status]||'▪'} ${x.title}（${x.assignee||'—'}）${x.progress?` ${x.progress}%`:''}\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`  └ ${s.title}（${s.assignee||'—'}）${s.progress?' '+s.progress+'%':''}${s.endDate?' 預計完成：'+s.endDate:''}\n`;});});const done=p.filter(x=>x.status==='completed');if(done.length)txt+=`\n已完成 ${done.length} 件 ✅\n`;});
+    allP.forEach(({g,p})=>{if(!p.length)return;txt+=`\n${GNAME[g]}\n`;p.filter(x=>x.status!=='completed').forEach(x=>{txt+=`${STATUS_LINE[x.status]||'▪'}　${x.title}（${x.assignee||'—'}）${x.progress?` ${x.progress}%`:''}\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`  └ ${s.title}（${s.assignee||'—'}）${s.progress?' '+s.progress+'%':''}${s.endDate?' 預計完成：'+s.endDate:''}\n`;});});const done=p.filter(x=>x.status==='completed');if(done.length)txt+=`\n已完成 ${done.length} 件 ✅\n`;});
     document.getElementById('weekly-text').textContent=txt;
   } else {
     let txt=`視覺多媒體設計組 週報\n日期：${todayStr}\n${'═'.repeat(30)}\n`;
