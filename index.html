@@ -453,10 +453,12 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   #active-hint{display:none}
   #sheets-link-btn{display:none!important}
 
-  .summary-bar{overflow-x:auto;flex-wrap:nowrap;padding:10px 14px 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  #summary-row{flex-direction:column;align-items:stretch;padding:8px 14px 4px;gap:8px}
+  .summary-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .summary-bar::-webkit-scrollbar{display:none}
   .summary-card{min-width:70px;padding:10px 12px;flex-shrink:0}
   .summary-num{font-size:22px}
+  .quick-add-inline{min-width:0}
 
   .toolbar{padding:8px 14px;gap:6px;flex-wrap:wrap}
   .fsel{font-size:11px;padding:6px 8px}
