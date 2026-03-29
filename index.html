@@ -1647,7 +1647,7 @@ function renderList(allProjects) {
     }).join('') : '';
     return `<div class="project-card${p.status==='completed'?' archived':''}${_selectedIds.has(p.id)?' selected':''}${isOd?' overdue':''}" data-id="${p.id}" draggable="true" ondragstart="dragStart(event,'${p.id}')" ondragover="dragOver(event,'${p.id}')" ondrop="dragDrop(event,'${p.id}')" ondragend="dragEnd(event)">
       <div class="project-row" onclick="toggleSub('sl-${p.id}','ti-${p.id}')">
-        <div onclick="event.stopPropagation()" style="display:flex;align-items:center;justify-content:center"><input type="checkbox" class="row-cb" id="cb-${p.id}" data-id="${p.id}" ${_selectedIds.has(p.id)?'checked':''} onchange="toggleSelect('${p.id}',this.checked)" style="width:14px;height:14px;accent-color:var(--teal);cursor:pointer"></div>
+        <div class="card-check-cell" onclick="event.stopPropagation()" style="display:flex;align-items:center;justify-content:center"><input type="checkbox" class="row-cb" id="cb-${p.id}" data-id="${p.id}" ${_selectedIds.has(p.id)?'checked':''} onchange="toggleSelect('${p.id}',this.checked)" style="width:14px;height:14px;accent-color:var(--teal);cursor:pointer"></div>
         <div class="toggle-icon${hasSubs?'':' hidden'} " id="ti-${p.id}">▶</div>
         <div>
           <div class="project-title">${esc(p.title)}${isOd?' <span class="overdue-badge">⚠️ 逾期</span>':''}</div>
