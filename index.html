@@ -670,7 +670,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     <div class="chart-card"><div class="chart-title">📂 類別工作量</div><div class="chart-sub">各類別件數與平均進度</div><div class="chart-canvas-wrap" style="height:200px"><canvas id="chart-category"></canvas></div></div>
   </div>
   <div class="chart-grid">
-    <div class="chart-card"><div class="chart-title">📅 月份截止熱度</div><div class="chart-sub">各月份截止件數</div><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-monthly"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">📅 預計完成月份分佈</div><div class="chart-sub">各月份預計完成件數</div><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-monthly"></canvas></div></div>
     <div class="chart-card"><div class="chart-title">⚡ 狀態分佈</div><div class="chart-sub">四種狀態比例</div><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-status"></canvas></div></div>
   </div>
   <div class="chart-grid">
@@ -942,7 +942,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
           <div>• <strong>負責人</strong>：接單者、負責人、承辦人</div>
           <div>• <strong>協同人員</strong>：接案者、協同、協辦</div>
           <div>• <strong>開始日期</strong>：接案日期、開始日期、收件日</div>
-          <div>• <strong>截止日期</strong>：希望完成日、完成日、截止日期</div>
+          <div>• <strong>預計完成日</strong>：希望完成日、完成日、截止日期</div>
           <div>• <strong>類別</strong>：單種、類別（自動從申請單格式萃取）</div>
           <div>• <strong>狀態</strong>：明細狀態、接案狀態（自動轉換中文）</div>
         </div>
@@ -958,7 +958,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
         <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">欄位對應設定</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="import-col-map-grid"></div>
         <div style="margin-top:10px;padding:8px 10px;background:rgba(59,130,246,.06);border-radius:7px;font-size:10px;color:var(--text-muted)">
-          💡 <strong>SUP0023</strong>：單號→支援單號　主題→標題　接單者→負責人　接案者→協同　接案日期→開始　希望完成日→截止　明細狀態→狀態　單種→類別　急件→備註
+          💡 <strong>SUP0023</strong>：單號→支援單號　主題→標題　接單者→負責人　接案者→協同　接案日期→開始　希望完成日→預計完成日明細狀態→狀態　單種→類別　急件→備註
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:10px">
@@ -983,7 +983,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
               <th style="padding:8px 10px;text-align:left;font-size:10px;color:var(--text-muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap">支援單號</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;color:var(--navy);font-weight:700;border-bottom:1px solid var(--border)">標題（可直接編輯）✏️</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;color:var(--text-muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap">負責人</th>
-              <th style="padding:8px 10px;text-align:left;font-size:10px;color:var(--text-muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap">截止日</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;color:var(--text-muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap">預計完成日</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;color:var(--text-muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap">類別</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;color:var(--text-muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap">狀態</th>
             </tr>
@@ -1868,7 +1868,7 @@ async function generateWeekly(){
     document.getElementById('weekly-text').textContent=txt;
   } else {
     let txt=`視覺多媒體設計組 週報\n日期：${todayStr}\n${'═'.repeat(30)}\n`;
-    allP.forEach(({g,p})=>{if(!p.length)return;txt+=`\n【${GNAME[g]}】\n`;const byStatus={'in-progress':[],'discussion':[],'pending':[],'review':[],'completed':[]};p.forEach(x=>byStatus[x.status]?.push(x));if(byStatus['in-progress'].length){txt+=`▌執行中\n`;byStatus['in-progress'].forEach(x=>{txt+=`  • ${x.title}（負責人：${x.assignee||'—'}，進度：${x.progress||0}%${x.endDate?'，預計完成：'+x.endDate:''}）\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`    └ ${s.title}（${s.assignee||'—'}，${s.progress||0}%${s.endDate?'，預計完成：'+s.endDate:''}）\n`;});});}if(byStatus['discussion'].length){txt+=`▌討論中\n`;byStatus['discussion'].forEach(x=>{txt+=`  • ${x.title}（${x.assignee||'—'}${x.endDate?'，預計完成：'+x.endDate:''}）\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`    └ ${s.title}（${s.assignee||'—'}，${s.progress||0}%${s.endDate?'，預計完成：'+s.endDate:''}）\n`;});});}if(byStatus['pending'].length){txt+=`▌未開始\n`;byStatus['pending'].forEach(x=>{txt+=`  • ${x.title}（${x.assignee||'—'}${x.endDate?'，預計完成：'+x.endDate:''}）\n`;});}if(byStatus['completed'].length)txt+=`▌本週完成 ${byStatus['completed'].length} 件\n`;});
+    allP.forEach(({g,p})=>{if(!p.length)return;txt+=`\n【${GNAME[g]}】\n`;const byStatus={'in-progress':[],'discussion':[],'pending':[],'review':[],'completed':[]};p.forEach(x=>byStatus[x.status]?.push(x));if(byStatus['in-progress'].length){txt+=`▌執行中\n`;byStatus['in-progress'].forEach(x=>{txt+=`  • ${x.title}（負責人：${x.assignee||'—'}，進度：${x.progress||0}%${x.endDate?'，預計完成：'+x.endDate:''}）\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`    └ ${s.title}（${s.assignee||'—'}，${s.progress||0}%${s.endDate?'，預計完成：'+s.endDate:''}）\n`;});});}if(byStatus['discussion'].length){txt+=`▌討論中\n`;byStatus['discussion'].forEach(x=>{txt+=`  • ${x.title}（${x.assignee||'—'}${x.endDate?'，預計完成：'+x.endDate:''}）\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`    └ ${s.title}（${s.assignee||'—'}，${s.progress||0}%${s.endDate?'，預計完成：'+s.endDate:''}）\n`;});});}if(byStatus['review'].length){txt+=`▌審核中\n`;byStatus['review'].forEach(x=>{txt+=`  • ${x.title}（負責人：${x.assignee||'—'}，進度：${x.progress||0}%${x.endDate?'，預計完成：'+x.endDate:''}）\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`    └ ${s.title}（${s.assignee||'—'}，${s.progress||0}%${s.endDate?'，預計完成：'+s.endDate:''}）\n`;});});}if(byStatus['pending'].length){txt+=`▌待執行\n`;byStatus['pending'].forEach(x=>{txt+=`  • ${x.title}（${x.assignee||'—'}${x.endDate?'，預計完成：'+x.endDate:''}）\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`    └ ${s.title}（${s.assignee||'—'}${s.endDate?'，預計完成：'+s.endDate:''}）\n`;});});}if(byStatus['completed'].length)txt+=`▌已完成 ${byStatus['completed'].length} 件 ✅\n`;});
     document.getElementById('weekly-text').textContent=txt;
   }
 }
@@ -1914,7 +1914,7 @@ async function exportTextPDF(){
       const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'預計完成：'+p.endDate:'',p.progress?p.progress+'%':'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
       body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
       (p.subtasks||[]).forEach(s=>{
-        body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST[s.status]||''}</em></div>`;
+        body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST[s.status]||''}</em>${s.progress?' <em>'+s.progress+'%</em>':''}${s.endDate?' <span style="color:#666;font-size:10px">預計完成：'+s.endDate+'</span>':''}</div>`;
       });
       if(p.note) body+=`<div class="note">備註：${p.note}</div>`;
       body+='</div>';
