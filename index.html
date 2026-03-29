@@ -124,9 +124,9 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 #sheets-link-btn{margin-left:auto}
 
 /* ── SUMMARY CARDS ── */
-.summary-bar{
-  display:flex;gap:10px;padding:16px 24px 4px;flex-wrap:wrap;
-}
+#summary-row{display:flex;align-items:center;gap:16px;padding:14px 24px 4px;flex-wrap:wrap}
+.summary-bar{display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.quick-add-inline{flex:1;display:flex;align-items:center;gap:8px;min-width:220px}
 .summary-card{
   background:var(--surface);border:1px solid var(--border);border-radius:12px;
   padding:14px 20px;min-width:86px;text-align:center;cursor:pointer;
