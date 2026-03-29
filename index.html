@@ -529,10 +529,14 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .logout-btn:hover{background:rgba(255,107,107,.25);color:white}
 
 /* ── ROLE-BASED VISIBILITY ── */
+/* leader-only：僅組長可見（設定） */
 body.role-member .leader-only{display:none!important}
-body.role-member .card-check-cell{visibility:hidden;pointer-events:none}
-body.role-member .btn-edit{display:none!important}
-body.role-member .btn-quick-done{display:none!important}
+body.role-guest  .leader-only{display:none!important}
+/* auth-only：登入後（組長/組員）才可見 */
+body.role-guest  .auth-only{display:none!important}
+body.role-guest  .card-check-cell{visibility:hidden;pointer-events:none}
+body.role-guest  .btn-edit{display:none!important}
+body.role-guest  .btn-quick-done{display:none!important}
 </style>
 </head>
 <body>
