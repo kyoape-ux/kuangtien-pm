@@ -580,9 +580,12 @@ body.role-member .card-check-cell{visibility:hidden;pointer-events:none}
   <span class="setup-label">⚙️ 連線設定</span>
   <input type="text" id="api-url-input" placeholder="Apps Script 網址 https://script.google.com/…" style="flex:2;max-width:480px">
   <input type="text" id="op-name-input" placeholder="您的姓名" style="max-width:130px">
-  <input type="text" id="sheets-url-input" placeholder="Google Sheets 網址（選填，方便開啟編輯）" style="max-width:300px">
+  <input type="text" id="sheets-url-input" placeholder="Google Sheets 網址（選填）" style="max-width:240px">
+  <span class="setup-label" style="margin-left:8px">🔐 密碼</span>
+  <input type="password" id="leader-pass-input" placeholder="組長密碼（留空不更改）" style="max-width:160px">
+  <input type="password" id="member-pass-input" placeholder="組員密碼（留空不更改）" style="max-width:160px">
   <button class="btn-setup" onclick="saveSetup()">儲存</button>
-  <button class="btn-setup grey" onclick="document.getElementById('setup-banner').style.display='none'">略過</button>
+  <button class="btn-setup grey" onclick="document.getElementById('setup-banner').style.display='none'">關閉</button>
 </div>
 
 <!-- LOADING -->
