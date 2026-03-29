@@ -1373,7 +1373,7 @@ function openSetup() {
 }
 function updateSheetsLink() {
   const btn = document.getElementById('sheets-link-btn');
-  if (SHEETS_URL) { btn.href = SHEETS_URL; btn.style.display = ''; }
+  if (SHEETS_URL && PM_ROLE !== 'guest') { btn.href = SHEETS_URL; btn.style.display = ''; }
   else btn.style.display = 'none';
 }
 function checkSetup() {
