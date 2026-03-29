@@ -535,6 +535,38 @@ body.role-member .card-check-cell{visibility:hidden;pointer-events:none}
 </head>
 <body>
 
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div class="login-brand">
+    <img src="./icon.png" alt="" style="width:60px;height:60px;border-radius:16px;object-fit:cover;box-shadow:0 0 24px rgba(0,191,166,.35)">
+    <div>
+      <div class="login-title">視覺多媒體設計組</div>
+      <div class="login-sub">光田醫院 · 專案進度控管系統</div>
+    </div>
+  </div>
+  <div class="login-box">
+    <div class="login-prompt">請選擇您的身份</div>
+    <div class="login-roles">
+      <button class="role-btn" id="role-btn-leader" onclick="selectRole('leader')">
+        <span class="role-icon">👑</span>
+        <span>組長</span>
+        <span style="font-size:10px;opacity:.55;font-weight:400">最高權限</span>
+      </button>
+      <button class="role-btn" id="role-btn-member" onclick="selectRole('member')">
+        <span class="role-icon">🧑‍💼</span>
+        <span>組員</span>
+        <span style="font-size:10px;opacity:.55;font-weight:400">一般權限</span>
+      </button>
+    </div>
+    <div class="login-pass-area" id="login-pass-area">
+      <input class="login-pass-input" type="password" id="login-pass" placeholder="請輸入密碼"
+        onkeydown="if(event.key==='Enter')submitLogin()">
+      <button class="login-submit" onclick="submitLogin()">登入</button>
+      <div class="login-err" id="login-err"></div>
+    </div>
+  </div>
+</div>
+
 <script>
   const _DEFAULT_API = 'https://script.google.com/macros/s/AKfycbxXyKligVJXL-pGZy4plU6dTw-X8bA-ksbzA07SjK6R202dgH5okaqZYKK-Q1N43LjHuA/exec';
   const _DEFAULT_SHEETS = 'https://docs.google.com/spreadsheets/d/1ZZG1Xco0S8K2k1DxpG9y0bK-nKxG_A2GxmpVcf02p90/edit';
