@@ -368,23 +368,21 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .fsel-dark option{background:var(--surface2)}
 
 /* ── QUICK ADD BAR ── */
-.quick-add-wrap{padding:10px 20px 6px;position:relative}
+.quick-add-wrap{padding:12px 20px 8px;position:relative}
 .quick-add-input{
-  width:100%;padding:11px 46px 11px 16px;
-  border:1.5px solid var(--border);border-radius:10px;
-  font-size:13px;font-family:'Noto Sans TC',sans-serif;
-  color:var(--text);background:var(--surface2);outline:none;
-  box-sizing:border-box;transition:border-color .15s,box-shadow .15s;
+  width:100%;padding:13px 52px 13px 18px;
+  border:2px solid var(--teal);border-radius:12px;
+  font-size:13.5px;font-family:'Noto Sans TC',sans-serif;
+  color:var(--text);background:rgba(0,191,166,.04);outline:none;
+  box-sizing:border-box;transition:border-color .15s,box-shadow .15s,background .15s;
 }
-.quick-add-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,191,166,.12)}
+.quick-add-input:focus{border-color:var(--teal);background:rgba(0,191,166,.08);box-shadow:0 0 0 4px rgba(0,191,166,.15)}
 .quick-add-input::placeholder{color:var(--text-dim);font-size:12px}
-.quick-add-enter{
-  position:absolute;right:28px;top:50%;transform:translateY(-50%);
-  background:var(--teal);color:#0d1b2a;border:none;border-radius:6px;
-  padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;opacity:.85;
-  transition:opacity .15s;
+.quick-add-hint{
+  position:absolute;right:30px;top:50%;transform:translateY(-50%);
+  font-size:10px;font-weight:700;color:var(--teal);opacity:.7;
+  pointer-events:none;white-space:nowrap;
 }
-.quick-add-enter:hover{opacity:1}
 
 /* ── EXPORT DROPDOWN ── */
 .export-wrap{position:relative;display:inline-flex}
@@ -623,9 +621,9 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 <!-- QUICK ADD BAR -->
 <div class="quick-add-wrap">
   <input class="quick-add-input" id="quick-add-input"
-    placeholder="快速新增：項目名稱 / 負責人 / 預計完成日　　例：光小編海報 / 筠慈 / 3/31"
-    onkeydown="if(event.key==='Enter')quickAddItem()">
-  <button class="quick-add-enter" onclick="quickAddItem()">Enter</button>
+    placeholder="快速新增：項目名稱 / 負責人 / 日期　加子任務：+ 子任務名稱 / 負責人　　↵ Enter 送出"
+    onkeydown="if(event.key==='Enter'){event.preventDefault();quickAddItem()}">
+  <span class="quick-add-hint">↵ Enter</span>
 </div>
 
 <!-- LIST VIEW -->
@@ -1825,26 +1823,67 @@ function parseQuickDate(s){
   if(full)return `${full[1]}-${full[2].padStart(2,'0')}-${full[3].padStart(2,'0')}`;
   return'';
 }
+function guessCategory(title){
+  const t=title;
+  const isMedia=currentGroup==='media';
+  if(isMedia){
+    if(/影片|剪輯|拍攝|短片|MV|宣傳片/.test(t)) return '特色醫療';
+    if(/衛教|疾病|健康|醫學/.test(t)) return '疾病衛教';
+    if(/形象|品牌|logo|LOGO/.test(t)) return '醫院介紹/形象';
+    if(/社群|FB|IG|貼文|Facebook|Instagram/.test(t)) return '社群媒體';
+    if(/員工|同仁|內部|活動|尾牙|聚餐/.test(t)) return '員工活動';
+    if(/教學|訓練|教材/.test(t)) return '教學';
+    if(/攝影|照片|拍照/.test(t)) return '形象攝影';
+    if(/流程|SOP|新服務/.test(t)) return '新服務流程';
+    return '';
+  } else {
+    if(/海報|DM|傳單|印刷|宣傳/.test(t)) return '平面設計';
+    if(/指標|牌|標示|看板/.test(t)) return '指標工程';
+    if(/活動|展覽|展示|佈置/.test(t)) return '活動專案';
+    if(/形象|院長|封面|年報/.test(t)) return '醫院形象';
+    if(/節慶|過年|聖誕|中秋|端午/.test(t)) return '節慶專案';
+    return '';
+  }
+}
 async function quickAddItem(){
   const inp=document.getElementById('quick-add-input');
   const raw=inp.value.trim();
   if(!raw)return;
-  const parts=raw.split(/[\/／]/).map(p=>p.trim());
-  const title=parts[0]||'';
-  const assignee=parts[1]||'';
-  const endDate=parseQuickDate(parts[2]||'');
+  // 用 + 分割主任務與子任務
+  const chunks=raw.split(/\s*\+\s*/);
+  const mainChunk=chunks[0];
+  const subChunks=chunks.slice(1);
+  const mainParts=mainChunk.split(/[\/／]/).map(p=>p.trim());
+  const title=mainParts[0]||'';
+  const assignee=mainParts[1]||'';
+  const endDate=parseQuickDate(mainParts[2]||'');
   if(!title){showToast('請輸入項目名稱');return;}
+  const category=guessCategory(title);
   inp.disabled=true;
+  const mainId='T'+Date.now();
   const item={
-    id:'T'+Date.now(),parentId:'',category:'',title,assignee,unit:'',
+    id:mainId,parentId:'',category,title,assignee,unit:'',
     startDate:'',endDate,status:'pending',progress:'0',
     sourceType:'self',supNum:'',collab:'',note:''
   };
   try{
     const res=await fetch(API_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',group:currentGroup,item})});
     const r=await res.json();
-    if(r.ok){inp.value='';await refreshList();showToast('✅ 已快速新增');openEditModal(item.id);}
-    else showToast('❌ 新增失敗');
+    if(!r.ok){showToast('❌ 新增失敗');inp.disabled=false;inp.focus();return;}
+    // 批次新增子任務
+    if(subChunks.length){
+      const subItems=subChunks.map((sc,i)=>{
+        const sp=sc.split(/[\/／]/).map(p=>p.trim());
+        return{id:'T'+(Date.now()+i+1),parentId:mainId,category,title:sp[0]||'子任務'+(i+1),
+          assignee:sp[1]||assignee,unit:'',startDate:'',endDate:parseQuickDate(sp[2]||''),
+          status:'pending',progress:'0',sourceType:'self',supNum:'',collab:'',note:''};
+      });
+      await fetch(API_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'batchAdd',group:currentGroup,items:subItems})});
+    }
+    inp.value='';await refreshList();
+    showToast(`✅ 已新增${subChunks.length?'（含 '+subChunks.length+' 個子任務）':''}`);
+    openEditModal(mainId);
   }catch(e){showToast('❌ 連線失敗');}
   inp.disabled=false;inp.focus();
 }
