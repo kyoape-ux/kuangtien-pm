@@ -2701,10 +2701,38 @@ function submitLogin() {
 }
 
 function applyRole(role) {
-  document.body.classList.remove('role-leader','role-member');
+  document.body.classList.remove('role-leader','role-member','role-guest');
   document.body.classList.add('role-'+role);
-  const badge = document.getElementById('role-badge');
-  if (badge) badge.textContent = role==='leader' ? '👑 組長' : '🧑‍💼 組員';
+  const badge   = document.getElementById('role-badge');
+  const logoutBtn = document.getElementById('logout-btn');
+  const loginBtn  = document.getElementById('login-header-btn');
+  if (role === 'guest') {
+    if (badge)     { badge.style.display = 'none'; }
+    if (logoutBtn) { logoutBtn.style.display = 'none'; }
+    if (loginBtn)  { loginBtn.style.display = ''; }
+  } else {
+    if (badge)     { badge.textContent = role==='leader' ? '👑 組長' : '🧑‍💼 組員'; badge.style.display = ''; }
+    if (logoutBtn) { logoutBtn.style.display = ''; }
+    if (loginBtn)  { loginBtn.style.display = 'none'; }
+  }
+}
+
+function showLoginOverlay() {
+  _loginRole = '';
+  document.getElementById('role-btn-leader').classList.remove('selected');
+  document.getElementById('role-btn-member').classList.remove('selected');
+  document.getElementById('login-pass-area').classList.remove('open');
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('login-overlay').style.display = 'flex';
+}
+
+function enterAsGuest() {
+  PM_ROLE = 'guest';
+  sessionStorage.setItem('pm_role', 'guest');
+  document.getElementById('login-overlay').style.display = 'none';
+  applyRole('guest');
+  checkSetup(); init();
 }
 
 function logout() {
@@ -2719,8 +2747,12 @@ if (PM_ROLE) {
   document.getElementById('login-overlay').style.display = 'none';
   checkSetup(); init();
 } else {
-  document.getElementById('login-overlay').style.display = 'flex';
-  document.getElementById('loading').style.display = 'none';
+  /* 預設以訪客身份載入，不強制登入 */
+  PM_ROLE = 'guest';
+  sessionStorage.setItem('pm_role', 'guest');
+  applyRole('guest');
+  document.getElementById('login-overlay').style.display = 'none';
+  checkSetup(); init();
 }
 </script>
 </body>
