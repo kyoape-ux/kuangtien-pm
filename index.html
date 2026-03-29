@@ -497,6 +497,40 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   body{background:white!important;color:black!important}
   .project-card{break-inside:avoid}
 }
+
+/* ── LOGIN OVERLAY ── */
+#login-overlay{
+  position:fixed;inset:0;background:var(--navy);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;gap:0;
+}
+.login-brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:32px}
+.login-title{font-family:'DM Serif Display',serif;font-size:22px;color:white;letter-spacing:.3px;text-align:center}
+.login-sub{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.8px;text-transform:uppercase;margin-top:2px}
+.login-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:30px 32px;width:100%;max-width:380px;backdrop-filter:blur(10px)}
+.login-prompt{font-size:12px;color:rgba(255,255,255,.45);text-align:center;margin-bottom:18px;letter-spacing:.3px}
+.login-roles{display:flex;gap:10px;margin-bottom:0}
+.role-btn{flex:1;padding:16px 8px;border:1.5px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;font-family:'Noto Sans TC',sans-serif;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.role-btn .role-icon{font-size:26px;line-height:1}
+.role-btn:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.25);color:white}
+.role-btn.selected{background:rgba(0,191,166,.12);border-color:var(--teal);color:var(--teal)}
+.login-pass-area{overflow:hidden;max-height:0;transition:max-height .25s ease,margin-top .25s ease;margin-top:0}
+.login-pass-area.open{max-height:160px;margin-top:16px}
+.login-pass-input{width:100%;padding:11px 14px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);border-radius:10px;color:white;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;transition:border-color .2s;margin-bottom:10px}
+.login-pass-input::placeholder{color:rgba(255,255,255,.28)}
+.login-pass-input:focus{border-color:var(--teal)}
+.login-submit{width:100%;padding:11px;background:var(--teal);color:#0d1b2a;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s}
+.login-submit:hover{background:var(--teal2)}
+.login-err{font-size:11px;color:var(--coral);text-align:center;min-height:16px;margin-top:8px}
+
+/* ── ROLE BADGE & LOGOUT ── */
+.role-badge{padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.12);white-space:nowrap}
+.logout-btn{padding:5px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,107,107,.3);background:rgba(255,107,107,.1);color:rgba(255,160,160,.9);font-family:'Noto Sans TC',sans-serif;transition:all .18s}
+.logout-btn:hover{background:rgba(255,107,107,.25);color:white}
+
+/* ── ROLE-BASED VISIBILITY ── */
+body.role-member .leader-only{display:none!important}
+body.role-member .card-check-cell{visibility:hidden;pointer-events:none}
 </style>
 </head>
 <body>
