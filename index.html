@@ -1451,15 +1451,7 @@ function renderSummary(projects) {
 
 /* ══ FILTERS UPDATE ══ */
 function updateFilters(projects) {
-  // Assignee chips ②
   const allNames = [...new Set(projects.flatMap(p=>(p.assignee||'').split(/[,，＋+]/).map(s=>s.trim())).filter(Boolean))];
-  const chips = document.getElementById('assignee-chips');
-  if (chips) {
-    chips.innerHTML = allNames.length
-      ? allNames.map(n=>`<span class="asgn-chip${_filterAssignee===n?' active':''}" onclick="setAssigneeFilter('${n.replace(/'/g,"\\'")}')">${n}</span>`).join('')
-      : '';
-  }
-  // Select dropdown (hidden on desktop, kept for mobile)
   const asel = document.getElementById('filter-assignee');
   if (asel) { const cur=asel.value; asel.innerHTML='<option value="">全部負責人</option>'+allNames.map(n=>`<option value="${n}"${n===cur?' selected':''}>${n}</option>`).join(''); }
   const cats = [...new Set(projects.map(p=>p.category).filter(Boolean))];
