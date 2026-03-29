@@ -2692,7 +2692,7 @@ function submitLogin() {
     sessionStorage.setItem('pm_role', PM_ROLE);
     document.getElementById('login-overlay').style.display = 'none';
     applyRole(PM_ROLE);
-    checkSetup(); init();
+    showToast(PM_ROLE==='leader' ? '✅ 已登入（組長）' : '✅ 已登入（組員）');
   } else {
     document.getElementById('login-err').textContent = '密碼錯誤，請再試一次';
     document.getElementById('login-pass').value = '';
