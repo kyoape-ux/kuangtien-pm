@@ -628,8 +628,9 @@ body.role-guest  .btn-quick-done{display:none!important}
     </div>
     <button class="hbtn accent" onclick="manualRefresh()">🔄 重新整理</button>
     <button class="hbtn leader-only" onclick="openSetup()">⚙️</button>
-    <span class="role-badge" id="role-badge"></span>
-    <button class="logout-btn" onclick="logout()" title="登出">登出</button>
+    <span class="role-badge" id="role-badge" style="display:none"></span>
+    <button class="logout-btn" id="logout-btn" onclick="logout()" style="display:none">登出</button>
+    <button class="hbtn" id="login-header-btn" onclick="showLoginOverlay()" style="display:none">🔐 登入</button>
   </div>
 </div>
 
