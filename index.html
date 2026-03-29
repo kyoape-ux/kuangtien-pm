@@ -2658,9 +2658,60 @@ document.addEventListener('mousemove', function(e) {
 let _toastTimer;
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),2800);}
 
+/* ══ AUTH ══ */
+let PM_ROLE = sessionStorage.getItem('pm_role') || null;
+let _loginRole = '';
+
+function selectRole(r) {
+  _loginRole = r;
+  document.getElementById('role-btn-leader').classList.toggle('selected', r==='leader');
+  document.getElementById('role-btn-member').classList.toggle('selected', r==='member');
+  document.getElementById('login-pass-area').classList.add('open');
+  document.getElementById('login-err').textContent = '';
+  setTimeout(()=>document.getElementById('login-pass').focus(), 50);
+}
+
+function submitLogin() {
+  if (!_loginRole) { document.getElementById('login-err').textContent = '請先選擇身份'; return; }
+  const pass = document.getElementById('login-pass').value;
+  const lp = localStorage.getItem('pm_leader_pass') || 'kt-leader-2025';
+  const mp = localStorage.getItem('pm_member_pass') || 'kt-member-2025';
+  const ok = (_loginRole==='leader' && pass===lp) || (_loginRole==='member' && pass===mp);
+  if (ok) {
+    PM_ROLE = _loginRole;
+    sessionStorage.setItem('pm_role', PM_ROLE);
+    document.getElementById('login-overlay').style.display = 'none';
+    applyRole(PM_ROLE);
+    checkSetup(); init();
+  } else {
+    document.getElementById('login-err').textContent = '密碼錯誤，請再試一次';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-pass').focus();
+  }
+}
+
+function applyRole(role) {
+  document.body.classList.remove('role-leader','role-member');
+  document.body.classList.add('role-'+role);
+  const badge = document.getElementById('role-badge');
+  if (badge) badge.textContent = role==='leader' ? '👑 組長' : '🧑‍💼 組員';
+}
+
+function logout() {
+  if (!confirm('確定要登出嗎？')) return;
+  sessionStorage.removeItem('pm_role');
+  location.reload();
+}
+
 /* ══ BOOT ══ */
-checkSetup();
-init();
+if (PM_ROLE) {
+  applyRole(PM_ROLE);
+  document.getElementById('login-overlay').style.display = 'none';
+  checkSetup(); init();
+} else {
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('loading').style.display = 'none';
+}
 </script>
 </body>
 </html>
