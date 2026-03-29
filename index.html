@@ -1358,7 +1358,7 @@ function switchView(v) {
   document.getElementById('mode-bar').style.display     = hideBar ? 'none' : 'flex';
   document.querySelector('.toolbar').style.display      = (v==='stats'||v==='cal') ? 'none' : 'flex';
   document.querySelector('.list-header').style.display  = hideBar ? 'none' : 'grid';
-  document.querySelector('.summary-bar').style.display  = hideBar ? 'none' : 'flex';
+  document.getElementById('summary-row').style.display  = hideBar ? 'none' : 'flex';
   renderAll();
 }
 function setMode(m) {
