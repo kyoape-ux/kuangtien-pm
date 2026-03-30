@@ -270,6 +270,13 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .project-card.dragging{opacity:.3;transform:scale(.985);border-style:dashed;border-color:var(--teal)}
 .project-card.drag-over{border-color:var(--teal)!important;box-shadow:0 0 0 2px rgba(0,191,166,.3),inset 0 0 0 2px rgba(0,191,166,.08);transform:none}
 .project-card.drag-over::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal);border-radius:12px 12px 0 0}
+/* ── SUBTASK DRAG ── */
+.subtask-row[draggable=true]{cursor:default}
+.st-drag-handle{cursor:grab;color:var(--text-dim);font-size:14px;user-select:none;display:flex;align-items:center;justify-content:center;opacity:.45;transition:opacity .15s;padding:0 2px}
+.st-drag-handle:hover{opacity:1;color:var(--teal)}
+.st-drag-handle:active{cursor:grabbing}
+.subtask-row.st-dragging{opacity:.3;background:rgba(0,191,166,.05)}
+.subtask-row.st-drag-over{border-top:2px solid var(--teal)!important;background:rgba(0,191,166,.06)}
 
 /* ── OVERDUE CARD ── */
 .project-card.overdue{border-left:3px solid var(--coral)!important;border-left-color:var(--coral)!important}
