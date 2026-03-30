@@ -1701,7 +1701,7 @@ function renderList(allProjects) {
       ? `<span class="src-ticket">🔵 支援單</span>${p.supNum?`<span style="background:#1e3a8a22;color:#3B82F6;border:1px solid #3B82F644;border-radius:5px;font-size:10px;font-weight:700;padding:1px 7px;font-family:monospace;letter-spacing:.5px">${esc(p.supNum)}</span>`:''}`
       : `<span class="src-self">🟢 自主</span>`;
     const subRows = hasSubs ? (p.subtasks||[]).map(s => {
-      const sst = STATUS[s.status]||{label:s.status||'—',cls:'s-pending'};
+      const sst = getStatusDisplay(s.status);
       const sOd = s.endDate && new Date(s.endDate)<today && s.status!=='completed';
       return `<div class="subtask-row">
         <div></div>
