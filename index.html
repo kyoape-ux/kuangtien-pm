@@ -1357,8 +1357,9 @@ function openAddModal(parentId, parentTitle) {
   modal.style.display = 'flex';
   // 更新標題與父任務提示
   document.getElementById('add-modal-title').textContent = _addParentId ? '＋ 新增子任務' : '＋ 新增項目';
-  // 動態類別選項
+  // 動態類別 / 狀態選項（依組別）
   updateCategoryOptions('af-category');
+  updateStatusSelects('pending');
   const banner = document.getElementById('add-parent-banner');
   if (_addParentId) {
     document.getElementById('add-parent-title-text').textContent = _addParentTitle;
