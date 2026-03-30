@@ -1294,7 +1294,7 @@ function updateStatusSelects(selectedVal) {
 function syncStatusProgress(statusId, progressId) {
   const s = document.getElementById(statusId)?.value;
   const p = document.getElementById(progressId);
-  if (s && p && STATUS_PROGRESS[s] !== undefined) p.value = String(STATUS_PROGRESS[s]);
+  if (s && p) p.value = String(getProgress(s));
 }
 
 function openAddModal(parentId, parentTitle) {
