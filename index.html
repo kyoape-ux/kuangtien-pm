@@ -1694,22 +1694,31 @@ async function bulkUpdateSubStatus(pid) {
   if (!newStatus) return;
   const newProgress = String(getProgress(newStatus));
   const ids = [..._selSubs[pid]];
-  showToast('⏳ 更新中…');
-  try {
-    await Promise.all(ids.map(sid => {
-      const item = _itemMap[sid];
-      if (!item) return Promise.resolve();
-      return fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+  const btn = document.querySelector(`#sbb-${pid} button`);
+  if (btn) { btn.textContent='更新中…'; btn.disabled=true; }
+  showToast(`⏳ 更新 ${ids.length} 筆中…`);
+  let successCount = 0;
+  for (const sid of ids) {
+    const item = _itemMap[sid];
+    if (!item) continue;
+    try {
+      const res = await fetch(API_URL, {
+        method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
         body: JSON.stringify({ action:'edit', group:currentGroup,
-          item: {...item, status:newStatus, progress:newProgress}, operator:OPERATOR||'admin' }) });
-    }));
-    showToast(`✅ 已更新 ${ids.length} 筆子任務`);
-    delete _selSubs[pid];
-    _cache[currentGroup] = null;
-    await renderAll();
-    // 重新展開子任務列表
-    setTimeout(()=>{ const sl=document.getElementById('sl-'+pid); const ti=document.getElementById('ti-'+pid); if(sl){sl.style.display='';} if(ti){ti.textContent='▼';} },80);
-  } catch(e) { showToast('❌ 更新失敗，請重試'); }
+          item: {...item, status:newStatus, progress:newProgress}, operator:OPERATOR||'admin' })
+      });
+      const result = await res.json();
+      if (result.ok) successCount++;
+    } catch(e) { /* 跳過單筆錯誤，繼續處理下一筆 */ }
+    await new Promise(r => setTimeout(r, 120)); // Apps Script 需要間隔
+  }
+  if (btn) { btn.textContent='確認更新'; btn.disabled=false; }
+  if (successCount === 0) { showToast('❌ 更新失敗，請重試'); return; }
+  showToast(`✅ 已更新 ${successCount}/${ids.length} 筆子任務`);
+  delete _selSubs[pid];
+  _cache[currentGroup] = null;
+  await renderAll();
+  setTimeout(()=>{ const sl=document.getElementById('sl-'+pid); const ti=document.getElementById('ti-'+pid); if(sl){sl.style.display='';} if(ti){ti.textContent='▼';} }, 80);
 }
 
 /* ══ CATEGORY OPTIONS ══ */
