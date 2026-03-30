@@ -1758,7 +1758,7 @@ function renderList(allProjects) {
           <button class="btn-edit" onclick="event.stopPropagation();openEditModal('${p.id}')" title="編輯項目">✏️</button>
         </div>
       </div>
-      ${hasSubs ? `<div class="subtask-list" id="sl-${p.id}" style="display:none">${subRows}</div>` : ''}
+      ${hasSubs ? `<div class="subtask-list" id="sl-${p.id}" style="display:none">${subBulkBar}${subRows}</div>` : ''}
     </div>`;
   }).join('');
 }
