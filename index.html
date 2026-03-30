@@ -1252,6 +1252,10 @@ const STATUS_PROGRESS = {
   }
 };
 function getProgress(status){ return (STATUS_PROGRESS[currentGroup]||STATUS_PROGRESS.media)[status] ?? 0; }
+function getStatusDisplay(status){
+  if(currentGroup==='design' && status==='revising') return {label:'待發包',cls:'s-revising'};
+  return STATUS[status]||{label:status||'—',cls:'s-pending'};
+}
 const STATUS_OPTIONS = {
   media:[
     {v:'pending',      l:'待執行'},
