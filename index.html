@@ -1251,16 +1251,15 @@ const STATUS_PROGRESS = {
 };
 const STATUS_OPTIONS = {
   media:[
-    {v:'pending',    l:'待執行'},
-    {v:'planning',   l:'企劃中'},
-    {v:'scripting',  l:'腳本製作'},
-    {v:'discussion', l:'討論中'},
-    {v:'filming',    l:'拍攝中'},
-    {v:'in-progress',l:'執行中'},
-    {v:'editing',    l:'剪輯中'},
-    {v:'revising',   l:'修改中'},
-    {v:'review',     l:'審核中'},
-    {v:'completed',  l:'已完成'}
+    {v:'pending',      l:'待執行'},
+    {v:'discussion',   l:'討論中'},
+    {v:'scripting',    l:'腳本已完成'},
+    {v:'filming',      l:'約拍中'},
+    {v:'raw-footage',  l:'素材已拍攝待剪輯'},
+    {v:'editing',      l:'剪輯中'},
+    {v:'review',       l:'審核中'},
+    {v:'revising',     l:'待修改'},
+    {v:'completed',    l:'已完成'}
   ],
   design:[
     {v:'pending',      l:'待執行'},
@@ -1268,8 +1267,8 @@ const STATUS_OPTIONS = {
     {v:'drafting',     l:'草稿設計'},
     {v:'discussion',   l:'討論中'},
     {v:'draft-review', l:'初稿審核'},
-    {v:'revising',     l:'修改中'},
     {v:'review',       l:'審核中'},
+    {v:'revising',     l:'待修改'},
     {v:'finalizing',   l:'定稿確認'},
     {v:'completed',    l:'已完成'}
   ]
