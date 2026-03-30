@@ -2286,7 +2286,7 @@ async function submitEditTask(e) {
     startDate: document.getElementById('ef-startDate').value,
     endDate:   document.getElementById('ef-endDate').value,
     status:    efStatus,
-    progress:  String(STATUS_PROGRESS[efStatus] ?? 0),
+    progress:  String(getProgress(efStatus)),
     sourceType:document.getElementById('ef-sourceType').value,
     supNum:    document.getElementById('ef-supNum').value.trim(),
     collab:    document.getElementById('ef-collab').value.trim(),
