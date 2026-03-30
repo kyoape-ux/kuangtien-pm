@@ -1242,13 +1242,16 @@ function saveSetup() {
 }
 /* ══ ADD TASK MODAL ══ */
 const STATUS_PROGRESS = {
-  /* 共用 */
-  pending:0, discussion:15, 'in-progress':50, review:80, completed:100,
-  /* 多媒體 */
-  scripting:25, filming:35, 'raw-footage':50, editing:65, revising:90,
-  /* 美編 */
-  confirming:10, drafting:30, 'draft-review':55, finalizing:85
+  media:{
+    pending:0, discussion:15, review:80, completed:100,
+    scripting:25, filming:35, 'raw-footage':50, editing:65, revising:90
+  },
+  design:{
+    pending:0, confirming:10, drafting:30, discussion:45,
+    'draft-review':55, review:75, revising:80, finalizing:90, completed:100
+  }
 };
+function getProgress(status){ return (STATUS_PROGRESS[currentGroup]||STATUS_PROGRESS.media)[status] ?? 0; }
 const STATUS_OPTIONS = {
   media:[
     {v:'pending',      l:'待執行'},
