@@ -1709,7 +1709,7 @@ function renderList(allProjects) {
         </div>
         <div class="col-val">${esc(s.assignee||'—')}</div>
         <div class="col-val" style="font-size:11px">${s.startDate||'—'}</div>
-        <div class="col-val" style="font-size:11px">${sOd?`<span class="overdue-badge">⚠️ 逾期</span>`:s.endDate||'—'}</div>
+        <div class="col-val" style="font-size:11px">${s.endDate||'—'}${sOd?` <span class="overdue-badge">⚠️ 逾期</span>`:''}</div>
         <div><span class="sbadge ${sst.cls}">${sst.label}</span></div>
         <div><div style="display:flex;align-items:center;gap:6px"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:${s.progress||0}%"></div></div><span class="prog-label">${s.progress||0}%</span></div></div>
         <div style="display:flex;justify-content:center"><button class="btn-edit" onclick="event.stopPropagation();openEditModal('${s.id}')" title="編輯子任務">✏️</button></div>
