@@ -1707,11 +1707,20 @@ function renderList(allProjects) {
     const srcBadge = p.sourceType==='ticket'
       ? `<span class="src-ticket">🔵 支援單</span>${p.supNum?`<span style="background:#1e3a8a22;color:#3B82F6;border:1px solid #3B82F644;border-radius:5px;font-size:10px;font-weight:700;padding:1px 7px;font-family:monospace;letter-spacing:.5px">${esc(p.supNum)}</span>`:''}`
       : `<span class="src-self">🟢 自主</span>`;
+    const stOptsHtml = (STATUS_OPTIONS[currentGroup]||STATUS_OPTIONS.media)
+      .map(o=>`<option value="${o.v}">${o.l}</option>`).join('');
+    const subBulkBar = `<div class="sub-bulk-bar" id="sbb-${p.id}">
+      <span id="sbb-count-${p.id}" style="color:var(--teal2);font-weight:700"></span>
+      <span style="color:var(--text-muted)">筆已選取，批次更新狀態為：</span>
+      <select id="sbb-status-${p.id}">${stOptsHtml}</select>
+      <button onclick="bulkUpdateSubStatus('${p.id}')" style="background:var(--teal);color:white">確認更新</button>
+      <button onclick="clearSubSel('${p.id}')" style="background:#F3F4F6;color:var(--text-muted)">取消</button>
+    </div>`;
     const subRows = hasSubs ? (p.subtasks||[]).map(s => {
       const sst = getStatusDisplay(s.status);
       const sOd = s.endDate && new Date(s.endDate)<today && s.status!=='completed';
-      return `<div class="subtask-row">
-        <div></div>
+      return `<div class="subtask-row" id="str-${s.id}">
+        <div style="display:flex;align-items:center;justify-content:center"><input type="checkbox" class="sub-cb" data-sid="${s.id}" data-pid="${p.id}" onchange="toggleSubSel('${s.id}','${p.id}',this.checked)" style="width:13px;height:13px;accent-color:var(--teal);cursor:pointer"></div>
         <div></div>
         <div class="st-indent"><span class="st-line"></span>
           <div><div style="font-size:12px;font-weight:500;color:var(--navy)">${esc(s.title)}</div></div>
