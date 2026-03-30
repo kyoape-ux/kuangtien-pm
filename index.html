@@ -2689,8 +2689,8 @@ function selectRole(r) {
 function submitLogin() {
   if (!_loginRole) { document.getElementById('login-err').textContent = '請先選擇身份'; return; }
   const pass = document.getElementById('login-pass').value;
-  const lp = localStorage.getItem('pm_leader_pass') || 'kt-leader-2025';
-  const mp = localStorage.getItem('pm_member_pass') || 'kt-member-2025';
+  const lp = localStorage.getItem('pm_leader_pass') || 'ktghadmin2026';
+  const mp = localStorage.getItem('pm_member_pass') || 'ktgh20662088';
   const ok = (_loginRole==='leader' && pass===lp) || (_loginRole==='member' && pass===mp);
   if (ok) {
     PM_ROLE = _loginRole;
