@@ -1591,20 +1591,34 @@ async function renderAll() {
 
 /* ══ SUMMARY ══ */
 function renderSummary(projects) {
-  const c = {total:projects.length,completed:0,'in-progress':0,pending:0,discussion:0};
-  projects.forEach(p=>{ if(c[p.status]!==undefined) c[p.status]++; });
-  // 子任務統計
+  // 有子任務的主項目→算子任務；無子任務的主項目→算自己
+  const items = [];
+  projects.forEach(p => {
+    if (p.subtasks && p.subtasks.length > 0) {
+      p.subtasks.forEach(s => items.push(s));
+    } else {
+      items.push(p);
+    }
+  });
+  const c = {total:items.length, completed:0, 'in-progress':0, pending:0, discussion:0, other:0};
+  items.forEach(item => {
+    if (c[item.status] !== undefined) c[item.status]++;
+    else c.other++;
+  });
+  // 子任務完成進度（有子任務的主項目才計）
   let subTotal=0, subDone=0;
-  projects.forEach(p=>{
-    (p.subtasks||[]).forEach(s=>{ subTotal++; if(s.status==='completed') subDone++; });
+  projects.forEach(p => {
+    if (p.subtasks && p.subtasks.length > 0) {
+      p.subtasks.forEach(s => { subTotal++; if(s.status==='completed') subDone++; });
+    }
   });
   document.getElementById('done-count').textContent = c.completed;
   const cards = [
-    {num:c.total,       label:'主項目',  color:'var(--teal)',       mode:'all'},
-    {num:c['in-progress'],label:'執行中',color:'var(--amber)',      mode:'active'},
-    {num:c.discussion,  label:'討論中',  color:'var(--purple)',     mode:'active'},
-    {num:c.completed,   label:'已完成',  color:'#4ade80',           mode:'completed'},
-    {num:c.pending,     label:'未開始',  color:'var(--text-muted)', mode:'active'},
+    {num:c.total,          label:'全部工作',color:'var(--teal)',       mode:'all'},
+    {num:c['in-progress'], label:'執行中',  color:'var(--amber)',      mode:'active'},
+    {num:c.discussion,     label:'討論中',  color:'var(--purple)',     mode:'active'},
+    {num:c.completed,      label:'已完成',  color:'#4ade80',           mode:'completed'},
+    {num:c.pending,        label:'未開始',  color:'var(--text-muted)', mode:'active'},
   ];
   const mainHtml = cards.map(card=>
     `<div class="summary-card" style="--accent-color:${card.color}" onclick="setMode('${card.mode}')">
@@ -1612,11 +1626,11 @@ function renderSummary(projects) {
       <div class="summary-label">${card.label}</div>
     </div>`
   ).join('');
-  const subColor = subTotal===0 ? 'var(--text-muted)' : subDone===subTotal ? '#4ade80' : 'var(--teal2)';
+  const subColor = subDone===subTotal && subTotal>0 ? '#4ade80' : 'var(--teal2)';
   const subHtml = subTotal>0 ? `
     <div class="summary-card" style="--accent-color:${subColor};border-left:3px solid ${subColor}" title="子任務完成進度">
       <div class="summary-num" style="color:${subColor};font-size:18px">${subDone}<span style="font-size:12px;color:var(--text-muted)">/${subTotal}</span></div>
-      <div class="summary-label">子任務</div>
+      <div class="summary-label">子任務完成</div>
     </div>` : '';
   document.getElementById('summary-bar').innerHTML = mainHtml + subHtml;
 }
