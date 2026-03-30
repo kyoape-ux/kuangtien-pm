@@ -1527,6 +1527,7 @@ async function init() {
   _cache = { design:null, media:null };
   const now = new Date();
   calYear = now.getFullYear(); calMonth = now.getMonth();
+  updateStatusSelects();
   await renderAll();
   showLoading(false);
 }
