@@ -1543,6 +1543,7 @@ function switchGroup(g) {
   currentGroup = g;
   document.querySelectorAll('.group-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+g).classList.add('active');
+  updateStatusSelects();
   renderAll();
 }
 function switchView(v) {
