@@ -2267,7 +2267,7 @@ async function submitEditTask(e) {
   if (!API_URL) { showToast('❌ 尚未設定 API 網址'); return; }
   const btn = document.getElementById('ef-submit-btn');
   btn.textContent = '更新中…'; btn.disabled = true;
-  const progress = parseInt(document.getElementById('ef-progress').value) || 0;
+  const efStatus = document.getElementById('ef-status').value;
   const item = {
     id:        document.getElementById('ef-id').value,
     parentId:  document.getElementById('ef-parentId').value,
@@ -2277,8 +2277,8 @@ async function submitEditTask(e) {
     unit:      document.getElementById('ef-unit').value.trim(),
     startDate: document.getElementById('ef-startDate').value,
     endDate:   document.getElementById('ef-endDate').value,
-    status:    document.getElementById('ef-status').value,
-    progress:  String(Math.min(100, Math.max(0, progress))),
+    status:    efStatus,
+    progress:  String(STATUS_PROGRESS[efStatus] ?? 0),
     sourceType:document.getElementById('ef-sourceType').value,
     supNum:    document.getElementById('ef-supNum').value.trim(),
     collab:    document.getElementById('ef-collab').value.trim(),
