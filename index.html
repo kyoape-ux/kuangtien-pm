@@ -1685,7 +1685,7 @@ function renderList(allProjects) {
         <div class="card-check-cell" onclick="event.stopPropagation()" style="display:flex;align-items:center;justify-content:center"><input type="checkbox" class="row-cb" id="cb-${p.id}" data-id="${p.id}" ${_selectedIds.has(p.id)?'checked':''} onchange="toggleSelect('${p.id}',this.checked)" style="width:14px;height:14px;accent-color:var(--teal);cursor:pointer"></div>
         <div class="toggle-icon${hasSubs?'':' hidden'} " id="ti-${p.id}">▶</div>
         <div>
-          <div class="project-title">${esc(p.title)}${isOd?' <span class="overdue-badge">⚠️ 逾期</span>':''}</div>
+          <div class="project-title">${esc(p.title)}${isOd?` <span class="overdue-badge">⚠️ 逾期${odDays>0?' '+odDays+'天':''}${odDays>=7?' 🔴':''}</span>`:''}</div>
           <div class="project-note" style="display:flex;gap:5px;align-items:center;margin-top:4px">
             <span class="cat-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}44">${esc(p.category||'未分類')}</span>
             ${srcBadge}
