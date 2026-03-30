@@ -2063,7 +2063,7 @@ async function generateWeekly(){
   let allP=[];
   for(const g of groups){const p=g===currentGroup?(await getProjects()):JSON.parse(localStorage.getItem('pm_'+g)||'[]');allP.push({g,p});}
   const GNAME={design:'🎨 美編組',media:'🎬 多媒體組'};
-  const STATUS_LINE={pending:'⬜ 待執行','in-progress':'🔶 執行中',discussion:'💬 討論中',review:'🔍 審核中',completed:'✅ 已完成'};
+  const STATUS_LINE={pending:'⬜ 待執行','in-progress':'🔶 執行中',discussion:'💬 討論中',review:'🔍 審核中',completed:'✅ 已完成',planning:'📋 企劃中',scripting:'✍️ 腳本製作',filming:'🎬 拍攝中',editing:'✂️ 剪輯中',revising:'🔄 修改中'};
   if(style==='line'){
     let txt=`📋 本週工作摘要\n🗓 ${todayStr}\n${'─'.repeat(25)}\n`;
     allP.forEach(({g,p})=>{if(!p.length)return;txt+=`\n${GNAME[g]}\n`;p.filter(x=>x.status!=='completed').forEach(x=>{txt+=`${STATUS_LINE[x.status]||'▪'}　${x.title}（${x.assignee||'—'}）${x.progress?` ${x.progress}%`:''}\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`  └ ${s.title}（${s.assignee||'—'}）${s.progress?' '+s.progress+'%':''}${s.endDate?' 預計完成：'+s.endDate:''}\n`;});});const done=p.filter(x=>x.status==='completed');if(done.length)txt+=`\n已完成 ${done.length} 件 ✅\n`;});
