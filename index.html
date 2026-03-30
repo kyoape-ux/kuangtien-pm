@@ -2241,7 +2241,6 @@ function openEditModal(id) {
   document.getElementById('ef-startDate').value  = item.startDate || '';
   document.getElementById('ef-endDate').value    = item.endDate || '';
   document.getElementById('ef-status').value     = item.status || 'pending';
-  document.getElementById('ef-progress').value   = String(Math.round((parseInt(item.progress)||0)/10)*10);
   document.getElementById('ef-sourceType').value = item.sourceType || 'self';
   document.getElementById('ef-supNum').value     = item.supNum || '';
   document.getElementById('ef-collab').value     = item.collab || '';
