@@ -1387,7 +1387,7 @@ async function submitAddTask(e) {
           title: subTitle,
           assignee: document.getElementById(`sr-assignee-${idx}`)?.value.trim() || '',
           unit: document.getElementById('af-unit').value.trim(),
-          startDate: document.getElementById('af-startDate').value,
+          startDate: '',
           endDate: document.getElementById(`sr-endDate-${idx}`)?.value || '',
           status: srStatus,
           progress: String(getProgress(srStatus)),
