@@ -1683,7 +1683,7 @@ function renderList(allProjects) {
     return;
   }
   el.innerHTML = projects.map(p => {
-    const st = STATUS[p.status]||{label:p.status||'—',cls:'s-pending'};
+    const st = getStatusDisplay(p.status);
     const catColor = CAT_COLOR[p.category]||'#6B7494';
     const isOd = p.endDate && new Date(p.endDate)<today && p.status!=='completed';
     const odDays = isOd ? Math.floor((today - new Date(p.endDate))/(1000*60*60*24)) : 0;
