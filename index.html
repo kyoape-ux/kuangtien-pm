@@ -1134,22 +1134,7 @@ body.role-guest  .btn-quick-done{display:none!important}
             <option value="pending">待執行</option>
           </select>
         </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">進度</label>
-          <select id="ef-progress" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white">
-            <option value="0">0%</option>
-            <option value="10">10%</option>
-            <option value="20">20%</option>
-            <option value="30">30%</option>
-            <option value="40">40%</option>
-            <option value="50">50%</option>
-            <option value="60">60%</option>
-            <option value="70">70%</option>
-            <option value="80">80%</option>
-            <option value="90">90%</option>
-            <option value="100">100%</option>
-          </select>
-        </div>
+        <select id="ef-progress" style="display:none"><option value="0">0%</option></select>
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">來源</label>
           <select id="ef-sourceType" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white">
