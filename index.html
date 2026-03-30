@@ -1371,15 +1371,15 @@ async function submitAddTask(e) {
     });
     const result = await res.json();
     if (result.ok) {
-      // 批次新增子項目（如果有）
+      // 批次新增子項目（一次送出，速度快）
       const subRowEls = document.querySelectorAll('#af-subtask-rows [data-sridx]');
-      let subAdded = 0;
+      const subItems = [];
       for (const el of subRowEls) {
         const idx = el.dataset.sridx;
         const subTitle = document.getElementById(`sr-title-${idx}`)?.value.trim();
         if (!subTitle) continue;
-        const subItem = {
-          id: 'T' + Date.now() + Math.random().toString(36).slice(2,5),
+        subItems.push({
+          id: 'T' + Date.now() + Math.random().toString(36).slice(2,6),
           parentId: id,
           category: document.getElementById('af-category').value,
           title: subTitle,
@@ -1390,13 +1390,11 @@ async function submitAddTask(e) {
           status: 'pending', progress: '0',
           sourceType: document.getElementById('af-sourceType').value,
           supNum: '', collab: '', note: ''
-        };
-        try {
-          await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-            body: JSON.stringify({ action:'add', group: currentGroup, item: subItem }) });
-          subAdded++;
-        } catch(e) {}
-        await new Promise(r => setTimeout(r, 80));
+        });
+      }
+      if (subItems.length > 0) {
+        await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({ action:'batchAdd', group: currentGroup, items: subItems, operator: OPERATOR||'admin' }) });
       }
       closeAddModal();
       _cache[currentGroup] = null;
