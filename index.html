@@ -1353,7 +1353,7 @@ async function submitAddTask(e) {
     startDate:document.getElementById('af-startDate').value,
     endDate:  document.getElementById('af-endDate').value,
     status:   document.getElementById('af-status').value,
-    progress: String(STATUS_PROGRESS[document.getElementById('af-status').value] ?? 0),
+    progress: String(getProgress(document.getElementById('af-status').value)),
     sourceType:document.getElementById('af-sourceType').value,
     supNum:   document.getElementById('af-supNum')?.value.trim()||'',
     collab:   document.getElementById('af-collab').value.trim(),
