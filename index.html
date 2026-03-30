@@ -1286,6 +1286,17 @@ function saveSetup() {
   init();
 }
 /* ══ ADD TASK MODAL ══ */
+const STATUS_PROGRESS = {
+  pending:0, planning:10, scripting:20, discussion:30,
+  filming:40, 'in-progress':50, editing:60, revising:75,
+  review:85, completed:100
+};
+function syncStatusProgress(statusId, progressId) {
+  const s = document.getElementById(statusId)?.value;
+  const p = document.getElementById(progressId);
+  if (s && p && STATUS_PROGRESS[s] !== undefined) p.value = String(STATUS_PROGRESS[s]);
+}
+
 function openAddModal(parentId, parentTitle) {
   _addParentId    = parentId    || '';
   _addParentTitle = parentTitle || '';
