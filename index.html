@@ -1188,7 +1188,7 @@ const STATUS = {
   /* 多媒體製作流程 */
   scripting:{label:'腳本已完成',cls:'s-scripting'},
   filming:{label:'約拍中',cls:'s-filming'},
-  'raw-footage':{label:'素材已拍攝待剪輯',cls:'s-raw-footage'},
+  'raw-footage':{label:'已拍攝待剪輯',cls:'s-raw-footage'},
   editing:{label:'剪輯中',cls:'s-editing'},
   revising:{label:'待修改',cls:'s-revising'}, /* media=待修改, design=待發包 */
   /* 美編流程 */
@@ -1270,7 +1270,7 @@ const STATUS_OPTIONS = {
     {v:'discussion',   l:'討論中'},
     {v:'scripting',    l:'腳本已完成'},
     {v:'filming',      l:'約拍中'},
-    {v:'raw-footage',  l:'素材已拍攝待剪輯'},
+    {v:'raw-footage',  l:'已拍攝待剪輯'},
     {v:'editing',      l:'剪輯中'},
     {v:'review',       l:'審核中'},
     {v:'revising',     l:'待修改'},
@@ -2182,7 +2182,7 @@ async function generateWeekly(){
   let allP=[];
   for(const g of groups){const p=g===currentGroup?(await getProjects()):JSON.parse(localStorage.getItem('pm_'+g)||'[]');allP.push({g,p});}
   const GNAME={design:'🎨 美編組',media:'🎬 多媒體組'};
-  const STATUS_LINE={pending:'⬜ 待執行','in-progress':'🔶 執行中',discussion:'💬 討論中',review:'🔍 審核中',completed:'✅ 已完成',scripting:'✍️ 腳本已完成',filming:'📅 約拍中','raw-footage':'🎞️ 素材已拍攝待剪輯',editing:'✂️ 剪輯中',revising:g==='design'?'📦 待發包':'🔄 待修改',confirming:'📋 需求確認',drafting:'✏️ 草稿設計','draft-review':'🔍 初稿審核',finalizing:'✔️ 定稿確認'};
+  const STATUS_LINE={pending:'⬜ 待執行','in-progress':'🔶 執行中',discussion:'💬 討論中',review:'🔍 審核中',completed:'✅ 已完成',scripting:'✍️ 腳本已完成',filming:'📅 約拍中','raw-footage':'🎞️ 已拍攝待剪輯',editing:'✂️ 剪輯中',revising:g==='design'?'📦 待發包':'🔄 待修改',confirming:'📋 需求確認',drafting:'✏️ 草稿設計','draft-review':'🔍 初稿審核',finalizing:'✔️ 定稿確認'};
   if(style==='line'){
     let txt=`📋 本週工作摘要\n🗓 ${todayStr}\n${'─'.repeat(25)}\n`;
     allP.forEach(({g,p})=>{if(!p.length)return;txt+=`\n${GNAME[g]}\n`;p.filter(x=>x.status!=='completed').forEach(x=>{txt+=`${STATUS_LINE[x.status]||'▪'}　${x.title}（${x.assignee||'—'}）${x.progress?` ${x.progress}%`:''}\n`;(x.subtasks||[]).filter(s=>s.status!=='completed').forEach(s=>{txt+=`  └ ${s.title}（${s.assignee||'—'}）${s.progress?' '+s.progress+'%':''}${s.endDate?' 預計完成：'+s.endDate:''}\n`;});});const done=p.filter(x=>x.status==='completed');if(done.length)txt+=`\n已完成 ${done.length} 件 ✅\n`;});
