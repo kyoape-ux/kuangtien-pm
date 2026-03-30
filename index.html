@@ -2024,29 +2024,40 @@ async function renderStats() {
   const GROUPS = {design:'美編組',media:'多媒體組'};
   const scopes = statsScope==='both' ? ['design','media'] : [statsScope];
   let allItems = [];
+  // effectiveItems：有子任務的主項目→算子任務；無子任務→算自己
+  let effectiveItems = [];
   for (const g of scopes) {
     const list = g===currentGroup ? (await getProjects()) : JSON.parse(localStorage.getItem('pm_'+g)||'[]');
-    list.forEach(p=>{ allItems.push({...p,_group:GROUPS[g]}); (p.subtasks||[]).forEach(s=>allItems.push({...s,_group:GROUPS[g],_isSubtask:true})); });
+    list.forEach(p=>{
+      allItems.push({...p,_group:GROUPS[g]});
+      (p.subtasks||[]).forEach(s=>allItems.push({...s,_group:GROUPS[g],_isSubtask:true}));
+      if (p.subtasks && p.subtasks.length>0) {
+        p.subtasks.forEach(s=>effectiveItems.push({...s,_group:GROUPS[g],category:s.category||p.category,sourceType:p.sourceType}));
+      } else {
+        effectiveItems.push({...p,_group:GROUPS[g]});
+      }
+    });
   }
   const mainItems = allItems.filter(p=>!p._isSubtask);
   const today = new Date(); today.setHours(0,0,0,0);
+  const totalEff=effectiveItems.length;
   const totalMain=mainItems.length, totalSub=allItems.filter(p=>p._isSubtask).length;
-  const completed=mainItems.filter(p=>p.status==='completed').length;
-  const inProg=mainItems.filter(p=>p.status==='in-progress').length;
-  const discussion=mainItems.filter(p=>p.status==='discussion').length;
-  const overdue=mainItems.filter(p=>p.endDate&&new Date(p.endDate)<today&&p.status!=='completed').length;
-  const avgProg=mainItems.length?Math.round(mainItems.reduce((a,p)=>a+(parseInt(p.progress)||0),0)/mainItems.length):0;
-  const compRate=totalMain?Math.round(completed/totalMain*100):0;
+  const completed=effectiveItems.filter(p=>p.status==='completed').length;
+  const inProg=effectiveItems.filter(p=>['in-progress','scripting','filming','raw-footage','editing','drafting','confirming','draft-review'].includes(p.status)).length;
+  const discussion=effectiveItems.filter(p=>p.status==='discussion').length;
+  const overdue=effectiveItems.filter(p=>p.endDate&&new Date(p.endDate)<today&&p.status!=='completed').length;
+  const avgProg=totalEff?Math.round(effectiveItems.reduce((a,p)=>a+(parseInt(p.progress)||0),0)/totalEff):0;
+  const compRate=totalEff?Math.round(completed/totalEff*100):0;
   const ticketCnt=mainItems.filter(p=>p.sourceType==='ticket').length;
   document.getElementById('kpi-row').innerHTML=`
-    <div class="kpi-card kpi-teal" onclick="setMode('all');switchView('list')"><div class="kpi-num">${totalMain}</div><div class="kpi-label">主任務總數</div><div class="kpi-sub">含 ${totalSub} 個子任務</div></div>
+    <div class="kpi-card kpi-teal" onclick="setMode('all');switchView('list')"><div class="kpi-num">${totalEff}</div><div class="kpi-label">工作總量</div><div class="kpi-sub">主任務 ${totalMain} ／子任務 ${totalSub}</div></div>
     <div class="kpi-card kpi-amber" onclick="setMode('active');switchView('list')"><div class="kpi-num">${inProg}</div><div class="kpi-label">執行中</div><div class="kpi-sub">討論中 ${discussion} 件</div></div>
-    <div class="kpi-card kpi-green" onclick="setMode('completed');switchView('list')"><div class="kpi-num">${compRate}%</div><div class="kpi-label">完成率</div><div class="kpi-sub">完成 ${completed}/${totalMain} 件</div></div>
+    <div class="kpi-card kpi-green" onclick="setMode('completed');switchView('list')"><div class="kpi-num">${compRate}%</div><div class="kpi-label">完成率</div><div class="kpi-sub">完成 ${completed}/${totalEff} 件</div></div>
     <div class="kpi-card kpi-coral" onclick="setMode('active');switchView('list')"><div class="kpi-num">${overdue}</div><div class="kpi-label">逾期未完成</div><div class="kpi-sub">${overdue?'⚠️ 需關注':'✅ 目前無逾期'}</div></div>
     <div class="kpi-card kpi-purple"><div class="kpi-num">${avgProg}%</div><div class="kpi-label">整體平均進度</div><div class="kpi-sub">支援單接案 ${ticketCnt} 件</div></div>`;
   const chartDefs=[
-    {key:'assignee',id:'chart-assignee',type:'doughnut',getData:()=>{const m={};mainItems.forEach(p=>{const a=p.assignee||'未指派';m[a]=(m[a]||0)+1;});const l=Object.keys(m).sort((a,b)=>m[b]-m[a]);return{labels:l,data:l.map(k=>m[k])};},opts:{cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#8B92A9',font:{size:11},boxWidth:10,padding:8}}}}},
-    {key:'status',id:'chart-status',type:'doughnut',getData:()=>({labels:['未開始','執行中','討論中','已完成'],data:[mainItems.filter(p=>p.status==='pending').length,inProg,discussion,completed]}),opts:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:'#8B92A9',font:{size:11},boxWidth:10,padding:8}}}}},
+    {key:'assignee',id:'chart-assignee',type:'doughnut',getData:()=>{const m={};effectiveItems.forEach(p=>{const a=p.assignee||'未指派';m[a]=(m[a]||0)+1;});const l=Object.keys(m).sort((a,b)=>m[b]-m[a]);return{labels:l,data:l.map(k=>m[k])};},opts:{cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#8B92A9',font:{size:11},boxWidth:10,padding:8}}}}},
+    {key:'status',id:'chart-status',type:'doughnut',getData:()=>({labels:['未開始','執行中','討論中','已完成'],data:[effectiveItems.filter(p=>p.status==='pending').length,inProg,discussion,completed]}),opts:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:'#8B92A9',font:{size:11},boxWidth:10,padding:8}}}}},
     {key:'source',id:'chart-source',type:'doughnut',getData:()=>({labels:['🟢 自主','🔵 支援單'],data:[mainItems.filter(p=>(p.sourceType||'self')==='self').length,ticketCnt]}),opts:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:'#8B92A9',font:{size:11},boxWidth:10,padding:8}}}}},
   ];
   chartDefs.forEach(def=>{
@@ -2056,43 +2067,43 @@ async function renderStats() {
     const {labels,data}=def.getData();
     _chartInstances[def.key]=new Chart(ctx,{type:def.type,data:{labels,datasets:[{data,backgroundColor:CHART_PALETTE,borderWidth:2,borderColor:'#FFFFFF',hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,...def.opts}});
   });
-  // Cat bar
+  // Cat bar（用 effectiveItems）
   destroyChart('category');
   const catMap={},catProg={};
-  mainItems.forEach(p=>{const c=p.category||'其他';catMap[c]=(catMap[c]||0)+1;if(!catProg[c])catProg[c]=[];catProg[c].push(parseInt(p.progress)||0);});
+  effectiveItems.forEach(p=>{const c=p.category||'其他';catMap[c]=(catMap[c]||0)+1;if(!catProg[c])catProg[c]=[];catProg[c].push(parseInt(p.progress)||0);});
   const catNames=Object.keys(catMap).sort((a,b)=>catMap[b]-catMap[a]);
   const ctx2=document.getElementById('chart-category')?.getContext('2d');
   if(ctx2&&catNames.length){_chartInstances.category=new Chart(ctx2,{type:'bar',indexAxis:'y',data:{labels:catNames,datasets:[{label:'件數',data:catNames.map(c=>catMap[c]),backgroundColor:catNames.map((_,i)=>CHART_PALETTE[i%CHART_PALETTE.length]+'CC'),borderRadius:4,yAxisID:'y'},{label:'平均進度%',data:catNames.map(c=>Math.round(catProg[c].reduce((a,v)=>a+v,0)/catProg[c].length)),type:'line',borderColor:'#00BFA6',backgroundColor:'rgba(0,191,166,.1)',pointRadius:4,pointBackgroundColor:'#00BFA6',tension:.3,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{color:'#8B92A9',font:{size:10}}},y1:{display:false,min:0,max:100},x:{ticks:{color:'#8B92A9'}}},plugins:{legend:{labels:{color:'#8B92A9',font:{size:11},boxWidth:10}}}}});}
-  // Monthly
+  // Monthly（用 effectiveItems）
   const monthly=Array(12).fill(0),monthlyDone=Array(12).fill(0);
-  allItems.forEach(p=>{if(!p.endDate)return;const m=parseInt(p.endDate.slice(5,7))-1;if(m>=0&&m<12){monthly[m]++;if(p.status==='completed')monthlyDone[m]++;}});
+  effectiveItems.forEach(p=>{if(!p.endDate)return;const m=parseInt(p.endDate.slice(5,7))-1;if(m>=0&&m<12){monthly[m]++;if(p.status==='completed')monthlyDone[m]++;}});
   const curM=today.getMonth();
   destroyChart('monthly');
   const ctx3=document.getElementById('chart-monthly')?.getContext('2d');
   if(ctx3){_chartInstances.monthly=new Chart(ctx3,{type:'bar',data:{labels:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],datasets:[{label:'截止件數',data:monthly,backgroundColor:monthly.map((_,i)=>i===curM?'#FF6B6B':i<curM?'rgba(107,116,148,.4)':'rgba(0,229,200,.5)'),borderRadius:4},{label:'已完成',data:monthlyDone,type:'line',borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,.1)',pointRadius:3,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{color:'#8B92A9',stepSize:1},beginAtZero:true,grid:{color:'rgba(28,35,64,.04)'}},x:{ticks:{color:'#8B92A9'}}},plugins:{legend:{labels:{color:'#8B92A9',font:{size:11},boxWidth:10}}}}});}
-  // Overdue
+  // Overdue（用 effectiveItems）
   const odByP={},okByP={};
-  mainItems.forEach(p=>{const a=p.assignee||'未指派';const isOd=p.endDate&&new Date(p.endDate)<today&&p.status!=='completed';if(isOd)odByP[a]=(odByP[a]||0)+1;else okByP[a]=(okByP[a]||0)+1;});
+  effectiveItems.forEach(p=>{const a=p.assignee||'未指派';const isOd=p.endDate&&new Date(p.endDate)<today&&p.status!=='completed';if(isOd)odByP[a]=(odByP[a]||0)+1;else okByP[a]=(okByP[a]||0)+1;});
   const odPersons=[...new Set([...Object.keys(odByP),...Object.keys(okByP)])].sort();
   destroyChart('overdue');
   const ctx6=document.getElementById('chart-overdue')?.getContext('2d');
   if(ctx6&&odPersons.length){_chartInstances.overdue=new Chart(ctx6,{type:'bar',data:{labels:odPersons,datasets:[{label:'正常',data:odPersons.map(p=>okByP[p]||0),backgroundColor:'rgba(74,222,128,.5)',borderRadius:4,stack:'s'},{label:'⚠️ 逾期',data:odPersons.map(p=>odByP[p]||0),backgroundColor:'rgba(255,107,107,.7)',borderRadius:4,stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:'#8B92A9'}},y:{ticks:{stepSize:1,color:'#8B92A9'},beginAtZero:true,grid:{color:'rgba(28,35,64,.04)'}}},plugins:{legend:{labels:{color:'#8B92A9',font:{size:11},boxWidth:10}}}}});}
-  // Media cat
+  // Media cat（用 effectiveItems）
   const mediaCatMap={};
   MEDIA_CATS.forEach(c=>mediaCatMap[c]=0);
-  allItems.filter(p=>!p._isSubtask&&p._group==='多媒體組').forEach(p=>{const c=p.category||'其他';if(mediaCatMap[c]!==undefined)mediaCatMap[c]++;else mediaCatMap['其他']=(mediaCatMap['其他']||0)+1;});
+  effectiveItems.filter(p=>p._group==='多媒體組').forEach(p=>{const c=p.category||'其他';if(mediaCatMap[c]!==undefined)mediaCatMap[c]++;else mediaCatMap['其他']=(mediaCatMap['其他']||0)+1;});
   destroyChart('media-cat');
   const ctx7=document.getElementById('chart-media-cat')?.getContext('2d');
   if(ctx7){const mC=Object.keys(mediaCatMap),mV=mC.map(c=>mediaCatMap[c]);_chartInstances['media-cat']=new Chart(ctx7,{type:'bar',data:{labels:mC,datasets:[{label:'件數',data:mV,backgroundColor:mC.map((_,i)=>CHART_PALETTE[i%CHART_PALETTE.length]),borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{stepSize:1,color:'#8B92A9'},beginAtZero:true,grid:{color:'rgba(28,35,64,.04)'}},x:{ticks:{font:{size:9},color:'#8B92A9',maxRotation:30}}},plugins:{legend:{display:false}}}});}
-  // Group compare
-  const dCnt=mainItems.filter(p=>p._group==='美編組').length, mCnt=mainItems.filter(p=>p._group==='多媒體組').length;
-  const dDone=mainItems.filter(p=>p._group==='美編組'&&p.status==='completed').length, mDone=mainItems.filter(p=>p._group==='多媒體組'&&p.status==='completed').length;
+  // Group compare（用 effectiveItems）
+  const dCnt=effectiveItems.filter(p=>p._group==='美編組').length, mCnt=effectiveItems.filter(p=>p._group==='多媒體組').length;
+  const dDone=effectiveItems.filter(p=>p._group==='美編組'&&p.status==='completed').length, mDone=effectiveItems.filter(p=>p._group==='多媒體組'&&p.status==='completed').length;
   destroyChart('group-compare');
   const ctx8=document.getElementById('chart-group-compare')?.getContext('2d');
   if(ctx8){_chartInstances['group-compare']=new Chart(ctx8,{type:'bar',data:{labels:['🎨 美編組','🎬 多媒體組'],datasets:[{label:'進行/待辦',data:[dCnt-dDone,mCnt-mDone],backgroundColor:['rgba(0,229,200,.4)','rgba(96,165,250,.4)'],borderRadius:5},{label:'已完成',data:[dDone,mDone],backgroundColor:['rgba(0,229,200,.9)','rgba(96,165,250,.9)'],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,ticks:{color:'#8B92A9'}},y:{stacked:true,ticks:{stepSize:1,color:'#8B92A9'},beginAtZero:true,grid:{color:'rgba(28,35,64,.04)'}}},plugins:{legend:{labels:{color:'#8B92A9',font:{size:11},boxWidth:10}}}}});}
-  // Person table
+  // Person table（用 effectiveItems）
   const personData={};
-  mainItems.forEach(p=>{const a=p.assignee||'未指派';if(!personData[a])personData[a]={total:0,done:0,overdue:0,inprog:0,progSum:0,cats:new Set(),groups:new Set()};personData[a].total++;personData[a].progSum+=(parseInt(p.progress)||0);if(p.status==='completed')personData[a].done++;if(p.status==='in-progress')personData[a].inprog++;if(p.endDate&&new Date(p.endDate)<today&&p.status!=='completed')personData[a].overdue++;if(p.category)personData[a].cats.add(p.category);if(p._group)personData[a].groups.add(p._group);});
+  effectiveItems.forEach(p=>{const a=p.assignee||'未指派';if(!personData[a])personData[a]={total:0,done:0,overdue:0,inprog:0,progSum:0,groups:new Set()};personData[a].total++;personData[a].progSum+=(parseInt(p.progress)||0);if(p.status==='completed')personData[a].done++;if(['in-progress','scripting','filming','raw-footage','editing','drafting','confirming','draft-review'].includes(p.status))personData[a].inprog++;if(p.endDate&&new Date(p.endDate)<today&&p.status!=='completed')personData[a].overdue++;if(p._group)personData[a].groups.add(p._group);});
   const maxT=Math.max(...Object.values(personData).map(d=>d.total),1);
   const sorted=Object.entries(personData).sort((a,b)=>b[1].total-a[1].total);
   document.getElementById('person-table').innerHTML=`<thead><tr><th>負責人</th><th>組別</th><th>工作量</th><th>件數</th><th>執行中</th><th>已完成</th><th>完成率</th><th>逾期</th><th>平均進度</th></tr></thead><tbody>${sorted.map(([name,d],i)=>{const avgP=d.total?Math.round(d.progSum/d.total):0;const rate=d.total?Math.round(d.done/d.total*100):0;const bc=CHART_PALETTE[i%CHART_PALETTE.length];const grps=[...d.groups].join('/');return`<tr><td><strong style="color:${bc}">${name}</strong></td><td style="font-size:11px;color:var(--text-muted)">${grps}</td><td><div class="person-bar-wrap"><div class="person-bar" style="width:${Math.round(d.total/maxT*100)}%;background:${bc}"></div></div></td><td><strong>${d.total}</strong></td><td style="color:var(--amber);font-weight:700">${d.inprog}</td><td style="color:#4ade80;font-weight:700">${d.done}</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:rgba(28,35,64,.05);border-radius:3px;height:4px;min-width:40px;overflow:hidden"><div style="width:${rate}%;height:100%;background:${rate>=80?'#4ade80':rate>=50?'#FFB547':'#FF6B6B'};border-radius:3px"></div></div><span style="font-size:11px;font-weight:700">${rate}%</span></div></td><td style="color:${d.overdue?'#FF6B6B':'var(--text-dim)'};font-weight:700">${d.overdue||'—'}</td><td><div style="display:flex;align-items:center;gap:5px"><div style="flex:1;background:rgba(28,35,64,.05);border-radius:3px;height:4px;min-width:40px;overflow:hidden"><div style="width:${avgP}%;height:100%;background:var(--teal);border-radius:3px"></div></div><span style="font-size:11px;font-weight:700">${avgP}%</span></div></td></tr>`;}).join('')}</tbody>`;
