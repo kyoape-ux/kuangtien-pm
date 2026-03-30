@@ -1702,13 +1702,19 @@ async function bulkUpdateSubStatus(pid) {
     const item = _itemMap[sid];
     if (!item) continue;
     try {
+      const payload = { action:'update', group:currentGroup,
+        item: {...item, status:newStatus, progress:newProgress} };
+      console.log('[bulkUpdate] sending:', JSON.stringify(payload));
       const res = await fetch(API_URL, {
         method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-        body: JSON.stringify({ action:'update', group:currentGroup,
-          item: {...item, status:newStatus, progress:newProgress} })
+        body: JSON.stringify(payload)
       });
-      const result = await res.json();
+      const raw = await res.text();
+      console.log('[bulkUpdate] response:', raw);
+      let result; try { result = JSON.parse(raw); } catch(pe){ result = {ok:false,error:'parse error:'+raw}; }
+      console.log('[bulkUpdate] result.ok:', result.ok, 'error:', result.error);
       if (result.ok) successCount++;
+      else showToast('❌ ' + (result.error||'更新失敗'));
     } catch(e) { /* 跳過單筆錯誤，繼續處理下一筆 */ }
     await new Promise(r => setTimeout(r, 120)); // Apps Script 需要間隔
   }
