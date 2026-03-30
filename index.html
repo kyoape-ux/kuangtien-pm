@@ -1297,10 +1297,53 @@ function saveSetup() {
 }
 /* ══ ADD TASK MODAL ══ */
 const STATUS_PROGRESS = {
-  pending:0, planning:10, scripting:20, discussion:30,
-  filming:40, 'in-progress':50, editing:60, revising:75,
-  review:85, completed:100
+  /* 共用 */
+  pending:0, discussion:30, 'in-progress':50, review:85, completed:100,
+  /* 多媒體 */
+  planning:10, scripting:20, filming:40, editing:60, revising:75,
+  /* 美編 */
+  confirming:10, drafting:30, 'draft-review':60, finalizing:90
 };
+const STATUS_OPTIONS = {
+  media:[
+    {v:'pending',    l:'待執行'},
+    {v:'planning',   l:'企劃中'},
+    {v:'scripting',  l:'腳本製作'},
+    {v:'discussion', l:'討論中'},
+    {v:'filming',    l:'拍攝中'},
+    {v:'in-progress',l:'執行中'},
+    {v:'editing',    l:'剪輯中'},
+    {v:'revising',   l:'修改中'},
+    {v:'review',     l:'審核中'},
+    {v:'completed',  l:'已完成'}
+  ],
+  design:[
+    {v:'pending',      l:'待執行'},
+    {v:'confirming',   l:'需求確認'},
+    {v:'drafting',     l:'草稿設計'},
+    {v:'discussion',   l:'討論中'},
+    {v:'draft-review', l:'初稿審核'},
+    {v:'revising',     l:'修改中'},
+    {v:'finalizing',   l:'定稿確認'},
+    {v:'review',       l:'審核中'},
+    {v:'completed',    l:'已完成'}
+  ]
+};
+function getStatusOptionsHTML(group, selectedVal) {
+  const opts = STATUS_OPTIONS[group] || STATUS_OPTIONS.media;
+  return opts.map(o=>`<option value="${o.v}"${o.v===selectedVal?' selected':''}>${o.l}</option>`).join('');
+}
+function updateStatusSelects(selectedVal) {
+  const g = currentGroup;
+  const html = getStatusOptionsHTML(g, selectedVal||'pending');
+  const filterOpts = '<option value="">全部狀態</option>' + getStatusOptionsHTML(g, '');
+  const fs = document.getElementById('filter-status');
+  if (fs) { const cur=fs.value; fs.innerHTML=filterOpts; fs.value=cur; }
+  const af = document.getElementById('af-status');
+  if (af) af.innerHTML = html;
+  const ef = document.getElementById('ef-status');
+  if (ef) ef.innerHTML = html;
+}
 function syncStatusProgress(statusId, progressId) {
   const s = document.getElementById(statusId)?.value;
   const p = document.getElementById(progressId);
