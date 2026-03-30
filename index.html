@@ -1704,8 +1704,8 @@ async function bulkUpdateSubStatus(pid) {
     try {
       const res = await fetch(API_URL, {
         method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-        body: JSON.stringify({ action:'edit', group:currentGroup,
-          item: {...item, status:newStatus, progress:newProgress}, operator:OPERATOR||'admin' })
+        body: JSON.stringify({ action:'update', group:currentGroup,
+          item: {...item, status:newStatus, progress:newProgress} })
       });
       const result = await res.json();
       if (result.ok) successCount++;
