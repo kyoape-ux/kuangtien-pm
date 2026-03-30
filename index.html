@@ -1379,6 +1379,7 @@ async function submitAddTask(e) {
         const idx = el.dataset.sridx;
         const subTitle = document.getElementById(`sr-title-${idx}`)?.value.trim();
         if (!subTitle) continue;
+        const srStatus = document.getElementById(`sr-status-${idx}`)?.value || 'pending';
         subItems.push({
           id: 'T' + Date.now() + Math.random().toString(36).slice(2,6),
           parentId: id,
@@ -1388,7 +1389,8 @@ async function submitAddTask(e) {
           unit: document.getElementById('af-unit').value.trim(),
           startDate: document.getElementById('af-startDate').value,
           endDate: document.getElementById(`sr-endDate-${idx}`)?.value || '',
-          status: 'pending', progress: '0',
+          status: srStatus,
+          progress: String(getProgress(srStatus)),
           sourceType: document.getElementById('af-sourceType').value,
           supNum: '', collab: '', note: ''
         });
