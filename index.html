@@ -2290,8 +2290,9 @@ function openEditModal(id) {
   const item = _itemMap[id];
   if (!item) { showToast('❌ 找不到項目資料'); return; }
   _editItem = item;
-  // 更新類別下拉
+  // 更新類別 / 狀態下拉（依組別，帶入目前值）
   updateCategoryOptions('ef-category', item.category);
+  updateStatusSelects(item.status || 'pending');
   // 填入資料
   document.getElementById('ef-id').value         = item.id;
   document.getElementById('ef-parentId').value   = item.parentId || '';
