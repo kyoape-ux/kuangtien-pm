@@ -1663,6 +1663,55 @@ function dragEnd(e) {
   });
 }
 
+/* ══ SUBTASK BULK SELECT ══ */
+function toggleSubSel(sid, pid, checked) {
+  if (!_selSubs[pid]) _selSubs[pid] = new Set();
+  if (checked) _selSubs[pid].add(sid); else _selSubs[pid].delete(sid);
+  const count = _selSubs[pid].size;
+  const bar = document.getElementById('sbb-'+pid);
+  const countEl = document.getElementById('sbb-count-'+pid);
+  const row = document.getElementById('str-'+sid);
+  if (bar) { bar.classList.toggle('active', count>0); }
+  if (countEl) countEl.textContent = count;
+  if (row) row.classList.toggle('st-selected', checked);
+}
+function clearSubSel(pid) {
+  if (_selSubs[pid]) {
+    _selSubs[pid].forEach(sid => {
+      const cb = document.querySelector(`.sub-cb[data-sid="${sid}"]`);
+      if (cb) cb.checked = false;
+      const row = document.getElementById('str-'+sid);
+      if (row) row.classList.remove('st-selected');
+    });
+    _selSubs[pid].clear();
+  }
+  const bar = document.getElementById('sbb-'+pid);
+  if (bar) bar.classList.remove('active');
+}
+async function bulkUpdateSubStatus(pid) {
+  if (!_selSubs[pid] || !_selSubs[pid].size) return;
+  const newStatus = document.getElementById('sbb-status-'+pid)?.value;
+  if (!newStatus) return;
+  const newProgress = String(getProgress(newStatus));
+  const ids = [..._selSubs[pid]];
+  showToast('⏳ 更新中…');
+  try {
+    await Promise.all(ids.map(sid => {
+      const item = _itemMap[sid];
+      if (!item) return Promise.resolve();
+      return fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({ action:'edit', group:currentGroup,
+          item: {...item, status:newStatus, progress:newProgress}, operator:OPERATOR||'admin' }) });
+    }));
+    showToast(`✅ 已更新 ${ids.length} 筆子任務`);
+    delete _selSubs[pid];
+    _cache[currentGroup] = null;
+    await renderAll();
+    // 重新展開子任務列表
+    setTimeout(()=>{ const sl=document.getElementById('sl-'+pid); const ti=document.getElementById('ti-'+pid); if(sl){sl.style.display='';} if(ti){ti.textContent='▼';} },80);
+  } catch(e) { showToast('❌ 更新失敗，請重試'); }
+}
+
 /* ══ CATEGORY OPTIONS ══ */
 function updateCategoryOptions(selectId, currentVal) {
   const cats = currentGroup === 'media' ? MEDIA_CATS : DESIGN_CATS;
