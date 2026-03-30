@@ -1222,6 +1222,7 @@ let _itemMap = {};
 let _editItem = null;
 let _dragSrcId = null;
 let _selectedIds = new Set();
+const _selSubs = {}; // pid → Set of selected subtask IDs
 let _filterDue = '';          // '' | 'today' | 'week'
 let _filterAssignee = '';     // assignee name chip filter
 
