@@ -1799,7 +1799,7 @@ function renderList(allProjects) {
       ? Math.round((p.subtasks||[]).reduce((s,t)=>s+(parseInt(t.progress)||0),0)/subTotal)
       : (parseInt(p.progress)||0);
     const subBadge = subTotal>0
-      ? `<span style="background:${subDone===subTotal?'rgba(74,222,128,.15)':'rgba(107,116,148,.12)'};color:${subDone===subTotal?'#22c55e':'var(--text-muted)'};border:1px solid ${subDone===subTotal?'rgba(74,222,128,.4)':'rgba(107,116,148,.25)'};border-radius:5px;font-size:10px;font-weight:700;padding:1px 8px;white-space:nowrap" title="子任務：已完成 ${subDone} / 共 ${subTotal} 件">${subDone===subTotal?`<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><polyline points="5.5,8.5 7,10 10.5,6"/></svg>`:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="8" height="11" rx="1.5"/><path d="M6 3V2h4v1"/></svg>`} ${subDone}/${subTotal}</span>`
+      ? `<span style="color:${subDone===subTotal?'#22c55e':'var(--text-muted)'};font-size:11px;font-weight:600;white-space:nowrap" title="子任務：已完成 ${subDone} / 共 ${subTotal} 件">${subDone}/${subTotal}</span>`
       : '';
     const srcBadge = p.sourceType==='ticket'
       ? `<span class="src-ticket">支援單</span>${p.supNum?`<span style="background:#1e3a8a22;color:#3B82F6;border:1px solid #3B82F644;border-radius:5px;font-size:10px;font-weight:700;padding:1px 7px;font-family:monospace;letter-spacing:.5px">${esc(p.supNum)}</span>`:''}`
