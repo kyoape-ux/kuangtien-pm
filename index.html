@@ -1354,7 +1354,7 @@ function closeAddModal() {
 }
 async function submitAddTask(e) {
   e.preventDefault();
-  if (!API_URL) { showToast('❌ 尚未設定 API 網址'); return; }
+  if (!API_URL) { showToast('尚未設定 API 網址'); return; }
   const btn = document.getElementById('af-submit-btn');
   btn.textContent = '新增中…'; btn.disabled = true;
   const id = 'T' + Date.now();
@@ -1417,15 +1417,15 @@ async function submitAddTask(e) {
         const sl = document.getElementById('sl-' + savedParentId);
         const ti = document.getElementById('ti-' + savedParentId);
         if (sl) { sl.style.display = ''; if (ti) ti.classList.add('open'); }
-        showToast('✅ 子任務已新增！');
+        showToast('子任務已新增！');
       } else {
-        showToast(`✅ 任務已新增！${subAdded ? ` 含 ${subAdded} 個子項目` : ''}`);
+        showToast(`任務已新增！${subAdded ? ` 含 ${subAdded} 個子項目` : ''}`);
       }
     } else {
-      showToast('❌ ' + (result.error||'新增失敗'));
+      showToast('' + (result.error||'新增失敗'));
     }
   } catch(err) {
-    showToast('❌ 網路錯誤：' + err.message);
+    showToast('網路錯誤：' + err.message);
   }
   btn.textContent = '新增'; btn.disabled = false;
 }
@@ -1499,7 +1499,7 @@ async function manualRefresh() {
   showLoading(true);
   await renderAll();
   showLoading(false);
-  showToast('🔄 已重新整理');
+  showToast('已重新整理');
 }
 
 /* ══ GROUP / VIEW ══ */
@@ -1725,7 +1725,7 @@ async function bulkUpdateSubStatus(pid) {
   const ids = [..._selSubs[pid]];
   const btn = document.querySelector(`#sbb-${pid} button`);
   if (btn) { btn.textContent='更新中…'; btn.disabled=true; }
-  showToast(`⏳ 更新 ${ids.length} 筆中…`);
+  showToast(`更新 ${ids.length} 筆中…`);
   let successCount = 0;
   for (const sid of ids) {
     const item = _itemMap[sid];
@@ -1743,13 +1743,13 @@ async function bulkUpdateSubStatus(pid) {
       let result; try { result = JSON.parse(raw); } catch(pe){ result = {ok:false,error:'parse error:'+raw}; }
       console.log('[bulkUpdate] result.ok:', result.ok, 'error:', result.error);
       if (result.ok) successCount++;
-      else showToast('❌ ' + (result.error||'更新失敗'));
+      else showToast('' + (result.error||'更新失敗'));
     } catch(e) { /* 跳過單筆錯誤，繼續處理下一筆 */ }
     await new Promise(r => setTimeout(r, 120)); // Apps Script 需要間隔
   }
   if (btn) { btn.textContent='確認更新'; btn.disabled=false; }
-  if (successCount === 0) { showToast('❌ 更新失敗，請重試'); return; }
-  showToast(`✅ 已更新 ${successCount}/${ids.length} 筆子任務`);
+  if (successCount === 0) { showToast('更新失敗，請重試'); return; }
+  showToast(`已更新 ${successCount}/${ids.length} 筆子任務`);
   delete _selSubs[pid];
   _cache[currentGroup] = null;
   await renderAll();
@@ -1975,15 +1975,15 @@ async function ganttConfirmChange() {
   const updatedItem = {...item, startDate: newStart, endDate: newEnd};
   if (!API_URL) {
     item.startDate = newStart; item.endDate = newEnd;
-    renderAll(); showToast('✅ 日期已更新（本機）'); return;
+    renderAll(); showToast('日期已更新（本機）'); return;
   }
   try {
     const res = await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({ action:'update', group: currentGroup, item: updatedItem }) });
     const result = await res.json();
-    if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('✅ 日期已更新！'); }
-    else { showToast('❌ '+(result.error||'更新失敗')); renderAll(); }
-  } catch(err) { showToast('❌ 網路錯誤'); renderAll(); }
+    if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('日期已更新！'); }
+    else { showToast(''+(result.error||'更新失敗')); renderAll(); }
+  } catch(err) { showToast('網路錯誤'); renderAll(); }
 }
 
 /* ══ CALENDAR ══ */
@@ -2188,7 +2188,7 @@ async function quickAddItem(){
   try{
     const res=await fetch(API_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',group:currentGroup,item})});
     const r=await res.json();
-    if(!r.ok){showToast('❌ 新增失敗');inp.disabled=false;inp.focus();return;}
+    if(!r.ok){showToast('新增失敗');inp.disabled=false;inp.focus();return;}
     // 批次新增子任務
     if(subChunks.length){
       const subItems=subChunks.map((sc,i)=>{
@@ -2201,11 +2201,11 @@ async function quickAddItem(){
         body:JSON.stringify({action:'batchAdd',group:currentGroup,items:subItems})});
     }
     inp.value='';await refreshList();
-    showToast(`✅ 已新增${subChunks.length?'（含 '+subChunks.length+' 個子任務）':''}`);
+    showToast(`已新增${subChunks.length?'（含 '+subChunks.length+' 個子任務）':''}`);
     openEditModal(mainId);
   }catch(e){
     console.error('quickAdd error:',e);
-    showToast('❌ 連線失敗（請確認 Apps Script 已重新部署）');
+    showToast('連線失敗（請確認 Apps Script 已重新部署）');
   }
   inp.disabled=false;inp.focus();
 }
@@ -2233,7 +2233,7 @@ async function generateWeekly(){
     document.getElementById('weekly-text').textContent=txt;
   }
 }
-function copyWeekly(){navigator.clipboard.writeText(document.getElementById('weekly-text').textContent).then(()=>showToast('✅ 已複製'));}
+function copyWeekly(){navigator.clipboard.writeText(document.getElementById('weekly-text').textContent).then(()=>showToast('已複製'));}
 
 /* ══ EXPORT ══ */
 function toggleExportMenu(e){e.stopPropagation();const m=document.getElementById('export-menu');m.style.display=m.style.display==='none'?'block':'none';}
@@ -2349,19 +2349,19 @@ async function loadSnapshots(){
 }
 async function confirmRestore(group,index){
   if(!confirm('確定還原此版本？目前資料將被覆蓋。'))return;
-  showToast('⏳ 還原中…');
+  showToast('還原中…');
   try{
     const res=await fetch(API_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'restore',group,restoreIndex:index,operator:OPERATOR||'未登入'})});
     const result=await res.json();
-    if(result.ok){_cache[group]=null;closeRestoreModal();await renderAll();showToast('✅ 還原成功！');}
-    else showToast('❌ 還原失敗');
-  }catch(e){showToast('❌ 錯誤：'+e.message);}
+    if(result.ok){_cache[group]=null;closeRestoreModal();await renderAll();showToast('還原成功！');}
+    else showToast('還原失敗');
+  }catch(e){showToast('錯誤：'+e.message);}
 }
 
 /* ══ EDIT MODAL ══ */
 function openEditModal(id) {
   const item = _itemMap[id];
-  if (!item) { showToast('❌ 找不到項目資料'); return; }
+  if (!item) { showToast('找不到項目資料'); return; }
   _editItem = item;
   // 更新類別 / 狀態下拉（依組別，帶入目前值）
   updateCategoryOptions('ef-category', item.category);
@@ -2397,7 +2397,7 @@ function closeEditModal() {
 }
 async function submitEditTask(e) {
   e.preventDefault();
-  if (!API_URL) { showToast('❌ 尚未設定 API 網址'); return; }
+  if (!API_URL) { showToast('尚未設定 API 網址'); return; }
   const btn = document.getElementById('ef-submit-btn');
   btn.textContent = '更新中…'; btn.disabled = true;
   const efStatus = document.getElementById('ef-status').value;
@@ -2428,12 +2428,12 @@ async function submitEditTask(e) {
       closeEditModal();
       _cache[currentGroup] = null;
       await renderAll();
-      showToast('✅ 項目已更新！');
+      showToast('項目已更新！');
     } else {
-      showToast('❌ ' + (result.error||'更新失敗'));
+      showToast('' + (result.error||'更新失敗'));
     }
   } catch(err) {
-    showToast('❌ 網路錯誤：' + err.message);
+    showToast('網路錯誤：' + err.message);
   }
   btn.textContent = '儲存更新'; btn.disabled = false;
 }
@@ -2489,7 +2489,7 @@ function importFileSelected(event) {
         const ws=wb.Sheets[wb.SheetNames[0]];
         rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
       }
-      if(!rows||rows.length<2){showToast('❌ 檔案內容為空或格式不符');return;}
+      if(!rows||rows.length<2){showToast('檔案內容為空或格式不符');return;}
       let hdrIdx=0;
       for(let i=0;i<Math.min(5,rows.length);i++){if(rows[i].some(c=>c&&String(c).trim())){hdrIdx=i;break;}}
       _importHeaders=rows[hdrIdx].map(h=>String(h||'').trim());
@@ -2500,7 +2500,7 @@ function importFileSelected(event) {
       document.getElementById('import-step1').style.display='none';
       document.getElementById('import-step2').style.display='';
       impSetStep(2);
-    } catch(err){showToast('❌ 解析失敗：'+err.message);}
+    } catch(err){showToast('解析失敗：'+err.message);}
   };
   reader.readAsArrayBuffer(file);
 }
@@ -2535,7 +2535,7 @@ function buildColMapUI() {
 }
 
 function goToImportStep3() {
-  if((_importColMap['title']??-1)<0){showToast('❌ 請設定「標題」欄位對應');return;}
+  if((_importColMap['title']??-1)<0){showToast('請設定「標題」欄位對應');return;}
   buildImportEditTable();
   document.getElementById('import-step2').style.display='none';
   document.getElementById('import-step3').style.display='';
@@ -2620,7 +2620,7 @@ function impAutoClean() {
   const inputs=document.querySelectorAll('[id^="imp-title-"]');
   let cleaned=0;
   inputs.forEach(inp=>{const orig=inp.value;const cl=autoCleanTitle(orig);if(cl!==orig){inp.value=cl;inp.style.background='rgba(139,92,246,.1)';cleaned++;}});
-  showToast(`✨ 自動整理完成，修改 ${cleaned} 筆標題`);
+  showToast(`自動整理完成，修改 ${cleaned} 筆標題`);
 }
 
 function impRemoveDupes() {
@@ -2632,7 +2632,7 @@ function impRemoveDupes() {
     else{if(item.supNum) seen.add(item.supNum);}
   });
   updateImpSelCount();
-  showToast(`🔍 取消 ${removed} 筆重複單號`);
+  showToast(`取消 ${removed} 筆重複單號`);
 }
 
 function parseImportDate(val) {
@@ -2647,9 +2647,9 @@ function parseImportDate(val) {
 }
 
 async function executeBatchImport() {
-  if(!API_URL){showToast('❌ 尚未設定 API 網址');return;}
+  if(!API_URL){showToast('尚未設定 API 網址');return;}
   const checkedCbs=[...document.querySelectorAll('.imp-cb:checked')];
-  if(!checkedCbs.length){showToast('❌ 請至少勾選一筆資料');return;}
+  if(!checkedCbs.length){showToast('請至少勾選一筆資料');return;}
   const btn=document.getElementById('import-execute-btn');
   btn.textContent=`批次匯入中（${checkedCbs.length} 筆）…`;btn.disabled=true;
   const items=checkedCbs.map(cb=>{
@@ -2672,11 +2672,11 @@ async function executeBatchImport() {
     btn.textContent='確認批次匯入';btn.disabled=false;
     if(result.ok){
       closeImportModal();_cache[currentGroup]=null;await renderAll();
-      showToast(`✅ 批次匯入完成！共 ${result.added||items.length} 筆`);
+      showToast(`批次匯入完成！共 ${result.added||items.length} 筆`);
     } else {
-      showToast('❌ 匯入失敗：'+(result.error||'未知錯誤'));
+      showToast('匯入失敗：'+(result.error||'未知錯誤'));
     }
-  } catch(e){btn.textContent='確認批次匯入';btn.disabled=false;showToast('❌ 網路錯誤：'+e.message);}
+  } catch(e){btn.textContent='確認批次匯入';btn.disabled=false;showToast('網路錯誤：'+e.message);}
 }
 
 /* ══ MULTI SELECT ══ */
@@ -2726,9 +2726,9 @@ async function bulkDelete() {
     const cache = _cache[currentGroup];
     if (cache) _cache[currentGroup] = cache.filter(p => !ids.includes(p.id));
     clearSelection(); await renderAll();
-    showToast('🗑 已刪除 ' + ids.length + ' 筆（本機）'); return;
+    showToast('已刪除 ' + ids.length + ' 筆（本機）'); return;
   }
-  showToast('🗑 刪除中…');
+  showToast('刪除中…');
   try {
     const res = await fetch(API_URL, {
       method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
@@ -2737,14 +2737,14 @@ async function bulkDelete() {
     const result = await res.json();
     if (result.ok) {
       clearSelection(); _cache[currentGroup]=null; await renderAll();
-      showToast('✅ 已刪除 ' + (result.deleted||ids.length) + ' 筆');
-    } else showToast('❌ ' + (result.error||'刪除失敗'));
-  } catch(e) { showToast('❌ 網路錯誤：'+e.message); }
+      showToast('已刪除 ' + (result.deleted||ids.length) + ' 筆');
+    } else showToast('' + (result.error||'刪除失敗'));
+  } catch(e) { showToast('網路錯誤：'+e.message); }
 }
 async function bulkCopy() {
   const ids = [..._selectedIds];
   if (!ids.length) return;
-  if (!API_URL) { showToast('❌ 複製功能需要 API 連線'); return; }
+  if (!API_URL) { showToast('複製功能需要 API 連線'); return; }
   const items = ids.map(id => {
     const orig = _itemMap[id]; if (!orig) return null;
     return Object.assign({}, orig, {
@@ -2753,7 +2753,7 @@ async function bulkCopy() {
     });
   }).filter(Boolean);
   if (!items.length) return;
-  showToast('📋 複製中…');
+  showToast('複製中…');
   try {
     const res = await fetch(API_URL, {
       method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
@@ -2762,9 +2762,9 @@ async function bulkCopy() {
     const result = await res.json();
     if (result.ok) {
       clearSelection(); _cache[currentGroup]=null; await renderAll();
-      showToast('✅ 已複製 ' + (result.added||items.length) + ' 筆，狀態重置為「未開始」');
-    } else showToast('❌ ' + (result.error||'複製失敗'));
-  } catch(e) { showToast('❌ 網路錯誤：'+e.message); }
+      showToast('已複製 ' + (result.added||items.length) + ' 筆，狀態重置為「未開始」');
+    } else showToast('' + (result.error||'複製失敗'));
+  } catch(e) { showToast('網路錯誤：'+e.message); }
 }
 
 /* ══ SUBTASK ROWS ══ */
@@ -2803,15 +2803,15 @@ async function quickComplete(id) {
   if (!item) return;
   if (!API_URL) {
     item.status = 'completed'; item.progress = '100';
-    _cache[currentGroup] = null; await renderAll(); showToast('✅ 已結案（本機）'); return;
+    _cache[currentGroup] = null; await renderAll(); showToast('已結案（本機）'); return;
   }
   try {
     const res = await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({ action:'update', group: currentGroup, item: {...item, status:'completed', progress:'100'} }) });
     const result = await res.json();
-    if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('✅ 已結案！'); }
-    else showToast('❌ ' + (result.error||'更新失敗'));
-  } catch(e) { showToast('❌ 網路錯誤'); }
+    if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('已結案！'); }
+    else showToast('' + (result.error||'更新失敗'));
+  } catch(e) { showToast('網路錯誤'); }
 }
 async function quickReopen(id) {
   const item = _itemMap[id];
@@ -2825,8 +2825,8 @@ async function quickReopen(id) {
       body: JSON.stringify({ action:'update', group: currentGroup, item: {...item, status:'in-progress'} }) });
     const result = await res.json();
     if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('↩ 已重新開啟！'); }
-    else showToast('❌ ' + (result.error||'更新失敗'));
-  } catch(e) { showToast('❌ 網路錯誤'); }
+    else showToast('' + (result.error||'更新失敗'));
+  } catch(e) { showToast('網路錯誤'); }
 }
 
 /* ══ GANTT TOOLTIP ══ */
@@ -2879,7 +2879,7 @@ function submitLogin() {
     sessionStorage.setItem('pm_role', PM_ROLE);
     document.getElementById('login-overlay').style.display = 'none';
     applyRole(PM_ROLE);
-    showToast(PM_ROLE==='leader' ? '✅ 已登入（組長）' : '✅ 已登入（組員）');
+    showToast(PM_ROLE==='leader' ? '已登入（組長）' : '已登入（組員）');
   } else {
     document.getElementById('login-err').textContent = '密碼錯誤，請再試一次';
     document.getElementById('login-pass').value = '';
