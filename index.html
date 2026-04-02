@@ -652,15 +652,15 @@ body.role-guest  .btn-quick-done{display:none!important}
       <span id="conn-text">本機模式</span>
     </div>
     <div class="export-wrap" id="export-wrap">
-      <button class="hbtn" onclick="toggleExportMenu(event)">📤 匯出 ▾</button>
+      <button class="hbtn" onclick="toggleExportMenu(event)"><span class="ic"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h8M8 3v8M5.5 5.5 8 3l2.5 2.5"/></svg></span> 匯出 ▾</button>
       <div class="export-dropdown" id="export-menu" style="display:none">
-        <button onclick="openWeekly();closeExportMenu()">📋 本週工作摘要（LINE）</button>
+        <button onclick="openWeekly();closeExportMenu()"><span class="ic"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6Z"/><polyline points="9,2 9,6 13,6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="8" y2="12"/></svg></span> 本週工作摘要（LINE）</button>
         <hr>
-        <button onclick="exportExcel();closeExportMenu()">📊 匯出 Excel 表格</button>
-        <button onclick="exportICS();closeExportMenu()">📅 匯出 Google 日曆 (.ics)</button>
+        <button onclick="exportExcel();closeExportMenu()"><span class="ic"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="2" y1="11" x2="14" y2="11"/><line x1="6" y1="7" x2="6" y2="14"/><line x1="10" y1="7" x2="10" y2="14"/></svg></span> 匯出 Excel 表格</button>
+        <button onclick="exportICS();closeExportMenu()"><span class="ic"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/></svg></span> 匯出 Google 日曆 (.ics)</button>
         <hr>
-        <button onclick="exportTextPDF();closeExportMenu()">📄 匯出精簡文字 PDF</button>
-        <button onclick="printView();closeExportMenu()">🖨️ 列印完整頁面</button>
+        <button onclick="exportTextPDF();closeExportMenu()"><span class="ic"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6Z"/><polyline points="9,2 9,6 13,6"/></svg></span> 匯出精簡文字 PDF</button>
+        <button onclick="printView();closeExportMenu()"><span class="ic"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2h6v4H5Z"/><path d="M3 6h10a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"/><path d="M5 12h6v2H5Z"/></svg></span> 列印完整頁面</button>
       </div>
     </div>
     <button class="hbtn accent" onclick="manualRefresh()">🔄 重新整理</button>
