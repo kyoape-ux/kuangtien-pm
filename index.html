@@ -1909,7 +1909,7 @@ function renderGantt(allProjects) {
         </div></div>`;
     });
   });
-  wrap.innerHTML = !projects.length ? `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-msg">尚無資料</div></div>` : header+rows;
+  wrap.innerHTML = !projects.length ? `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="3" height="6" rx="1"/><rect x="6.5" y="5" width="3" height="9" rx="1"/><rect x="11" y="2" width="3" height="12" rx="1"/></svg></div><div class="empty-msg">尚無資料</div></div>` : header+rows;
 }
 
 /* ══ GANTT DRAG RESIZE ══ */
