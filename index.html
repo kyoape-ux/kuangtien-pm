@@ -847,6 +847,37 @@ body.role-guest  .btn-quick-done{display:none!important}
   </div>
 </div>
 
+<!-- PDF EXPORT OPTIONS MODAL -->
+<div id="pdf-options-modal" style="display:none;position:fixed;inset:0;background:rgba(28,35,64,.55);z-index:250;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)" onclick="closePdfOptionsOutside(event)">
+  <div style="background:white;border:1px solid var(--border);border-radius:18px;width:100%;max-width:390px;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:slideUp .22s ease">
+    <div class="weekly-header">
+      <div class="weekly-title"><span class="ic"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6Z"/><polyline points="9,2 9,6 13,6"/></svg></span> 匯出精簡文字 PDF</div>
+      <button class="modal-x" onclick="closePdfOptions()"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button>
+    </div>
+    <div class="weekly-body">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">選擇要包含在報告中的項目：</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label class="pdf-opt-row">
+          <input type="checkbox" id="pdf-opt-active" checked>
+          <div><div class="pdf-opt-label">進行中項目</div><div class="pdf-opt-desc">執行中、討論、審核、腳本、拍攝、剪輯等所有進行中狀態</div></div>
+        </label>
+        <label class="pdf-opt-row">
+          <input type="checkbox" id="pdf-opt-pending" checked>
+          <div><div class="pdf-opt-label">待執行</div><div class="pdf-opt-desc">尚未開始的項目</div></div>
+        </label>
+        <label class="pdf-opt-row">
+          <input type="checkbox" id="pdf-opt-done">
+          <div><div class="pdf-opt-label">已完成</div><div class="pdf-opt-desc">顯示於報告最下方，以虛線分隔</div></div>
+        </label>
+      </div>
+    </div>
+    <div class="weekly-footer">
+      <button class="btn btn-dim" onclick="closePdfOptions()">取消</button>
+      <button class="btn btn-teal" onclick="doExportTextPDF()" style="display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6Z"/><polyline points="9,2 9,6 13,6"/></svg> 匯出 PDF</button>
+    </div>
+  </div>
+</div>
+
 <!-- GANTT DATE CONFIRM MODAL -->
 <div id="gantt-confirm">
   <div class="gcm-box">
