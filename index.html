@@ -2344,7 +2344,7 @@ async function loadSnapshots(){
     const res=await fetch(`${API_URL}?action=snapshots&group=${group}`,{cache:'no-cache'});
     const snaps=await res.json();
     if(!snaps.length){wrap.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text-muted)">尚無備份快照</div>`;return;}
-    wrap.innerHTML=snaps.map((s,i)=>{const ts=typeof s.timestamp==='string'?s.timestamp.replace('T',' ').slice(0,19):s.timestamp;return`<div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--border);border-radius:9px;margin-bottom:7px;background:var(--surface2)"><div style="flex:1"><div style="font-size:12px;font-weight:700">${i===0?'🕐 最新備份':'備份 #'+(i+1)}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${ts}・${s.itemCount}件</div></div><button class="btn btn-dim" style="font-size:11px" onclick="confirmRestore('${group}',${s.index})">⏪ 還原</button></div>`;}).join('');
+    wrap.innerHTML=snaps.map((s,i)=>{const ts=typeof s.timestamp==='string'?s.timestamp.replace('T',' ').slice(0,19):s.timestamp;return`<div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--border);border-radius:9px;margin-bottom:7px;background:var(--surface2)"><div style="flex:1"><div style="font-size:12px;font-weight:700">${i===0?'最新備份':'備份 #'+(i+1)}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${ts}・${s.itemCount}件</div></div><button class="btn btn-dim" style="font-size:11px" onclick="confirmRestore('${group}',${s.index})">⏪ 還原</button></div>`;}).join('');
   }catch(e){wrap.innerHTML=`<div style="text-align:center;padding:24px;color:var(--coral)">讀取失敗</div>`;}
 }
 async function confirmRestore(group,index){
