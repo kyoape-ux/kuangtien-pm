@@ -1112,7 +1112,7 @@ body.role-guest  .btn-quick-done{display:none!important}
 <div id="edit-modal" onclick="if(event.target===this)closeEditModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:18px;padding:32px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
-      <div id="edit-modal-title" style="font-size:18px;font-weight:700;color:var(--navy)">✏️ 編輯項目</div>
+      <div id="edit-modal-title" style="font-size:18px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px"><span class="ic"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5a2 2 0 0 1 2.83 2.83L5 14.5l-3 .5.5-3Z"/></svg></span>編輯項目</div>
       <button onclick="closeEditModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted)">✕</button>
     </div>
     <form id="edit-form" onsubmit="submitEditTask(event)">
