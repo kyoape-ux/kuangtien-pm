@@ -2298,46 +2298,60 @@ async function exportICS(){
   const a=document.createElement('a');a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);a.download='視覺組專案.ics';a.click();
 }
 function printView(){closeExportMenu();setTimeout(()=>window.print(),100);}
-async function exportTextPDF(){
-  closeExportMenu();
+function openPdfOptions(){const m=document.getElementById('pdf-options-modal');m.style.display='flex';}
+function closePdfOptions(){document.getElementById('pdf-options-modal').style.display='none';}
+function closePdfOptionsOutside(e){if(e.target.id==='pdf-options-modal')closePdfOptions();}
+async function doExportTextPDF(){
+  const showActive=document.getElementById('pdf-opt-active').checked;
+  const showPending=document.getElementById('pdf-opt-pending').checked;
+  const showDone=document.getElementById('pdf-opt-done').checked;
+  closePdfOptions();
   const projects = await getProjects();
   const GN={design:'美編組',media:'多媒體組'};
   const ST_LABEL={pending:'待執行','in-progress':'執行中',discussion:'討論中',review:'審核中',completed:'已完成',scripting:'腳本已完成',filming:'約拍中','raw-footage':'已拍攝待剪輯',editing:'剪輯中',revising:currentGroup==='design'?'待發包':'待修改',confirming:'需求確認',drafting:'草稿設計','draft-review':'初稿審核',finalizing:'定稿確認'};
   const ST_ICON={pending:'⬜','in-progress':'🔶',discussion:'💬',review:'🔍',scripting:'✍️',filming:'📅','raw-footage':'🎞️',editing:'✂️',revising:'🔄',confirming:'📋',drafting:'✏️','draft-review':'🔎',finalizing:'✔️'};
   const SC={self:'自主',ticket:'支援單'};
-  // 依狀態分組
   const byStatus={};
   projects.forEach(p=>{if(!byStatus[p.status])byStatus[p.status]=[];byStatus[p.status].push(p);});
-  // 非完成狀態的顯示順序
-  const activeOrder=['in-progress','scripting','filming','raw-footage','editing','revising','finalizing','draft-review','drafting','confirming','discussion','review','pending'];
+  const activeKeys=['in-progress','scripting','filming','raw-footage','editing','revising','finalizing','draft-review','drafting','confirming','discussion','review'];
   let body='';
-  activeOrder.forEach(k=>{
-    const items=byStatus[k]; if(!items||!items.length) return;
-    body+=`<h2>${ST_ICON[k]||'▪'} ${ST_LABEL[k]}（${items.length} 件）</h2>`;
-    items.forEach(p=>{
-      const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'預計完成：'+p.endDate:'',p.progress?p.progress+'%':'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
-      body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
-      (p.subtasks||[]).forEach(s=>{
-        body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST_LABEL[s.status]||''}</em>${s.progress?' <em>'+s.progress+'%</em>':''}${s.endDate?' <span style="color:#666;font-size:10px">預計完成：'+s.endDate+'</span>':''}</div>`;
+  if(showActive){
+    activeKeys.forEach(k=>{
+      const items=byStatus[k]; if(!items||!items.length) return;
+      body+=`<h2>${ST_ICON[k]||'▪'} ${ST_LABEL[k]}（${items.length} 件）</h2>`;
+      items.forEach(p=>{
+        const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'預計完成：'+p.endDate:'',p.progress?p.progress+'%':'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
+        body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
+        (p.subtasks||[]).forEach(s=>{body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST_LABEL[s.status]||''}</em>${s.progress?' <em>'+s.progress+'%</em>':''}${s.endDate?' <span style="color:#666;font-size:10px">預計完成：'+s.endDate+'</span>':''}</div>`;});
+        if(p.note)body+=`<div class="note">備註：${p.note}</div>`;
+        body+='</div>';
       });
-      if(p.note) body+=`<div class="note">備註：${p.note}</div>`;
-      body+='</div>';
     });
-  });
-  // 已完成區塊：分隔線 + 置底
-  const done=byStatus['completed']||[];
-  if(done.length){
-    body+=`<div class="divider"></div>`;
-    body+=`<h2 class="h-done">✅ 已完成（${done.length} 件）</h2>`;
-    done.forEach(p=>{
-      const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'完成日期：'+p.endDate:'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
-      body+=`<div class="item item-done"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
-      (p.subtasks||[]).forEach(s=>{
-        body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''}</div>`;
+  }
+  if(showPending){
+    const items=byStatus['pending']||[]; if(items.length){
+      body+=`<h2>⬜ 待執行（${items.length} 件）</h2>`;
+      items.forEach(p=>{
+        const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'預計完成：'+p.endDate:'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
+        body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
+        (p.subtasks||[]).forEach(s=>{body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''}</div>`;});
+        if(p.note)body+=`<div class="note">備註：${p.note}</div>`;
+        body+='</div>';
       });
-      if(p.note) body+=`<div class="note">備註：${p.note}</div>`;
-      body+='</div>';
-    });
+    }
+  }
+  if(showDone){
+    const done=byStatus['completed']||[]; if(done.length){
+      body+=`<div class="divider"></div>`;
+      body+=`<h2 class="h-done">✅ 已完成（${done.length} 件）</h2>`;
+      done.forEach(p=>{
+        const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'完成日期：'+p.endDate:'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
+        body+=`<div class="item item-done"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
+        (p.subtasks||[]).forEach(s=>{body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''}</div>`;});
+        if(p.note)body+=`<div class="note">備註：${p.note}</div>`;
+        body+='</div>';
+      });
+    }
   }
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>專案報告・${GN[currentGroup]}</title>
