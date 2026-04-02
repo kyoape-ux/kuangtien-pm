@@ -2089,7 +2089,7 @@ async function renderStats() {
   const odPersons=[...new Set([...Object.keys(odByP),...Object.keys(okByP)])].sort();
   destroyChart('overdue');
   const ctx6=document.getElementById('chart-overdue')?.getContext('2d');
-  if(ctx6&&odPersons.length){_chartInstances.overdue=new Chart(ctx6,{type:'bar',data:{labels:odPersons,datasets:[{label:'正常',data:odPersons.map(p=>okByP[p]||0),backgroundColor:'rgba(74,222,128,.5)',borderRadius:4,stack:'s'},{label:'⚠️ 逾期',data:odPersons.map(p=>odByP[p]||0),backgroundColor:'rgba(255,107,107,.7)',borderRadius:4,stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:'#8B92A9'}},y:{ticks:{stepSize:1,color:'#8B92A9'},beginAtZero:true,grid:{color:'rgba(28,35,64,.04)'}}},plugins:{legend:{labels:{color:'#8B92A9',font:{size:11},boxWidth:10}}}}});}
+  if(ctx6&&odPersons.length){_chartInstances.overdue=new Chart(ctx6,{type:'bar',data:{labels:odPersons,datasets:[{label:'正常',data:odPersons.map(p=>okByP[p]||0),backgroundColor:'rgba(74,222,128,.5)',borderRadius:4,stack:'s'},{label:'逾期',data:odPersons.map(p=>odByP[p]||0),backgroundColor:'rgba(255,107,107,.7)',borderRadius:4,stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:'#8B92A9'}},y:{ticks:{stepSize:1,color:'#8B92A9'},beginAtZero:true,grid:{color:'rgba(28,35,64,.04)'}}},plugins:{legend:{labels:{color:'#8B92A9',font:{size:11},boxWidth:10}}}}});}
   // Media cat（用 effectiveItems）
   const mediaCatMap={};
   MEDIA_CATS.forEach(c=>mediaCatMap[c]=0);
