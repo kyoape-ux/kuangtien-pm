@@ -2346,7 +2346,7 @@ async function doExportTextPDF(){
   }
   if(showPending){
     const items=byStatus['pending']||[]; if(items.length){
-      body+=`<h2>⬜ 待執行（${items.length} 件）</h2>`;
+      body+=`<h2>${ST_ICON.pending} 待執行（${items.length} 件）</h2>`;
       items.forEach(p=>{
         const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'預計完成：'+p.endDate:'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
         body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
