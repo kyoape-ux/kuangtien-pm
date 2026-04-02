@@ -770,9 +770,9 @@ body.role-guest  .btn-quick-done{display:none!important}
 <div id="bulk-bar" class="auth-only">
   <span style="font-size:12px">已選 <strong id="bulk-count" style="color:var(--teal);font-size:15px">0</strong> 筆</span>
   <div style="width:1px;height:20px;background:rgba(255,255,255,.2)"></div>
-  <button class="bulk-btn" onclick="bulkCopy()" style="background:rgba(0,191,166,.25);color:#7ff3e4" onmouseover="this.style.background='rgba(0,191,166,.45)'" onmouseout="this.style.background='rgba(0,191,166,.25)'">📋 複製</button>
-  <button class="bulk-btn" onclick="bulkDelete()" style="background:rgba(255,107,107,.25);color:#ffaaaa" onmouseover="this.style.background='rgba(255,107,107,.45)'" onmouseout="this.style.background='rgba(255,107,107,.25)'">🗑 刪除</button>
-  <button onclick="clearSelection()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1" title="取消選取">✕</button>
+  <button class="bulk-btn" onclick="bulkCopy()" style="background:rgba(0,191,166,.25);color:#7ff3e4;display:inline-flex;align-items:center;gap:5px" onmouseover="this.style.background='rgba(0,191,166,.45)'" onmouseout="this.style.background='rgba(0,191,166,.25)'"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="8" height="11" rx="1.5"/><path d="M6 3V2h4v1"/></svg> 複製</button>
+  <button class="bulk-btn" onclick="bulkDelete()" style="background:rgba(255,107,107,.25);color:#ffaaaa;display:inline-flex;align-items:center;gap:5px" onmouseover="this.style.background='rgba(255,107,107,.45)'" onmouseout="this.style.background='rgba(255,107,107,.25)'"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,5 4,14 12,14 13,5"/><line x1="2" y1="5" x2="14" y2="5"/><path d="M6 5V3h4v2"/></svg> 刪除</button>
+  <button onclick="clearSelection()" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:2px 4px;display:inline-flex;align-items:center" title="取消選取"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button>
 </div>
 
 
