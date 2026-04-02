@@ -1003,7 +1003,7 @@ body.role-guest  .btn-quick-done{display:none!important}
       <button class="modal-x" onclick="closeRestoreModal()">✕</button>
     </div>
     <div class="dark-modal-body">
-      <div style="background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.2);border-radius:8px;padding:10px 14px;font-size:11px;margin-bottom:12px;color:#FFB547">⚠️ 還原後目前資料將被覆蓋，系統會自動備份當前版本。</div>
+      <div style="background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.2);border-radius:8px;padding:10px 14px;font-size:11px;margin-bottom:12px;color:#FFB547;display:flex;align-items:flex-start;gap:7px"><span class="ic" style="margin-top:1px;flex-shrink:0"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2L1.5 13.5h13Z"/><line x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="12.5" r=".5" fill="currentColor" stroke="none"/></svg></span>還原後目前資料將被覆蓋，系統會自動備份當前版本。</div>
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <select class="fsel-dark" id="restore-group" onchange="loadSnapshots()">
           <option value="design">🎨 美編組</option>
