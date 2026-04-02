@@ -1243,7 +1243,7 @@ function saveSetup() {
   if (lpass) localStorage.setItem('pm_leader_pass', lpass);
   if (mpass) localStorage.setItem('pm_member_pass', mpass);
   if (lpass || mpass) showToast('設定已儲存（含密碼更新）');
-  else showToast('✅ 設定已儲存');
+  else showToast('設定已儲存');
   document.getElementById('leader-pass-input').value = '';
   document.getElementById('member-pass-input').value = '';
   document.getElementById('setup-banner').style.display = 'none';
