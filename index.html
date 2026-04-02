@@ -2359,7 +2359,7 @@ async function doExportTextPDF(){
   if(showDone){
     const done=byStatus['completed']||[]; if(done.length){
       body+=`<div class="divider"></div>`;
-      body+=`<h2 class="h-done">✅ 已完成（${done.length} 件）</h2>`;
+      body+=`<h2 class="h-done">${ST_ICON.completed} 已完成（${done.length} 件）</h2>`;
       done.forEach(p=>{
         const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'完成日期：'+p.endDate:'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
         body+=`<div class="item item-done"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
