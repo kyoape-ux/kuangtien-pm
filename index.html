@@ -2266,25 +2266,43 @@ async function exportTextPDF(){
   closeExportMenu();
   const projects = await getProjects();
   const GN={design:'美編組',media:'多媒體組'};
-  const ST={pending:'待執行','in-progress':'執行中',discussion:'討論中',review:'審核中',completed:'已完成'};
+  const ST_LABEL={pending:'待執行','in-progress':'執行中',discussion:'討論中',review:'審核中',completed:'已完成',scripting:'腳本已完成',filming:'約拍中','raw-footage':'已拍攝待剪輯',editing:'剪輯中',revising:currentGroup==='design'?'待發包':'待修改',confirming:'需求確認',drafting:'草稿設計','draft-review':'初稿審核',finalizing:'定稿確認'};
+  const ST_ICON={pending:'⬜','in-progress':'🔶',discussion:'💬',review:'🔍',scripting:'✍️',filming:'📅','raw-footage':'🎞️',editing:'✂️',revising:'🔄',confirming:'📋',drafting:'✏️','draft-review':'🔎',finalizing:'✔️'};
   const SC={self:'自主',ticket:'支援單'};
-  const byStatus={'in-progress':[],'discussion':[],'pending':[],'review':[],'completed':[]};
-  projects.forEach(p=>byStatus[p.status]?.push(p));
-  const sections=[{k:'in-progress',l:'🔶 執行中'},{k:'discussion',l:'💬 討論中'},{k:'pending',l:'⬜ 待執行'},{k:'review',l:'🔍 審核中'},{k:'completed',l:'✅ 已完成'}];
+  // 依狀態分組
+  const byStatus={};
+  projects.forEach(p=>{if(!byStatus[p.status])byStatus[p.status]=[];byStatus[p.status].push(p);});
+  // 非完成狀態的顯示順序
+  const activeOrder=['in-progress','scripting','filming','raw-footage','editing','revising','finalizing','draft-review','drafting','confirming','discussion','review','pending'];
   let body='';
-  sections.forEach(sec=>{
-    const items=byStatus[sec.k]; if(!items.length) return;
-    body+=`<h2>${sec.l}（${items.length} 件）</h2>`;
+  activeOrder.forEach(k=>{
+    const items=byStatus[k]; if(!items||!items.length) return;
+    body+=`<h2>${ST_ICON[k]||'▪'} ${ST_LABEL[k]}（${items.length} 件）</h2>`;
     items.forEach(p=>{
       const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'預計完成：'+p.endDate:'',p.progress?p.progress+'%':'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
       body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
       (p.subtasks||[]).forEach(s=>{
-        body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST[s.status]||''}</em>${s.progress?' <em>'+s.progress+'%</em>':''}${s.endDate?' <span style="color:#666;font-size:10px">預計完成：'+s.endDate+'</span>':''}</div>`;
+        body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST_LABEL[s.status]||''}</em>${s.progress?' <em>'+s.progress+'%</em>':''}${s.endDate?' <span style="color:#666;font-size:10px">預計完成：'+s.endDate+'</span>':''}</div>`;
       });
       if(p.note) body+=`<div class="note">備註：${p.note}</div>`;
       body+='</div>';
     });
   });
+  // 已完成區塊：分隔線 + 置底
+  const done=byStatus['completed']||[];
+  if(done.length){
+    body+=`<div class="divider"></div>`;
+    body+=`<h2 class="h-done">✅ 已完成（${done.length} 件）</h2>`;
+    done.forEach(p=>{
+      const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'完成日期：'+p.endDate:'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
+      body+=`<div class="item item-done"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
+      (p.subtasks||[]).forEach(s=>{
+        body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''}</div>`;
+      });
+      if(p.note) body+=`<div class="note">備註：${p.note}</div>`;
+      body+='</div>';
+    });
+  }
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>專案報告・${GN[currentGroup]}</title>
 <style>
@@ -2294,7 +2312,11 @@ async function exportTextPDF(){
   .hd h1{font-size:17px;font-weight:700}
   .hd .meta{font-size:10px;color:#666;margin-top:4px}
   h2{font-size:12px;font-weight:700;color:#1C2340;background:#F4F5F7;padding:5px 10px;border-radius:5px;margin:18px 0 8px;border-left:3px solid #1C2340}
+  .h-done{background:#f0fdf4;border-left-color:#22c55e;color:#166534}
+  .divider{border:none;border-top:2px dashed #ccc;margin:28px 0 4px}
   .item{padding:7px 0;border-bottom:1px solid #eee}
+  .item-done .ititle{color:#888;font-weight:400}
+  .item-done .imeta{color:#aaa}
   .ititle{font-weight:700;font-size:13px;margin-bottom:3px}
   .imeta{font-size:10px;color:#666}
   .sub{font-size:11px;color:#444;padding:2px 0 2px 12px}
