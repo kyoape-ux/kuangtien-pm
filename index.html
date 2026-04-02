@@ -2560,7 +2560,7 @@ function impRawToItem(row) {
   if(catMatch) rawCat=catMatch[1].trim();
   const category=cats.includes(rawCat)?rawCat:(cats.find(c=>rawCat.includes(c)||c.includes(rawCat))||'其他');
   const urgentVal=getCol('note');
-  const noteDisplay=(urgentVal==='是'||urgentVal==='Y'||urgentVal==='1')?'⚡ 急件':(urgentVal==='否'||urgentVal==='N'||urgentVal==='0')?'':urgentVal;
+  const noteDisplay=(urgentVal==='是'||urgentVal==='Y'||urgentVal==='1')?'急件':(urgentVal==='否'||urgentVal==='N'||urgentVal==='0')?'':urgentVal;
   return {
     supNum:getCol('supNum'),title:getCol('title'),assignee:getCol('assignee'),
     unit:getCol('unit'),startDate:parseImportDate(getCol('startDate')),
