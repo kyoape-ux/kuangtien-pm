@@ -678,6 +678,218 @@ body.role-guest  .btn-quick-done{display:none!important}
   <div class="loading-text">讀取專案資料中…</div>
 </div>
 
+<!-- GUIDE MODAL -->
+<div id="guide-modal" onclick="closeGuideOutside(event)">
+  <div class="guide-card">
+    <div class="guide-header">
+      <div class="guide-header-title"><span class="ic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2a5 5 0 0 1 5 5v1a2 2 0 0 1-2 2H9a1 1 0 0 0-1 1v1"/><circle cx="8" cy="13.5" r=".5" fill="currentColor"/></svg></span> 使用指南 · 操作手冊</div>
+      <button class="modal-x" onclick="closeGuide()"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button>
+    </div>
+    <div class="guide-body">
+      <!-- NAV -->
+      <nav class="guide-nav">
+        <div class="guide-nav-section">入門</div>
+        <button class="guide-nav-item active" onclick="showGuideSection('overview')">系統概覽</button>
+        <button class="guide-nav-item" onclick="showGuideSection('roles')">角色與權限</button>
+        <div class="guide-nav-section">主要功能</div>
+        <button class="guide-nav-item" onclick="showGuideSection('views')">視圖切換</button>
+        <button class="guide-nav-item" onclick="showGuideSection('projects')">新增與管理項目</button>
+        <button class="guide-nav-item" onclick="showGuideSection('subtasks')">子任務</button>
+        <button class="guide-nav-item" onclick="showGuideSection('filter')">篩選與搜尋</button>
+        <div class="guide-nav-section">進階</div>
+        <button class="guide-nav-item" onclick="showGuideSection('status')">狀態說明</button>
+        <button class="guide-nav-item" onclick="showGuideSection('export')">匯出功能</button>
+        <button class="guide-nav-item" onclick="showGuideSection('ig')">IG 貼文管理</button>
+        <button class="guide-nav-item" onclick="showGuideSection('stats')">統計分析</button>
+      </nav>
+      <!-- CONTENT -->
+      <div class="guide-content">
+
+        <!-- 系統概覽 -->
+        <div class="guide-section active" id="gs-overview">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="14" height="14" rx="3"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="6"/></svg> 系統概覽</div>
+          <p class="guide-p">本系統為視覺多媒體設計組專用的工作進度控管平台，支援美編組與多媒體組兩組並行管理，提供列表、甘特圖、月曆、統計等多種視圖，並可一鍵匯出報告。</p>
+          <div class="guide-h2">主要功能一覽</div>
+          <table class="guide-table">
+            <tr><th>功能</th><th>說明</th></tr>
+            <tr><td><span class="guide-badge g-badge-purple">列表視圖</span></td><td>瀏覽所有專案項目，支援展開子任務、即時編輯狀態與進度</td></tr>
+            <tr><td><span class="guide-badge g-badge-teal">甘特圖</span></td><td>以時間軸呈現各項目的起訖區間，直覺掌握時程衝突</td></tr>
+            <tr><td><span class="guide-badge g-badge-navy">月曆視圖</span></td><td>依截止日期將項目標示在月曆上，快速確認當月工作量</td></tr>
+            <tr><td><span class="guide-badge g-badge-orange">統計分析</span></td><td>圖表化呈現工作量、狀態分佈、人員負載、逾期比例等 KPI</td></tr>
+            <tr><td><span class="guide-badge g-badge-green">匯出報告</span></td><td>支援 Excel、PDF、Google 日曆、LINE 摘要等多種格式</td></tr>
+          </table>
+          <div class="guide-tip">💡 系統資料同步至 Google Sheets，多人同時操作不會互蓋。本機模式下資料僅存在瀏覽器，重新整理仍保留。</div>
+        </div>
+
+        <!-- 角色與權限 -->
+        <div class="guide-section" id="gs-roles">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg> 角色與權限</div>
+          <p class="guide-p">系統分為三種身份，登入後右上角會顯示目前角色。</p>
+          <table class="guide-table">
+            <tr><th>角色</th><th>可執行操作</th></tr>
+            <tr><td><span class="guide-badge g-badge-purple">組長</span></td><td>新增、編輯、刪除所有項目；設定組別名單；查看操作日誌；還原版本</td></tr>
+            <tr><td><span class="guide-badge g-badge-teal">組員</span></td><td>新增、編輯、刪除項目；無法進入設定頁</td></tr>
+            <tr><td><span class="guide-badge g-badge-gray">訪客</span></td><td>唯讀瀏覽，無法新增或修改任何資料</td></tr>
+          </table>
+          <div class="guide-h2">如何登入</div>
+          <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text">點擊右上角「登入」按鈕</div></div>
+          <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text">輸入組長或組員設定的密碼</div></div>
+          <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text">登入後右上角顯示角色標籤，即可進行對應操作</div></div>
+          <div class="guide-warn">⚠️ 密碼由組長在「設定」中管理，若忘記密碼請聯繫組長。</div>
+        </div>
+
+        <!-- 視圖切換 -->
+        <div class="guide-section" id="gs-views">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="6" height="5" rx="1"/><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="1" y="10" width="6" height="4" rx="1"/><rect x="9" y="10" width="6" height="4" rx="1"/></svg> 視圖切換</div>
+          <p class="guide-p">畫面左上方有四個視圖切換按鈕，依需求選擇最適合的呈現方式。</p>
+          <table class="guide-table">
+            <tr><th>視圖</th><th>適合情境</th><th>特色功能</th></tr>
+            <tr><td><span class="guide-badge g-badge-purple">列表</span></td><td>日常管理、快速查看進度</td><td>展開子任務、即點即改狀態</td></tr>
+            <tr><td><span class="guide-badge g-badge-teal">甘特圖</span></td><td>掌握時程、找出時間衝突</td><td>懸停顯示詳情，月份快速跳轉</td></tr>
+            <tr><td><span class="guide-badge g-badge-navy">月曆</span></td><td>確認截止日、規劃當月排程</td><td>依截止日顯示，顏色區分狀態</td></tr>
+            <tr><td><span class="guide-badge g-badge-orange">統計</span></td><td>主管報告、KPI 檢視</td><td>圓餅圖、趨勢圖、人員工作量比較</td></tr>
+          </table>
+          <div class="guide-h2">組別切換</div>
+          <p class="guide-p">篩選列左側的「美編組 / 多媒體組」切換按鈕，可在兩組之間切換。統計頁可同時顯示兩組的比較數據。</p>
+        </div>
+
+        <!-- 新增與管理項目 -->
+        <div class="guide-section" id="gs-projects">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="11"/><line x1="5" y1="8" x2="11" y2="8"/></svg> 新增與管理項目</div>
+          <div class="guide-h2">新增項目</div>
+          <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text">點擊右上方橘色「＋ 新增項目」按鈕（需登入）</div></div>
+          <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text">填寫項目名稱（必填）、類別、來源類型（自主專案 / 支援單）</div></div>
+          <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text">設定負責人、申請單位、開始日期、預計完成日期</div></div>
+          <div class="guide-step"><div class="guide-step-num">4</div><div class="guide-step-text">選擇狀態與完成進度（0–100%）</div></div>
+          <div class="guide-step"><div class="guide-step-num">5</div><div class="guide-step-text">點擊「儲存」完成新增</div></div>
+          <div class="guide-h2">編輯 / 刪除</div>
+          <p class="guide-p">項目列右側有「編輯（鉛筆）」按鈕，點擊後修改資料再儲存即可。刪除時系統會詢問確認，刪除後可在「操作日誌」中還原。</p>
+          <div class="guide-h2">快速更新狀態</div>
+          <p class="guide-p">在列表視圖中，點擊項目列右方的狀態標籤，可直接彈出下拉選單快速切換狀態，不需進入編輯模式。</p>
+          <div class="guide-tip">💡 支援單來源需填入「支援單號」，方便對帳與追蹤。</div>
+        </div>
+
+        <!-- 子任務 -->
+        <div class="guide-section" id="gs-subtasks">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h8M4 8h6M4 12h4"/></svg> 子任務</div>
+          <p class="guide-p">子任務可以將一個大型專案拆分為多個執行項目，個別設定負責人、狀態與截止日。</p>
+          <div class="guide-h2">新增子任務</div>
+          <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text">在主項目列點擊「＋ 子任務」按鈕（需登入）</div></div>
+          <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text">填寫子任務名稱、負責人、截止日、狀態、進度</div></div>
+          <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text">儲存後自動掛載在主項目下</div></div>
+          <div class="guide-h2">展開 / 收合子任務</div>
+          <p class="guide-p">主項目右側的三角形箭頭可展開或收合子任務列表。主項目標題右側會顯示「已完成 / 總數」的灰色文字，例如 <strong>2/4</strong>，代表 4 個子任務中已完成 2 個。</p>
+          <div class="guide-tip">💡 統計頁面的工作量數據以「有效項目」計算：有子任務的主項目以其子任務數量計入，無子任務的主項目本身計入。</div>
+        </div>
+
+        <!-- 篩選與搜尋 -->
+        <div class="guide-section" id="gs-filter">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h12l-5 6v4l-2-1V9Z"/></svg> 篩選與搜尋</div>
+          <div class="guide-h2">顯示模式</div>
+          <table class="guide-table">
+            <tr><th>按鈕</th><th>說明</th></tr>
+            <tr><td><span class="guide-badge g-badge-teal">進行中</span></td><td>僅顯示非「已完成」的項目（預設）</td></tr>
+            <tr><td><span class="guide-badge g-badge-gray">全部</span></td><td>顯示所有項目包含已完成</td></tr>
+            <tr><td><span class="guide-badge g-badge-purple">IG 貼文</span></td><td>僅顯示標記為 IG 貼文的項目，並區分藍標／黃標／綠標</td></tr>
+            <tr><td><span class="guide-badge g-badge-orange">逾期</span></td><td>顯示截止日已過但尚未完成的項目</td></tr>
+          </table>
+          <div class="guide-h2">搜尋</div>
+          <p class="guide-p">列表頂端的搜尋框可即時過濾項目名稱、負責人或備註，輸入關鍵字後自動更新結果。</p>
+          <div class="guide-h2">篩選器</div>
+          <p class="guide-p">搜尋框旁有「類別」「負責人」「截止區間」三個下拉篩選，可組合使用縮小範圍。</p>
+        </div>
+
+        <!-- 狀態說明 -->
+        <div class="guide-section" id="gs-status">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r=".5" fill="currentColor"/></svg> 狀態說明</div>
+          <div class="guide-h2">通用狀態（美編組 ＆ 多媒體組）</div>
+          <table class="guide-table">
+            <tr><th>狀態</th><th>說明</th></tr>
+            <tr><td><span class="guide-badge g-badge-gray">待執行</span></td><td>已建立但尚未開始</td></tr>
+            <tr><td><span class="guide-badge g-badge-orange">執行中</span></td><td>正在進行中</td></tr>
+            <tr><td><span class="guide-badge g-badge-purple">討論中</span></td><td>與需求方或組內進行討論確認</td></tr>
+            <tr><td><span class="guide-badge g-badge-teal">審核中</span></td><td>已提交，等待上級或需求方審核</td></tr>
+            <tr><td><span class="guide-badge g-badge-green">已完成</span></td><td>全部流程結束並核可</td></tr>
+          </table>
+          <div class="guide-h2">多媒體組專屬流程狀態</div>
+          <table class="guide-table">
+            <tr><th>狀態</th><th>說明</th></tr>
+            <tr><td><span class="guide-badge g-badge-gray">腳本已完成</span></td><td>腳本撰寫完成，等待進入拍攝階段</td></tr>
+            <tr><td><span class="guide-badge g-badge-teal">約拍中</span></td><td>與相關人員協調拍攝時間中</td></tr>
+            <tr><td><span class="guide-badge g-badge-navy">已拍攝待剪輯</span></td><td>素材已取得，等待剪輯作業</td></tr>
+            <tr><td><span class="guide-badge g-badge-orange">剪輯中</span></td><td>影片後製進行中</td></tr>
+            <tr><td><span class="guide-badge g-badge-purple">待修改</span></td><td>送審後收到修改意見，回到修改流程</td></tr>
+          </table>
+          <div class="guide-h2">美編組專屬流程狀態</div>
+          <table class="guide-table">
+            <tr><th>狀態</th><th>說明</th></tr>
+            <tr><td><span class="guide-badge g-badge-gray">需求確認</span></td><td>與申請單位釐清設計需求與規格</td></tr>
+            <tr><td><span class="guide-badge g-badge-teal">草稿設計</span></td><td>進行初版設計稿</td></tr>
+            <tr><td><span class="guide-badge g-badge-navy">初稿審核</span></td><td>初版設計已送審，等待回饋</td></tr>
+            <tr><td><span class="guide-badge g-badge-orange">定稿確認</span></td><td>最終版本確認中，即將完成</td></tr>
+            <tr><td><span class="guide-badge g-badge-purple">待發包</span></td><td>設計稿已完成，等待外包印刷或製作</td></tr>
+          </table>
+        </div>
+
+        <!-- 匯出功能 -->
+        <div class="guide-section" id="gs-export">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h8M8 3v8M5.5 5.5 8 3l2.5 2.5"/></svg> 匯出功能</div>
+          <p class="guide-p">點擊右上角「匯出 ▾」按鈕展開選單，共有五種匯出方式。</p>
+          <table class="guide-table">
+            <tr><th>功能</th><th>說明</th><th>用途</th></tr>
+            <tr><td><span class="guide-badge g-badge-teal">本週工作摘要</span></td><td>產生 LINE 貼文格式的本週進度摘要</td><td>傳送至 LINE 群組回報進度</td></tr>
+            <tr><td><span class="guide-badge g-badge-green">匯出 Excel</span></td><td>將所有項目匯出為 .xlsx 試算表</td><td>資料備份或進一步分析</td></tr>
+            <tr><td><span class="guide-badge g-badge-navy">匯出日曆</span></td><td>匯出 .ics 格式行事曆檔</td><td>匯入 Google 日曆或 Outlook</td></tr>
+            <tr><td><span class="guide-badge g-badge-purple">精簡文字 PDF</span></td><td>依狀態分類的簡潔報告，可選擇顯示哪些狀態</td><td>主管報告、會議簡報用</td></tr>
+            <tr><td><span class="guide-badge g-badge-gray">列印完整頁面</span></td><td>將目前列表視圖送至印表機 / 存成 PDF</td><td>紙本存檔</td></tr>
+          </table>
+          <div class="guide-h2">精簡文字 PDF 選項</div>
+          <p class="guide-p">點擊後會先出現選項面板，可勾選要包含的項目類型：</p>
+          <ul style="font-size:12.5px;color:#444;line-height:2;padding-left:18px">
+            <li><strong>進行中項目</strong>：所有非待執行、非已完成的狀態</li>
+            <li><strong>待執行</strong>：尚未開始的項目</li>
+            <li><strong>已完成</strong>：完成項目顯示於報告最下方，以虛線分隔</li>
+          </ul>
+          <div class="guide-tip">💡 本週工作摘要可選擇「LINE 群組風格」或「正式報告風格」，也可只顯示單一組別。</div>
+        </div>
+
+        <!-- IG 貼文管理 -->
+        <div class="guide-section" id="gs-ig">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="3.5"/><circle cx="8" cy="8" r="3"/><circle cx="11.5" cy="4.5" r=".5" fill="currentColor"/></svg> IG 貼文管理</div>
+          <p class="guide-p">新增或編輯項目時，可標記該項目為「IG 貼文」，並設定三種標籤顏色區分類型。</p>
+          <table class="guide-table">
+            <tr><th>標籤</th><th>建議用途</th></tr>
+            <tr><td><span class="guide-badge" style="background:#DBEAFE;color:#1d4ed8">藍標</span></td><td>一般衛教、疾病資訊類貼文</td></tr>
+            <tr><td><span class="guide-badge" style="background:#FEF9C3;color:#854d0e">黃標</span></td><td>活動宣傳、節慶限定類貼文</td></tr>
+            <tr><td><span class="guide-badge" style="background:#DCFCE7;color:#166534">綠標</span></td><td>已發佈或完成審核的貼文</td></tr>
+          </table>
+          <p class="guide-p">在篩選列切換至「IG 貼文」模式，即可專門瀏覽所有 IG 相關項目，方便社群內容的排程管理。</p>
+          <div class="guide-h2">IG 統計</div>
+          <p class="guide-p">月報表中設有「IG 貼文統計」區塊，可查看各月份的 IG 貼文數量與標籤分佈。</p>
+        </div>
+
+        <!-- 統計分析 -->
+        <div class="guide-section" id="gs-stats">
+          <div class="guide-h1"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,12 6,7 10,10 15,4"/><polyline points="11,4 15,4 15,8"/></svg> 統計分析</div>
+          <p class="guide-p">切換至「統計」視圖，可看到多組數據圖表，所有統計均以「有效工作量」為基礎（有子任務的主項目以子任務數量計）。</p>
+          <table class="guide-table">
+            <tr><th>圖表</th><th>說明</th></tr>
+            <tr><td>KPI 卡片</td><td>總工作量、在進行中數量、逾期件數、完成率</td></tr>
+            <tr><td>負責人分佈</td><td>各成員的工作量圓餅圖</td></tr>
+            <tr><td>類別分佈</td><td>各設計類別的件數比例</td></tr>
+            <tr><td>月度趨勢</td><td>近 6 個月的新增與完成數量折線圖</td></tr>
+            <tr><td>狀態分佈</td><td>所有狀態的件數長條圖</td></tr>
+            <tr><td>兩組比較</td><td>美編組 vs 多媒體組的工作量對照</td></tr>
+            <tr><td>人員工作表</td><td>各成員的進行中 / 完成 / 逾期明細</td></tr>
+          </table>
+          <div class="guide-tip">💡 統計視圖右上方可切換「本組」或「全部」範圍，選擇「全部」時會同時載入兩組資料進行比較。</div>
+        </div>
+
+      </div><!-- /guide-content -->
+    </div><!-- /guide-body -->
+  </div><!-- /guide-card -->
+</div>
+
 <!-- HEADER -->
 <div class="header">
   <div class="header-brand">
