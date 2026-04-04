@@ -2544,6 +2544,22 @@ async function exportICS(){
   const a=document.createElement('a');a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);a.download='視覺組專案.ics';a.click();
 }
 function printView(){closeExportMenu();setTimeout(()=>window.print(),100);}
+/* ══ GUIDE ══ */
+function openGuide(section){
+  document.getElementById('guide-modal').style.display='flex';
+  showGuideSection(section||'overview');
+}
+function closeGuide(){document.getElementById('guide-modal').style.display='none';}
+function closeGuideOutside(e){if(e.target.id==='guide-modal')closeGuide();}
+function showGuideSection(id){
+  document.querySelectorAll('.guide-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.guide-nav-item').forEach(b=>b.classList.remove('active'));
+  const sec=document.getElementById('gs-'+id);
+  if(sec)sec.classList.add('active');
+  document.querySelectorAll('.guide-nav-item').forEach(b=>{
+    if(b.getAttribute('onclick')===`showGuideSection('${id}')`)b.classList.add('active');
+  });
+}
 function openPdfOptions(){const m=document.getElementById('pdf-options-modal');m.style.display='flex';}
 function closePdfOptions(){document.getElementById('pdf-options-modal').style.display='none';}
 function closePdfOptionsOutside(e){if(e.target.id==='pdf-options-modal')closePdfOptions();}
