@@ -1141,6 +1141,171 @@ body.role-guest  .btn-quick-done{display:none!important}
   <div class="gantt-container"><div class="gantt-wrap" id="gantt-wrap"></div></div>
 </div>
 
+<!-- CMD VIEW (指揮台首頁) -->
+<div id="cmd-view" style="display:none">
+  <div class="cmd-header">
+    <div>
+      <div class="cmd-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 21V3M2 12h20"/></svg> 指揮台首頁</div>
+      <div class="cmd-date" id="cmd-date-label"></div>
+    </div>
+  </div>
+  <div class="cmd-kpi-row">
+    <div class="cmd-kpi c-teal"><div class="cmd-kpi-num" id="cmd-total">—</div><div class="cmd-kpi-label">全部工作項目</div><div class="cmd-kpi-sub" id="cmd-total-sub"></div></div>
+    <div class="cmd-kpi c-coral"><div class="cmd-kpi-num" id="cmd-overdue">—</div><div class="cmd-kpi-label">逾期未完成</div><div class="cmd-kpi-sub" id="cmd-overdue-sub"></div></div>
+    <div class="cmd-kpi c-amber"><div class="cmd-kpi-num" id="cmd-events-cnt">—</div><div class="cmd-kpi-label">近30天活動</div><div class="cmd-kpi-sub" id="cmd-events-sub"></div></div>
+    <div class="cmd-kpi c-purple"><div class="cmd-kpi-num" id="cmd-done-rate">—</div><div class="cmd-kpi-label">整體完成率</div><div class="cmd-kpi-sub" id="cmd-done-sub"></div></div>
+  </div>
+  <div class="cmd-grid">
+    <div>
+      <div class="cmd-card">
+        <div class="cmd-card-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg> 各組進度概覽</div>
+        <div id="cmd-groups-list"></div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-card-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/></svg> 近期活動</div>
+        <div class="cmd-upcoming-list" id="cmd-upcoming-list"></div>
+      </div>
+    </div>
+    <div>
+      <div class="cmd-card">
+        <div class="cmd-card-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="3" x2="8" y2="8"/><line x1="8" y1="8" x2="11" y2="11"/></svg> 快速工具連結</div>
+        <div class="cmd-tool-grid" id="cmd-tool-grid"></div>
+      </div>
+      <div class="cmd-card">
+        <div class="cmd-card-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--coral)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="var(--coral)"/></svg> <span style="color:var(--coral)">逾期警示</span></div>
+        <div id="cmd-urgent-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENTS VIEW (活動管理) -->
+<div id="events-view" style="display:none">
+  <div class="ev-header">
+    <div class="ev-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 活動管理</div>
+    <button class="btn btn-teal auth-only" onclick="openAddEventModal()" style="display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg> 新增活動</button>
+  </div>
+  <div class="ev-filter-bar">
+    <select class="fsel" id="ev-filter-status" onchange="renderEventsView()">
+      <option value="">全部狀態</option>
+      <option value="planning">籌備中</option>
+      <option value="in-progress">進行中</option>
+      <option value="done">已完成</option>
+      <option value="cancelled">已取消</option>
+    </select>
+    <select class="fsel" id="ev-filter-cat" onchange="renderEventsView()">
+      <option value="">全部類別</option>
+      <option value="健康講座">健康講座</option>
+      <option value="研討會">研討會</option>
+      <option value="社區活動">社區活動</option>
+      <option value="員工活動">員工活動</option>
+      <option value="義診">義診</option>
+      <option value="其他">其他</option>
+    </select>
+  </div>
+  <div id="events-list"></div>
+</div>
+
+<!-- ADD/EDIT EVENT MODAL -->
+<div id="event-modal" onclick="if(event.target===this)closeEventModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;padding:28px;width:560px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div id="event-modal-title" style="font-size:17px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 新增活動</div>
+      <button onclick="closeEventModal()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);display:inline-flex;align-items:center"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button>
+    </div>
+    <form id="event-form" onsubmit="submitEventForm(event)">
+      <input type="hidden" id="evf-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">活動名稱 *</label>
+          <input id="evf-title" required placeholder="例：健康藝術人文講座" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">活動日期 *</label>
+          <input id="evf-date" type="date" required style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">類別</label>
+          <select id="evf-category" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white">
+            <option value="健康講座">健康講座</option><option value="研討會">研討會</option>
+            <option value="社區活動">社區活動</option><option value="員工活動">員工活動</option>
+            <option value="義診">義診</option><option value="其他">其他</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">狀態</label>
+          <select id="evf-status" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;background:white">
+            <option value="planning">籌備中</option><option value="in-progress">進行中</option>
+            <option value="done">已完成</option><option value="cancelled">已取消</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">負責人</label>
+          <input id="evf-assignee" placeholder="負責人姓名" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">場地</label>
+          <input id="evf-venue" placeholder="活動場地" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">備註</label>
+          <textarea id="evf-note" rows="2" placeholder="備註說明（選填）" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;resize:vertical" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+        <div style="grid-column:1/-1">
+          <div style="background:#F0F7FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px;font-size:11px;color:#1e40af">💡 儲存後系統將自動產生 T-60 到 T+3 的執行任務清單，可在活動卡片中逐一勾選完成狀態。</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+        <button type="button" onclick="closeEventModal()" style="padding:9px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">取消</button>
+        <button type="submit" style="padding:9px 24px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif">儲存活動</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- RESULT MODAL (成果紀錄) -->
+<div id="result-modal" onclick="if(event.target===this)closeResultModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;padding:28px;width:520px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:17px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg> 成果紀錄</div>
+      <button onclick="closeResultModal()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);display:inline-flex;align-items:center"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button>
+    </div>
+    <input type="hidden" id="res-ev-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">報名人數</label>
+        <input id="res-reg" type="number" min="0" placeholder="0" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;text-align:center" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">出席人數</label>
+        <input id="res-attend" type="number" min="0" placeholder="0" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;text-align:center" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">滿意度（1-5）</label>
+        <input id="res-sat" type="number" min="1" max="5" step="0.1" placeholder="4.5" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;text-align:center" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">成果說明</label>
+      <textarea id="res-note" rows="2" placeholder="活動概況、亮點、改進建議..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;resize:vertical" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+    </div>
+    <div>
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:8px">相關連結（成果文件、簡報、照片等）</label>
+      <div id="res-links-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:6px;align-items:center">
+        <input id="res-link-name" placeholder="連結名稱" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        <input id="res-link-url" placeholder="https://..." style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:'Noto Sans TC',sans-serif;outline:none" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+        <button type="button" onclick="addResLink()" style="padding:7px 12px;background:var(--teal);color:white;border:none;border-radius:7px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif">＋ 加入</button>
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:5px">可加入 Google Drive 連結、簡報網址、問卷結果等</div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button onclick="closeResultModal()" style="padding:9px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">取消</button>
+      <button onclick="saveResult()" style="padding:9px 24px;background:var(--teal);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif">儲存成果</button>
+    </div>
+  </div>
+</div>
+
 <!-- STATS VIEW -->
 <div id="stats-view">
   <div class="stats-header">
