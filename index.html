@@ -2893,57 +2893,55 @@ async function doExportTextPDF(){
     completed:_svg('<circle cx="8" cy="8" r="6"/><polyline points="5,8 7,10.5 11.5,6"/>'),
   };
   const SC={self:'自主',ticket:'支援單'};
-  const byStatus={};
-  projects.forEach(p=>{if(!byStatus[p.status])byStatus[p.status]=[];byStatus[p.status].push(p);});
   const activeKeys=['in-progress','scripting','filming','raw-footage','editing','revising','finalizing','draft-review','drafting','confirming','discussion','review'];
+  const renderItem=(p,isDone)=>{
+    const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?(isDone?'完成日期：':'預計完成：')+p.endDate:'',p.progress&&!isDone?p.progress+'%':'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
+    let h=`<div class="item${isDone?' item-done':''}"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
+    (p.subtasks||[]).forEach(s=>{h+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST_LABEL[s.status]||''}</em>${s.progress?' <em>'+s.progress+'%</em>':''}${s.endDate?' <span style="color:#666;font-size:10px">預計完成：'+s.endDate+'</span>':''}</div>`;});
+    if(p.note)h+=`<div class="note">備註：${p.note}</div>`;
+    return h+'</div>';
+  };
   let body='';
-  if(showActive){
-    activeKeys.forEach(k=>{
-      const items=byStatus[k]; if(!items||!items.length) return;
-      body+=`<h2>${ST_ICON[k]||'▪'} ${ST_LABEL[k]}（${items.length} 件）</h2>`;
-      items.forEach(p=>{
-        const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'預計完成：'+p.endDate:'',p.progress?p.progress+'%':'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
-        body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
-        (p.subtasks||[]).forEach(s=>{body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''} <em>${ST_LABEL[s.status]||''}</em>${s.progress?' <em>'+s.progress+'%</em>':''}${s.endDate?' <span style="color:#666;font-size:10px">預計完成：'+s.endDate+'</span>':''}</div>`;});
-        if(p.note)body+=`<div class="note">備註：${p.note}</div>`;
-        body+='</div>';
-      });
-    });
-  }
-  if(showPending){
-    const items=byStatus['pending']||[]; if(items.length){
-      body+=`<h2>${ST_ICON.pending} 待執行（${items.length} 件）</h2>`;
-      items.forEach(p=>{
-        const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'預計完成：'+p.endDate:'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
-        body+=`<div class="item"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
-        (p.subtasks||[]).forEach(s=>{body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''}</div>`;});
-        if(p.note)body+=`<div class="note">備註：${p.note}</div>`;
-        body+='</div>';
+  let totalProjects=0;
+  for(const grp of selGroups){
+    const grpProjects = grp===currentGroup ? (await getProjects()) : JSON.parse(localStorage.getItem('pm_'+grp)||'[]');
+    if(!grpProjects.length) continue;
+    totalProjects+=grpProjects.length;
+    const byStatus={};
+    grpProjects.forEach(p=>{if(!byStatus[p.status])byStatus[p.status]=[];byStatus[p.status].push(p);});
+    if(selGroups.length>1) body+=`<div class="group-hd">${GNC[grp]}</div>`;
+    if(showActive){
+      activeKeys.forEach(k=>{
+        const items=byStatus[k]; if(!items||!items.length) return;
+        body+=`<h2>${ST_ICON[k]||'▪'} ${ST_LABEL[k]}（${items.length} 件）</h2>`;
+        items.forEach(p=>{body+=renderItem(p,false);});
       });
     }
-  }
-  if(showDone){
-    const done=byStatus['completed']||[]; if(done.length){
-      body+=`<div class="divider"></div>`;
-      body+=`<h2 class="h-done">${ST_ICON.completed} 已完成（${done.length} 件）</h2>`;
-      done.forEach(p=>{
-        const tags=[p.category,p.assignee?'負責：'+p.assignee:'',p.endDate?'完成日期：'+p.endDate:'',p.sourceType?SC[p.sourceType]:''].filter(Boolean).join('　');
-        body+=`<div class="item item-done"><div class="ititle">${p.title}</div><div class="imeta">${tags}</div>`;
-        (p.subtasks||[]).forEach(s=>{body+=`<div class="sub">└ ${s.title}${s.assignee?' ('+s.assignee+')':''}</div>`;});
-        if(p.note)body+=`<div class="note">備註：${p.note}</div>`;
-        body+='</div>';
-      });
+    if(showPending){
+      const items=byStatus['pending']||[]; if(items.length){
+        body+=`<h2>${ST_ICON.pending} 待執行（${items.length} 件）</h2>`;
+        items.forEach(p=>{body+=renderItem(p,false);});
+      }
+    }
+    if(showDone){
+      const done=byStatus['completed']||[]; if(done.length){
+        body+=`<div class="divider"></div>`;
+        body+=`<h2 class="h-done">${ST_ICON.completed} 已完成（${done.length} 件）</h2>`;
+        done.forEach(p=>{body+=renderItem(p,true);});
+      }
     }
   }
+  const titleText=selGroups.length===1?GNC[selGroups[0]]:selGroups.map(g=>GN[g]).join('・');
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>專案報告・${GN[currentGroup]}</title>
+<title>專案報告・${titleText}</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Noto Sans TC','Hiragino Sans','Microsoft JhengHei',sans-serif;font-size:12px;color:#1C2340;padding:28px 32px;max-width:780px;margin:auto}
-  .hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;border-bottom:2px solid #1C2340;padding-bottom:12px}
-  .hd h1{font-size:17px;font-weight:700}
+  .hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;border-bottom:2px solid #006341;padding-bottom:12px}
+  .hd h1{font-size:17px;font-weight:700;color:#006341}
   .hd .meta{font-size:10px;color:#666;margin-top:4px}
-  h2{font-size:12px;font-weight:700;color:#1C2340;background:#F4F5F7;padding:5px 10px;border-radius:5px;margin:18px 0 8px;border-left:3px solid #1C2340;display:flex;align-items:center;gap:6px}
+  .group-hd{font-size:13px;font-weight:700;color:#fff;background:#006341;padding:6px 12px;border-radius:6px;margin:24px 0 10px}
+  h2{font-size:12px;font-weight:700;color:#1C2340;background:#F4F5F7;padding:5px 10px;border-radius:5px;margin:14px 0 8px;border-left:3px solid #1C2340;display:flex;align-items:center;gap:6px}
   .h-done{background:#f0fdf4;border-left-color:#22c55e;color:#166534}
   .divider{border:none;border-top:2px dashed #ccc;margin:28px 0 4px}
   .item{padding:7px 0;border-bottom:1px solid #eee}
@@ -2956,7 +2954,7 @@ async function doExportTextPDF(){
   .note{font-size:10px;color:#888;padding:2px 0 0 12px;font-style:italic}
   .print-btn{display:flex;gap:8px;margin-bottom:16px}
   .print-btn button{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:700}
-  .btn-p{background:#1C2340;color:white}
+  .btn-p{background:#006341;color:white}
   .btn-c{background:#eee;color:#333}
   @media print{.print-btn{display:none}}
 </style>
@@ -2966,7 +2964,7 @@ async function doExportTextPDF(){
   <button class="btn-c" onclick="window.close()" style="display:inline-flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg> 關閉</button>
 </div>
 <div class="hd">
-  <div><h1>視覺多媒體設計組 · 專案報告</h1><div class="meta">${GN[currentGroup]}　${new Date().toLocaleDateString('zh-TW')}　共 ${projects.length} 件主任務</div></div>
+  <div><h1>行銷企劃處 · 專案報告</h1><div class="meta">${titleText}　${new Date().toLocaleDateString('zh-TW')}　共 ${totalProjects} 件主任務</div></div>
 </div>${body}</body></html>`;
   const w=window.open('','_blank','width=820,height=700');
   if(w){w.document.write(html);w.document.close();}
