@@ -3999,18 +3999,19 @@ function renderEventsView() {
 }
 
 /* ══ BOOT ══ */
-if (PM_ROLE) {
+async function boot() {
+  if (!PM_ROLE) {
+    PM_ROLE = 'guest';
+    sessionStorage.setItem('pm_role', 'guest');
+  }
   applyRole(PM_ROLE);
   document.getElementById('login-overlay').style.display = 'none';
-  checkSetup(); init();
-} else {
-  /* 預設以訪客身份載入，不強制登入 */
-  PM_ROLE = 'guest';
-  sessionStorage.setItem('pm_role', 'guest');
-  applyRole('guest');
-  document.getElementById('login-overlay').style.display = 'none';
-  checkSetup(); init();
+  checkSetup();
+  await init();
+  // 預設進入指揮台首頁
+  switchMainTab('cmd');
 }
+boot();
 </script>
 </body>
 </html>
