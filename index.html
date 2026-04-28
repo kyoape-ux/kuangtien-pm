@@ -2904,6 +2904,20 @@ function showGuideSection(id){
     if(b.getAttribute('onclick')===`showGuideSection('${id}')`)b.classList.add('active');
   });
 }
+/* ══ CMD 快速新增 ══ */
+function toggleCmdQuickAdd(e){
+  e.stopPropagation();
+  const p=document.getElementById('cmd-quick-popup');
+  if(p) p.classList.toggle('open');
+}
+function cmdQuickAdd(grp){
+  const p=document.getElementById('cmd-quick-popup');
+  if(p) p.classList.remove('open');
+  switchMainTab(grp);
+  setTimeout(()=>openAddModal(),80);
+}
+document.addEventListener('click',()=>{const p=document.getElementById('cmd-quick-popup');if(p)p.classList.remove('open');});
+
 function openPdfOptions(){
   ['planning','pr','media','design'].forEach(g=>{const cb=document.getElementById('pdf-grp-'+g);if(cb)cb.checked=(g===currentGroup);});
   document.getElementById('pdf-options-modal').style.display='flex';
