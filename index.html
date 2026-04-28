@@ -2858,7 +2858,10 @@ function showGuideSection(id){
     if(b.getAttribute('onclick')===`showGuideSection('${id}')`)b.classList.add('active');
   });
 }
-function openPdfOptions(){const m=document.getElementById('pdf-options-modal');m.style.display='flex';}
+function openPdfOptions(){
+  ['planning','pr','media','design'].forEach(g=>{const cb=document.getElementById('pdf-grp-'+g);if(cb)cb.checked=(g===currentGroup);});
+  document.getElementById('pdf-options-modal').style.display='flex';
+}
 function closePdfOptions(){document.getElementById('pdf-options-modal').style.display='none';}
 function closePdfOptionsOutside(e){if(e.target.id==='pdf-options-modal')closePdfOptions();}
 async function doExportTextPDF(){
