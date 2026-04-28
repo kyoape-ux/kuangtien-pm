@@ -2585,8 +2585,8 @@ function calNext(){ if(calMonth===11){calMonth=0;calYear++;}else calMonth++; ren
 function destroyChart(key){ if(_chartInstances[key]){_chartInstances[key].destroy();delete _chartInstances[key];} }
 async function renderStats() {
   if (currentView!=='stats') return;
-  const GROUPS = {design:'美編組',media:'多媒體組'};
-  const scopes = statsScope==='both' ? ['design','media'] : [statsScope];
+  const GROUPS = {planning:'企劃',pr:'媒體公關',media:'多媒體',design:'美編'};
+  const scopes = statsScope==='both' ? ['planning','pr','media','design'] : [statsScope];
   let allItems = [];
   // effectiveItems：有子任務的主項目→算子任務；無子任務→算自己
   let effectiveItems = [];
