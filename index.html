@@ -1171,6 +1171,17 @@ body.role-guest  .btn-quick-done{display:none!important}
       <div class="cmd-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 21V3M2 12h20"/></svg> 指揮台首頁</div>
       <div class="cmd-date" id="cmd-date-label"></div>
     </div>
+    <div class="cmd-header-right">
+      <button class="cmd-quick-add-btn" onclick="toggleCmdQuickAdd(event)">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg> 快速新增
+      </button>
+      <div class="cmd-quick-popup" id="cmd-quick-popup">
+        <div class="cmd-quick-popup-item" onclick="cmdQuickAdd('planning')"><span style="width:8px;height:8px;border-radius:50%;background:#3B82F6;flex-shrink:0;display:inline-block"></span>企劃</div>
+        <div class="cmd-quick-popup-item" onclick="cmdQuickAdd('pr')"><span style="width:8px;height:8px;border-radius:50%;background:#8B5CF6;flex-shrink:0;display:inline-block"></span>媒體公關</div>
+        <div class="cmd-quick-popup-item" onclick="cmdQuickAdd('media')"><span style="width:8px;height:8px;border-radius:50%;background:#00BFA6;flex-shrink:0;display:inline-block"></span>多媒體</div>
+        <div class="cmd-quick-popup-item" onclick="cmdQuickAdd('design')"><span style="width:8px;height:8px;border-radius:50%;background:#F97316;flex-shrink:0;display:inline-block"></span>美編</div>
+      </div>
+    </div>
   </div>
   <div class="cmd-kpi-row">
     <div class="cmd-kpi c-teal"><div class="cmd-kpi-num" id="cmd-total">—</div><div class="cmd-kpi-label">全部工作項目</div><div class="cmd-kpi-sub" id="cmd-total-sub"></div></div>
