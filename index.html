@@ -2868,10 +2868,13 @@ async function doExportTextPDF(){
   const showActive=document.getElementById('pdf-opt-active').checked;
   const showPending=document.getElementById('pdf-opt-pending').checked;
   const showDone=document.getElementById('pdf-opt-done').checked;
+  const ALL_GROUPS=['planning','pr','media','design'];
+  const selGroups=ALL_GROUPS.filter(g=>document.getElementById('pdf-grp-'+g)?.checked);
+  if(!selGroups.length){alert('請至少選擇一個組別');return;}
   closePdfOptions();
-  const projects = await getProjects();
-  const GN={design:'美編組',media:'多媒體組'};
-  const ST_LABEL={pending:'待執行','in-progress':'執行中',discussion:'討論中',review:'審核中',completed:'已完成',scripting:'腳本已完成',filming:'約拍中','raw-footage':'已拍攝待剪輯',editing:'剪輯中',revising:currentGroup==='design'?'待發包':'待修改',confirming:'需求確認',drafting:'草稿設計','draft-review':'初稿審核',finalizing:'定稿確認'};
+  const GN={design:'美編',media:'多媒體',planning:'企劃',pr:'媒體公關'};
+  const GNC={design:'美編組',media:'多媒體組',planning:'企劃組',pr:'媒體公關組'};
+  const ST_LABEL={pending:'待執行','in-progress':'執行中',discussion:'討論中',review:'審核中',completed:'已完成',scripting:'腳本已完成',filming:'約拍中','raw-footage':'已拍攝待剪輯',editing:'剪輯中',revising:'待修改',confirming:'需求確認',drafting:'草稿設計','draft-review':'初稿審核',finalizing:'定稿確認'};
   const _svg=(p)=>`<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
   const ST_ICON={
     'in-progress':_svg('<path d="M8 2L14 8L8 14L2 8Z"/>'),
