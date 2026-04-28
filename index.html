@@ -1311,9 +1311,11 @@ body.role-guest  .btn-quick-done{display:none!important}
   <div class="stats-header">
     <div class="stats-title"><span class="ic" style="margin-right:7px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,12 6,7 10,10 15,4"/><polyline points="11,4 15,4 15,8"/></svg></span>工作量統計分析</div>
     <div class="stats-scope">
-      <button class="scope-btn active" id="scope-both" onclick="setStatsScope('both')">全部</button>
-      <button class="scope-btn" id="scope-design" onclick="setStatsScope('design')"><span class="ic" style="margin-right:4px"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 2.5a2 2 0 0 0-2.83 0L4 9.17l.5 2.33 2.33.5 6.67-6.67a2 2 0 0 0 0-2.83Z"/><path d="M4 12.5C3 12.5 2 13.5 2 14.5"/></svg></span>美編組</button>
-      <button class="scope-btn" id="scope-media" onclick="setStatsScope('media')"><span class="ic" style="margin-right:4px"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="10" height="8" rx="1.5"/><polyline points="11,6.5 15,4 15,12 11,9.5"/></svg></span>多媒體組</button>
+      <button class="scope-btn active" id="scope-both" onclick="setStatsScope('both')">全部四組</button>
+      <button class="scope-btn" id="scope-planning" onclick="setStatsScope('planning')">企劃</button>
+      <button class="scope-btn" id="scope-pr" onclick="setStatsScope('pr')">媒體公關</button>
+      <button class="scope-btn" id="scope-media" onclick="setStatsScope('media')"><span class="ic" style="margin-right:4px"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="10" height="8" rx="1.5"/><polyline points="11,6.5 15,4 15,12 11,9.5"/></svg></span>多媒體</button>
+      <button class="scope-btn" id="scope-design" onclick="setStatsScope('design')"><span class="ic" style="margin-right:4px"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 2.5a2 2 0 0 0-2.83 0L4 9.17l.5 2.33 2.33.5 6.67-6.67a2 2 0 0 0 0-2.83Z"/><path d="M4 12.5C3 12.5 2 13.5 2 14.5"/></svg></span>美編</button>
     </div>
   </div>
   <div class="kpi-row" id="kpi-row"></div>
