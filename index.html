@@ -2778,10 +2778,11 @@ async function generateWeekly(){
   const scope=document.getElementById('weekly-scope').value;
   const style=document.getElementById('weekly-style').value;
   const today=new Date();const todayStr=`${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
-  let groups=scope==='both'?['design','media']:scope==='design'?['design']:['media'];
+  const ALL_GROUPS=['planning','pr','media','design'];
+  let groups=scope==='all'?ALL_GROUPS:[scope];
   let allP=[];
   for(const g of groups){const p=g===currentGroup?(await getProjects()):JSON.parse(localStorage.getItem('pm_'+g)||'[]');allP.push({g,p});}
-  const GNAME={design:'美編組',media:'多媒體組'};
+  const GNAME={design:'美編',media:'多媒體',planning:'企劃',pr:'媒體公關'};
   if(style==='line'){
     let txt=`📋 本週工作摘要\n🗓 ${todayStr}\n${'─'.repeat(25)}\n`;
     allP.forEach(({g,p})=>{
