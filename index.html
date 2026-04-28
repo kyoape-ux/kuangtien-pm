@@ -1346,9 +1346,11 @@ body.role-guest  .btn-quick-done{display:none!important}
     <div class="weekly-body">
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
         <select class="fsel-dark" id="weekly-scope" onchange="generateWeekly()">
-          <option value="both">美編 + 多媒體（全部）</option>
-          <option value="design">僅美編組</option>
-          <option value="media">僅多媒體組</option>
+          <option value="all">全部四組</option>
+          <option value="planning">僅企劃</option>
+          <option value="pr">僅媒體公關</option>
+          <option value="media">僅多媒體</option>
+          <option value="design">僅美編</option>
         </select>
         <select class="fsel-dark" id="weekly-style" onchange="generateWeekly()">
           <option value="line">LINE 群組風格</option>
