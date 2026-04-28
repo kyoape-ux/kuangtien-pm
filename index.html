@@ -2836,12 +2836,15 @@ async function exportExcel(){
   if(typeof XLSX!=='undefined'){const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[8,10,8,10,6,28,8,10,10,10,6,5,20].map(w=>({wch:w}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'工作表');XLSX.writeFile(wb,`行銷企劃處專案_${new Date().toISOString().slice(0,10)}.xlsx`);}
 }
 async function exportICS(){
-  const projects=await getProjects();
-  let ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//視覺組專案管理//ZH\r\n';
+  const GN={design:'美編',media:'多媒體',planning:'企劃',pr:'媒體公關'};
+  let ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//行銷企劃處專案管理//ZH\r\n';
   const fmt=d=>d?d.replace(/-/g,''):'';
-  projects.forEach(p=>{if(!p.endDate)return;ics+=`BEGIN:VEVENT\r\nSUMMARY:${p.title}\r\nDTSTART;VALUE=DATE:${fmt(p.startDate||p.endDate)}\r\nDTEND;VALUE=DATE:${fmt(p.endDate)}\r\nDESCRIPTION:${p.assignee||''} | ${p.category||''}\r\nEND:VEVENT\r\n`;});
+  for(const g of ['planning','pr','media','design']){
+    const projects = g===currentGroup ? (await getProjects()) : JSON.parse(localStorage.getItem('pm_'+g)||'[]');
+    projects.forEach(p=>{if(!p.endDate)return;ics+=`BEGIN:VEVENT\r\nSUMMARY:[${GN[g]}] ${p.title}\r\nDTSTART;VALUE=DATE:${fmt(p.startDate||p.endDate)}\r\nDTEND;VALUE=DATE:${fmt(p.endDate)}\r\nDESCRIPTION:${p.assignee||''} | ${p.category||''} | ${GN[g]}\r\nEND:VEVENT\r\n`;});
+  }
   ics+='END:VCALENDAR';
-  const a=document.createElement('a');a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);a.download='視覺組專案.ics';a.click();
+  const a=document.createElement('a');a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);a.download='行銷企劃處專案.ics';a.click();
 }
 function printView(){closeExportMenu();setTimeout(()=>window.print(),100);}
 /* ══ GUIDE ══ */
