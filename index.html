@@ -3690,18 +3690,22 @@ async function renderCmd() {
   const dLabel = document.getElementById('cmd-date-label');
   if (dLabel) dLabel.textContent = new Date().toLocaleDateString('zh-TW', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
 
-  let totalAll = 0, overdueAll = 0, completedAll = 0;
-  const groupStats = {};
+  // ── 載入全組資料 ──
+  const groupData = {};
   for (const [gKey, gInfo] of Object.entries(CMD_GROUPS)) {
     const raw = gKey === currentGroup
       ? (await getProjects())
       : JSON.parse(localStorage.getItem('pm_' + gKey) || '[]');
-    const total    = raw.length;
-    const done     = raw.filter(p => p.status === 'completed').length;
-    const overdue  = raw.filter(p => p.endDate && new Date(p.endDate) < today && p.status !== 'completed').length;
-    groupStats[gKey] = { total, done, overdue, name: gInfo.name, color: gInfo.color };
-    totalAll += total; completedAll += done; overdueAll += overdue;
+    const total      = raw.length;
+    const done       = raw.filter(p => p.status === 'completed').length;
+    const overdue    = raw.filter(p => p.endDate && new Date(p.endDate) < today && p.status !== 'completed').length;
+    const inProgress = raw.filter(p => !['completed','pending'].includes(p.status)).length;
+    groupData[gKey]  = { raw, total, done, overdue, inProgress, name: gInfo.name, color: gInfo.color };
   }
+  const allGroups = Object.values(groupData);
+  const totalAll     = allGroups.reduce((s,g)=>s+g.total, 0);
+  const completedAll = allGroups.reduce((s,g)=>s+g.done, 0);
+  const overdueAll   = allGroups.reduce((s,g)=>s+g.overdue, 0);
 
   const activities = JSON.parse(localStorage.getItem('pm_activities') || '[]');
   const in30 = activities.filter(a => {
@@ -3722,20 +3726,57 @@ async function renderCmd() {
   set('cmd-done-rate',  doneRate + '%');
   set('cmd-done-sub',   `${completedAll} / ${totalAll} 件`);
 
-  // Group progress
+  // ── 本週到期任務 ──
+  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 6);
+  const weekItems = [];
+  for (const [gKey, g] of Object.entries(groupData)) {
+    g.raw.forEach(p => {
+      if (!p.endDate || p.status === 'completed') return;
+      const d = new Date(p.endDate); d.setHours(0,0,0,0);
+      const diff = Math.round((d - today) / 86400000);
+      if (diff >= 0 && diff <= 6) weekItems.push({...p, _gk: gKey, _gn: g.name, _gc: g.color, _diff: diff});
+    });
+  }
+  weekItems.sort((a,b) => a._diff - b._diff);
+  const wb = el('cmd-week-board');
+  const badge = el('cmd-week-badge');
+  if (badge) { if(weekItems.length){ badge.textContent=weekItems.length+'件';badge.style.display=''; }else{ badge.style.display='none'; } }
+  if (wb) wb.innerHTML = weekItems.length ? weekItems.slice(0,12).map(p => {
+    const dayLabel = p._diff===0?'今天':p._diff===1?'明天':p._diff===2?'後天':`${p._diff} 天後`;
+    const dc = p._diff===0?'var(--coral)':p._diff<=2?'#E65100':'var(--text-muted)';
+    return `<div class="cmd-week-item" onclick="switchMainTab('${p._gk}')">
+      <div class="cmd-week-grp" style="background:${p._gc}18;color:${p._gc}">${p._gn}</div>
+      <div class="cmd-week-title">${esc(p.title)}</div>
+      <div class="cmd-week-date" style="color:${dc}">${dayLabel}</div>
+    </div>`;
+  }).join('') : '<div style="text-align:center;padding:14px;color:#4ade80;font-size:12px;font-weight:600">✓ 本週無到期任務</div>';
+
+  // ── 各組進度（健康燈號 + 細項統計）──
   const gl = el('cmd-groups-list');
-  if (gl) gl.innerHTML = Object.entries(groupStats).map(([k, s]) => {
+  if (gl) gl.innerHTML = Object.entries(groupData).map(([k, s]) => {
     const pct = s.total ? Math.round(s.done / s.total * 100) : 0;
+    const overdueRatio = s.total ? s.overdue / s.total : 0;
+    const healthColor = s.overdue > 3 || overdueRatio > 0.2 ? '#ef4444'
+      : s.overdue > 0 ? '#f59e0b' : '#22c55e';
     return `<div class="cmd-group-row" onclick="switchMainTab('${k}')">
-      <div class="cmd-group-name">${s.name}</div>
-      <div class="cmd-prog-wrap"><div class="cmd-prog-fill" style="width:${pct}%;background:${s.color}"></div></div>
+      <div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="cmd-group-name">${s.name}</div>
+          <div class="cmd-health" style="background:${healthColor}" title="${s.overdue?'逾期'+s.overdue+'件':'正常'}"></div>
+        </div>
+        <div class="cmd-grp-stats">
+          <span class="cmd-grp-stat">進行中 ${s.inProgress}</span>
+          <span class="cmd-grp-stat">待執行 ${s.total-s.done-s.inProgress>=0?s.total-s.done-s.inProgress:0}</span>
+          ${s.overdue?`<span class="cmd-grp-stat warn">逾期 ${s.overdue}</span>`:''}
+        </div>
+      </div>
+      <div class="cmd-prog-wrap" style="margin-top:0"><div class="cmd-prog-fill" style="width:${pct}%;background:${s.color}"></div></div>
       <div class="cmd-prog-pct" style="color:${s.color}">${pct}%</div>
       <div class="cmd-prog-cnt">${s.done}/${s.total}</div>
-      ${s.overdue ? `<div style="font-size:10px;color:var(--coral);font-weight:700;white-space:nowrap">逾期 ${s.overdue}</div>` : ''}
     </div>`;
   }).join('');
 
-  // Quick tools
+  // ── 快速工具連結 ──
   const tg = el('cmd-tool-grid');
   if (tg) tg.innerHTML = CMD_TOOLS.map(t =>
     `<a href="${t.url}" target="_blank" class="cmd-tool-card">
@@ -3743,7 +3784,7 @@ async function renderCmd() {
       <div><div class="cmd-tool-name">${t.name}</div><div class="cmd-tool-url">${t.sub}</div></div>
     </a>`).join('');
 
-  // Upcoming activities
+  // ── 近期活動（改良倒數標籤）──
   const upcoming = activities
     .filter(a => { const diff = a.date ? Math.ceil((new Date(a.date) - today) / 86400000) : 9999; return diff >= -7 && diff <= 60; })
     .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -3751,31 +3792,33 @@ async function renderCmd() {
   const ul = el('cmd-upcoming-list');
   if (ul) ul.innerHTML = upcoming.length ? upcoming.map(a => {
     const diff = Math.ceil((new Date(a.date) - today) / 86400000);
-    const label = diff === 0 ? '今天' : diff > 0 ? `T-${diff}` : `+${-diff}d`;
-    const color = diff < 0 ? 'var(--text-dim)' : diff <= 7 ? 'var(--coral)' : 'var(--teal2)';
-    return `<div class="cmd-upcoming-item" onclick="switchMainTab('events')">
+    const label = diff === 0 ? '今天' : diff === 1 ? '明天' : diff === 2 ? '後天' : diff > 0 ? `${diff} 天後` : diff === -1 ? '昨天' : `${-diff} 天前`;
+    const color = diff < 0 ? 'var(--text-dim)' : diff <= 3 ? 'var(--coral)' : diff <= 14 ? '#E65100' : 'var(--teal2)';
+    const borderColor = diff < 0 ? 'var(--border)' : diff <= 3 ? 'var(--coral)' : diff <= 14 ? '#E65100' : 'var(--teal)';
+    return `<div class="cmd-upcoming-item" onclick="switchMainTab('events')" style="border-left-color:${borderColor}">
       <div class="cmd-upcoming-days" style="color:${color}">${label}</div>
-      <div><div class="cmd-upcoming-name">${esc(a.title)}</div><div class="cmd-upcoming-date">${a.date} · ${a.category||'活動'}</div></div>
+      <div style="flex:1;min-width:0"><div class="cmd-upcoming-name">${esc(a.title)}</div><div class="cmd-upcoming-date">${a.date} · ${a.category||'活動'}</div></div>
     </div>`;
   }).join('') : '<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px">近期無安排活動</div>';
 
-  // Urgent
+  // ── 逾期警示（一鍵跳轉）──
   const allUrgent = [];
-  for (const [gKey, gInfo] of Object.entries(CMD_GROUPS)) {
-    const raw = gKey === currentGroup
-      ? (await getProjects())
-      : JSON.parse(localStorage.getItem('pm_' + gKey) || '[]');
-    raw.filter(p => p.endDate && new Date(p.endDate) < today && p.status !== 'completed')
-      .slice(0, 4).forEach(p => allUrgent.push({...p, _gn: gInfo.name, _gc: gInfo.color}));
+  for (const [gKey, g] of Object.entries(groupData)) {
+    g.raw.filter(p => p.endDate && new Date(p.endDate) < today && p.status !== 'completed')
+      .sort((a,b) => new Date(a.endDate)-new Date(b.endDate))
+      .slice(0, 4).forEach(p => allUrgent.push({...p, _gk: gKey, _gn: g.name, _gc: g.color}));
   }
+  allUrgent.sort((a,b)=>new Date(a.endDate)-new Date(b.endDate));
   const urgEl = el('cmd-urgent-list');
   if (urgEl) urgEl.innerHTML = allUrgent.length
-    ? allUrgent.slice(0, 8).map(p =>
-      `<div class="cmd-urgent-item">
-        <div class="cmd-urgent-group" style="background:${p._gc}18;color:${p._gc}">${p._gn}</div>
-        <div style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</div>
-        <div style="font-size:10px;color:var(--coral);white-space:nowrap">${p.endDate}</div>
-      </div>`).join('')
+    ? allUrgent.slice(0, 10).map(p => {
+        const daysLate = Math.round((today - new Date(p.endDate)) / 86400000);
+        return `<div class="cmd-urgent-item" onclick="switchMainTab('${p._gk}')" title="點擊前往 ${p._gn}">
+          <div class="cmd-urgent-group" style="background:${p._gc}18;color:${p._gc}">${p._gn}</div>
+          <div style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</div>
+          <div style="font-size:10px;color:var(--coral);white-space:nowrap;font-weight:700">逾 ${daysLate}天</div>
+        </div>`;
+      }).join('')
     : '<div style="text-align:center;padding:14px;color:#4ade80;font-size:12px;font-weight:600">✓ 目前無逾期項目</div>';
 }
 
