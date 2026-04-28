@@ -2042,11 +2042,14 @@ async function getProjects() {
 /* ══ INIT ══ */
 async function init() {
   showLoading(true);
-  _cache = { design:null, media:null };
+  _cache = { design:null, media:null, planning:null, pr:null };
   const now = new Date();
   calYear = now.getFullYear(); calMonth = now.getMonth();
   updateStatusSelects();
-  await renderAll();
+  // Only pre-render group data if we're on a group tab
+  if (currentMainTab !== 'cmd' && currentMainTab !== 'events') {
+    await renderAll();
+  }
   showLoading(false);
 }
 function showLoading(v) { document.getElementById('loading').style.display = v ? 'flex' : 'none'; }
