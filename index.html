@@ -1376,7 +1376,26 @@ body.role-guest  .btn-quick-done{display:none!important}
       <button class="modal-x" onclick="closePdfOptions()"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button>
     </div>
     <div class="weekly-body">
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">選擇要包含在報告中的項目：</p>
+      <p style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:8px">匯出組別（可複選）：</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px">
+        <label class="pdf-opt-row" style="padding:8px 12px">
+          <input type="checkbox" id="pdf-grp-planning">
+          <div><div class="pdf-opt-label">企劃</div></div>
+        </label>
+        <label class="pdf-opt-row" style="padding:8px 12px">
+          <input type="checkbox" id="pdf-grp-pr">
+          <div><div class="pdf-opt-label">媒體公關</div></div>
+        </label>
+        <label class="pdf-opt-row" style="padding:8px 12px">
+          <input type="checkbox" id="pdf-grp-media">
+          <div><div class="pdf-opt-label">多媒體</div></div>
+        </label>
+        <label class="pdf-opt-row" style="padding:8px 12px">
+          <input type="checkbox" id="pdf-grp-design">
+          <div><div class="pdf-opt-label">美編</div></div>
+        </label>
+      </div>
+      <p style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:8px">包含項目狀態：</p>
       <div style="display:flex;flex-direction:column;gap:8px">
         <label class="pdf-opt-row">
           <input type="checkbox" id="pdf-opt-active" checked>
