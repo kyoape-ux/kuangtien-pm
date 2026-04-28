@@ -2824,14 +2824,16 @@ function toggleExportMenu(e){e.stopPropagation();const m=document.getElementById
 function closeExportMenu(){document.getElementById('export-menu').style.display='none';}
 document.addEventListener('click',()=>closeExportMenu());
 async function exportExcel(){
-  const projects=await getProjects();
   const rows=[['群組','類別','來源','支援單號','層級','名稱','負責人','申請單位','開始日期','預計完成','狀態','進度%','備註']];
   const GN={design:'美編',media:'多媒體',planning:'企劃',pr:'媒體公關'}, SRC={self:'自主專案',ticket:'支援單接案'};
-  projects.forEach(p=>{
-    rows.push([GN[currentGroup],p.category,SRC[p.sourceType||'self']||'',p.supNum||'','主任務',p.title,p.assignee,p.unit,p.startDate,p.endDate,STATUS[p.status]?.label||'',p.progress||0,p.note]);
-    (p.subtasks||[]).forEach(s=>rows.push([GN[currentGroup],p.category,SRC[p.sourceType||'self']||'',p.supNum||'','子任務',s.title,s.assignee,s.unit,s.startDate,s.endDate,STATUS[s.status]?.label||'',s.progress||0,s.note]));
-  });
-  if(typeof XLSX!=='undefined'){const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[8,10,8,10,6,28,8,10,10,10,6,5,20].map(w=>({wch:w}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'工作表');XLSX.writeFile(wb,`視覺組專案_${new Date().toISOString().slice(0,10)}.xlsx`);}
+  for(const g of ['planning','pr','media','design']){
+    const projects = g===currentGroup ? (await getProjects()) : JSON.parse(localStorage.getItem('pm_'+g)||'[]');
+    projects.forEach(p=>{
+      rows.push([GN[g],p.category,SRC[p.sourceType||'self']||'',p.supNum||'','主任務',p.title,p.assignee,p.unit,p.startDate,p.endDate,STATUS[p.status]?.label||'',p.progress||0,p.note]);
+      (p.subtasks||[]).forEach(s=>rows.push([GN[g],p.category,SRC[p.sourceType||'self']||'',p.supNum||'','子任務',s.title,s.assignee,s.unit,s.startDate,s.endDate,STATUS[s.status]?.label||'',s.progress||0,s.note]));
+    });
+  }
+  if(typeof XLSX!=='undefined'){const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[8,10,8,10,6,28,8,10,10,10,6,5,20].map(w=>({wch:w}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'工作表');XLSX.writeFile(wb,`行銷企劃處專案_${new Date().toISOString().slice(0,10)}.xlsx`);}
 }
 async function exportICS(){
   const projects=await getProjects();
