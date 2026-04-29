@@ -3937,10 +3937,10 @@ async function openEditEventModal(id) {
 
 function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
 
-function submitEventForm(e) {
+async function submitEventForm(e) {
   e.preventDefault();
   const id = document.getElementById('evf-id').value;
-  const acts = getActivities();
+  const acts = await getActivities();
   const evDate = document.getElementById('evf-date').value;
   const fields = {
     title:    document.getElementById('evf-title').value.trim(),
@@ -3951,22 +3951,26 @@ function submitEventForm(e) {
     venue:    document.getElementById('evf-venue').value.trim(),
     note:     document.getElementById('evf-note').value.trim()
   };
+  let syncedItem;
   if (id) {
     const idx = acts.findIndex(x => x.id === id);
     if (idx >= 0) {
       const old = acts[idx];
       acts[idx] = { ...old, ...fields,
         tasks: old.date !== evDate ? generateEventTasks(evDate, old.tasks||[]) : (old.tasks||generateEventTasks(evDate,[])) };
+      syncedItem = acts[idx];
     }
   } else {
-    acts.push({ id:_genId(), ...fields,
+    syncedItem = { id:_genId(), ...fields,
       tasks:  generateEventTasks(evDate, []),
-      result: { reg:null, attend:null, sat:null, note:'', links:[] } });
+      result: { reg:null, attend:null, sat:null, note:'', links:[] } };
+    acts.push(syncedItem);
   }
   saveActivities(acts);
   closeEventModal();
   renderEventsView();
   showToast(id ? '活動已更新' : '活動已新增');
+  if (syncedItem) await _gasAct(id ? 'update' : 'add', syncedItem);
 }
 
 function toggleEventTask(actId, taskId) {
