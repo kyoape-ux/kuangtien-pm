@@ -3722,7 +3722,7 @@ async function renderCmd() {
   const completedAll = allGroups.reduce((s,g)=>s+g.done, 0);
   const overdueAll   = allGroups.reduce((s,g)=>s+g.overdue, 0);
 
-  const activities = JSON.parse(localStorage.getItem('pm_activities') || '[]');
+  const activities = await getActivities();
   const in30 = activities.filter(a => {
     if (!a.date) return false;
     const diff = Math.ceil((new Date(a.date) - today) / 86400000);
