@@ -2663,9 +2663,7 @@ async function ganttConfirmChange() {
     renderAll(); showToast('日期已更新（本機）'); return;
   }
   try {
-    const res = await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'update', group: currentGroup, item: updatedItem }) });
-    const result = await res.json();
+    const result = await gasWrite({ action:'update', group: currentGroup, item: updatedItem });
     if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('日期已更新！'); }
     else { showToast(''+(result.error||'更新失敗')); renderAll(); }
   } catch(err) { showToast('網路錯誤'); renderAll(); }
