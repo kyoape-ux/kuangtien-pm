@@ -3664,7 +3664,7 @@ function switchMainTab(t) {
     if (cmdView) { cmdView.style.display = 'block'; renderCmd(); }
   } else if (t === 'events') {
     _hideGroupElements();
-    if (eventsView) { eventsView.style.display = 'block'; renderEventsView(); }
+    if (eventsView) { eventsView.style.display = 'block'; _activitiesCache = null; renderEventsView(); }
   } else {
     // Group tab – restore group elements then delegate to existing view logic
     currentGroup = t;
