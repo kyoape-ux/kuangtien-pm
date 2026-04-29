@@ -3989,7 +3989,25 @@ let _activitiesCache = null;
 
 async function getActivities() {
   if (_activitiesCache !== null) return _activitiesCache;
-  // 活動資料僅用 localStorage（GAS 不支援 activities 群組，避免讀到錯誤的專案資料）
+  // 嘗試從 GAS 拉跨裝置同步資料（需 GAS 已支援 activities 群組）
+  if (API_URL) {
+    try {
+      const res = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          // 安全檢查：確保 GAS 回傳的不是污染的專案資料
+          const isPolluted = data.some(x => x && (x.assignee || x.endDate || x.startDate));
+          if (!isPolluted) {
+            localStorage.setItem('pm_activities', JSON.stringify(data));
+            _activitiesCache = data;
+            return data;
+          }
+          console.warn('[activities] GAS 回傳專案結構，視為尚未支援活動，改用本地資料');
+        }
+      }
+    } catch(e) { console.warn('[activities] GAS 同步失敗，改用本地資料', e); }
+  }
   _activitiesCache = JSON.parse(localStorage.getItem('pm_activities') || '[]');
   return _activitiesCache;
 }
