@@ -2176,6 +2176,17 @@ async function init() {
     });
     localStorage.setItem('pm_gas_clean_v1', '1');
   }
+  // 一次性清除：若 pm_activities 被 GAS 污染（內含專案物件特徵：assignee 欄位），清空之
+  if (!localStorage.getItem('pm_act_clean_v1')) {
+    try {
+      const actRaw = JSON.parse(localStorage.getItem('pm_activities') || '[]');
+      if (Array.isArray(actRaw) && actRaw.length > 0 && actRaw[0].assignee !== undefined) {
+        localStorage.removeItem('pm_activities');
+        console.info('[init] cleared corrupted pm_activities (was project data)');
+      }
+    } catch(e) { localStorage.removeItem('pm_activities'); }
+    localStorage.setItem('pm_act_clean_v1', '1');
+  }
   _cache = { design:null, media:null, planning:null, pr:null };
   const now = new Date();
   calYear = now.getFullYear(); calMonth = now.getMonth();
