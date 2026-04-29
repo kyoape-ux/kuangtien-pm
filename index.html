@@ -2082,8 +2082,13 @@ function setConn(state) {
 }
 
 /* ══ DATA ══ */
+// GAS 後端目前只支援這兩組；企劃/媒體公關僅用 localStorage
+const GAS_SUPPORTED_GROUPS = ['design', 'media'];
+
 async function fetchProjects(group) {
-  if (!API_URL) return JSON.parse(localStorage.getItem('pm_'+group)||'[]');
+  if (!API_URL || !GAS_SUPPORTED_GROUPS.includes(group)) {
+    return JSON.parse(localStorage.getItem('pm_'+group)||'[]');
+  }
   try {
     setConn('sync');
     const res  = await fetch(`${API_URL}?group=${group}`, {cache:'no-cache'});
