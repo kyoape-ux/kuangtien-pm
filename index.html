@@ -2207,7 +2207,9 @@ function setAssigneeFilter(name) {
 
 /* ══ RENDER ALL ══ */
 async function renderAll() {
+  const group = currentGroup; // 記住啟動時的組別
   const projects = await getProjects();
+  if (currentGroup !== group) return; // 等待期間組別已切換，捨棄此次渲染
   renderSummary(projects);
   renderList(projects);
   renderGantt(projects);
