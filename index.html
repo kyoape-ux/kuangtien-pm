@@ -4011,8 +4011,8 @@ function switchEvTab(evId, tab) {
 /* 成果紀錄 modal */
 let _resLinks = [];
 
-function openResultModal(id) {
-  const a = getActivities().find(x => x.id === id);
+async function openResultModal(id) {
+  const a = (await getActivities()).find(x => x.id === id);
   if (!a) return;
   document.getElementById('res-ev-id').value = id;
   const r = a.result || {};
