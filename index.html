@@ -3661,7 +3661,7 @@ function switchMainTab(t) {
 
   if (t === 'cmd') {
     _hideGroupElements();
-    if (cmdView) { cmdView.style.display = 'block'; renderCmd(); }
+    if (cmdView) { cmdView.style.display = 'block'; _activitiesCache = null; renderCmd(); }
   } else if (t === 'events') {
     _hideGroupElements();
     if (eventsView) { eventsView.style.display = 'block'; _activitiesCache = null; renderEventsView(); }
