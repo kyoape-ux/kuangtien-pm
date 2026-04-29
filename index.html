@@ -2085,6 +2085,67 @@ function setConn(state) {
 // GAS 後端目前只支援這兩組；企劃/媒體公關僅用 localStorage
 const GAS_SUPPORTED_GROUPS = ['design', 'media'];
 
+/* ── 統一寫入函式：GAS 支援的組別走 GAS；其餘直接寫 localStorage ── */
+async function gasWrite(body) {
+  const grp = body.group || currentGroup;
+  if (!API_URL || !GAS_SUPPORTED_GROUPS.includes(grp)) {
+    return _localWrite(body, grp);
+  }
+  try {
+    const res = await fetch(API_URL, {method:'POST', mode:'cors',
+      headers:{'Content-Type':'text/plain'}, body: JSON.stringify(body)});
+    const result = await res.json();
+    return result;
+  } catch(e) {
+    console.warn('gasWrite failed, fallback to local', e);
+    return _localWrite(body, grp);
+  }
+}
+
+function _localWrite(body, grp) {
+  const g = grp || currentGroup;
+  let projects = JSON.parse(localStorage.getItem('pm_'+g)||'[]');
+  const {action, item, items, ids} = body;
+  if (action === 'add') {
+    if (!item.parentId) {
+      // 主任務
+      if (!item.id) item.id = Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+      projects.push({...item, subtasks:item.subtasks||[]});
+    } else {
+      // 子任務
+      const p = projects.find(x=>x.id===item.parentId);
+      if (p) { if(!p.subtasks)p.subtasks=[]; p.subtasks.push(item); }
+    }
+  } else if (action === 'batchAdd') {
+    (items||[]).forEach(it => {
+      if (!it.parentId) {
+        if (!it.id) it.id = Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+        projects.push({...it, subtasks:it.subtasks||[]});
+      } else {
+        const p = projects.find(x=>x.id===it.parentId);
+        if (p) { if(!p.subtasks)p.subtasks=[]; p.subtasks.push(it); }
+      }
+    });
+  } else if (action === 'update') {
+    const idx = projects.findIndex(x=>x.id===item.id);
+    if (idx>=0) { projects[idx]={...projects[idx],...item}; }
+    else {
+      // 可能是子任務
+      for (const p of projects) {
+        const si = (p.subtasks||[]).findIndex(s=>s.id===item.id);
+        if (si>=0) { p.subtasks[si]={...p.subtasks[si],...item}; break; }
+      }
+    }
+  } else if (action === 'batchDelete') {
+    const idSet = new Set(ids||[]);
+    projects = projects.filter(p=>!idSet.has(p.id));
+    projects.forEach(p=>{ if(p.subtasks) p.subtasks=p.subtasks.filter(s=>!idSet.has(s.id)); });
+  }
+  localStorage.setItem('pm_'+g, JSON.stringify(projects));
+  _cache[g] = null;
+  return {ok:true};
+}
+
 async function fetchProjects(group) {
   if (!API_URL || !GAS_SUPPORTED_GROUPS.includes(group)) {
     return JSON.parse(localStorage.getItem('pm_'+group)||'[]');
