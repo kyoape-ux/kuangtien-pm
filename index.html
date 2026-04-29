@@ -3857,8 +3857,43 @@ const EV_STATUS_MAP = {
   cancelled:     {label:'已取消', cls:'ev-cancelled'}
 };
 
-function getActivities() { return JSON.parse(localStorage.getItem('pm_activities') || '[]'); }
-function saveActivities(list) { localStorage.setItem('pm_activities', JSON.stringify(list)); }
+/* ── 活動資料：localStorage + GAS 雙寫同步 ── */
+let _activitiesCache = null;
+
+async function getActivities() {
+  if (_activitiesCache !== null) return _activitiesCache;
+  if (API_URL) {
+    try {
+      const res  = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        localStorage.setItem('pm_activities', JSON.stringify(data));
+        _activitiesCache = data; return data;
+      }
+      throw new Error('invalid');
+    } catch(e) { console.warn('[activities] GAS fetch failed, using localStorage', e); }
+  }
+  _activitiesCache = JSON.parse(localStorage.getItem('pm_activities') || '[]');
+  return _activitiesCache;
+}
+
+function saveActivities(list) {
+  localStorage.setItem('pm_activities', JSON.stringify(list));
+  _activitiesCache = list;
+}
+
+async function _gasAct(action, item, id) {
+  if (!API_URL) return;
+  try {
+    const body = action === 'batchDelete'
+      ? {action, group:'activities', ids:[id], operator: OPERATOR||'system'}
+      : {action, group:'activities', item, operator: OPERATOR||'system'};
+    await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify(body)});
+  } catch(e) { console.warn('[activities] GAS sync failed', e); }
+}
+
 function _genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 function generateEventTasks(dateStr, existingTasks) {
