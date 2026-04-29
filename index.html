@@ -2100,8 +2100,9 @@ async function fetchProjects(group) {
   }
 }
 async function getProjects() {
-  if (!_cache[currentGroup]) _cache[currentGroup] = await fetchProjects(currentGroup);
-  return _cache[currentGroup];
+  const group = currentGroup; // 捕捉當下的組別，避免 await 期間 currentGroup 被切換
+  if (!_cache[group]) _cache[group] = await fetchProjects(group);
+  return _cache[group];
 }
 
 /* ══ INIT ══ */
