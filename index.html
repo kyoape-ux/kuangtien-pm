@@ -2113,11 +2113,23 @@ async function getProjects() {
 /* ══ INIT ══ */
 async function init() {
   showLoading(true);
+  // 一次性清除：若 pm_planning / pm_pr 被 GAS 污染（內容與 design/media 相同），清空之
+  if (!localStorage.getItem('pm_gas_clean_v1')) {
+    const mediaRaw   = localStorage.getItem('pm_media')    || '[]';
+    const designRaw  = localStorage.getItem('pm_design')   || '[]';
+    ['planning','pr'].forEach(g => {
+      const raw = localStorage.getItem('pm_'+g);
+      if (raw && (raw === mediaRaw || raw === designRaw)) {
+        localStorage.removeItem('pm_'+g);
+        console.info('[init] cleared corrupted pm_'+g);
+      }
+    });
+    localStorage.setItem('pm_gas_clean_v1', '1');
+  }
   _cache = { design:null, media:null, planning:null, pr:null };
   const now = new Date();
   calYear = now.getFullYear(); calMonth = now.getMonth();
   updateStatusSelects();
-  // Only pre-render group data if we're on a group tab
   if (currentMainTab !== 'cmd' && currentMainTab !== 'events') {
     await renderAll();
   }
