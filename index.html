@@ -3919,8 +3919,8 @@ function openAddEventModal() {
   document.getElementById('event-modal').style.display = 'flex';
 }
 
-function openEditEventModal(id) {
-  const a = getActivities().find(x => x.id === id);
+async function openEditEventModal(id) {
+  const a = (await getActivities()).find(x => x.id === id);
   if (!a) return;
   document.getElementById('evf-id').value = a.id;
   document.getElementById('event-modal-title').innerHTML =
