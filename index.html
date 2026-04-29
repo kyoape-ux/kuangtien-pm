@@ -3566,32 +3566,16 @@ function removeSubtaskRow(idx) {
 async function quickComplete(id) {
   const item = _itemMap[id];
   if (!item) return;
-  if (!API_URL) {
-    item.status = 'completed'; item.progress = '100';
-    _cache[currentGroup] = null; await renderAll(); showToast('已結案（本機）'); return;
-  }
-  try {
-    const res = await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'update', group: currentGroup, item: {...item, status:'completed', progress:'100'} }) });
-    const result = await res.json();
-    if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('已結案！'); }
-    else showToast('' + (result.error||'更新失敗'));
-  } catch(e) { showToast('網路錯誤'); }
+  const result = await gasWrite({ action:'update', group: currentGroup, item: {...item, status:'completed', progress:'100'} });
+  if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('已結案！'); }
+  else showToast('' + (result.error||'更新失敗'));
 }
 async function quickReopen(id) {
   const item = _itemMap[id];
   if (!item) return;
-  if (!API_URL) {
-    item.status = 'in-progress';
-    _cache[currentGroup] = null; await renderAll(); showToast('↩ 已重新開啟（本機）'); return;
-  }
-  try {
-    const res = await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'update', group: currentGroup, item: {...item, status:'in-progress'} }) });
-    const result = await res.json();
-    if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('↩ 已重新開啟！'); }
-    else showToast('' + (result.error||'更新失敗'));
-  } catch(e) { showToast('網路錯誤'); }
+  const result = await gasWrite({ action:'update', group: currentGroup, item: {...item, status:'in-progress'} });
+  if (result.ok) { _cache[currentGroup]=null; await renderAll(); showToast('↩ 已重新開啟！'); }
+  else showToast('' + (result.error||'更新失敗'));
 }
 
 /* ══ GANTT TOOLTIP ══ */
