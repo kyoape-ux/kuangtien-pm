@@ -2403,6 +2403,45 @@ async function init() {
     });
     localStorage.setItem('pm_gas_clean_v1', '1');
   }
+  // 一次性遷移：把 localStorage 的 planning / pr 資料推上 GAS（GAS v3.2 後才支援這兩組）
+  if (!localStorage.getItem('pm_pp_uploaded_v1') && API_URL) {
+    setTimeout(async () => {
+      let uploaded = 0;
+      for (const grp of ['planning', 'pr']) {
+        const local = JSON.parse(localStorage.getItem('pm_'+grp) || '[]');
+        if (!local.length) continue;
+        for (const p of local) {
+          if (!p || !p.id || !p.title) continue;
+          try {
+            // 用 update 動作（已存在就覆蓋，不存在 GAS 會回 error 我們就改用 add）
+            const r = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+              body: JSON.stringify({action:'update', group:grp, item:p, operator:'migration'})});
+            const j = await r.json();
+            if (!j.ok) {
+              const r2 = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+                body: JSON.stringify({action:'add', group:grp, item:p, operator:'migration'})});
+              const j2 = await r2.json();
+              if (j2.ok) uploaded++;
+            } else uploaded++;
+            // 子任務也上傳
+            if (Array.isArray(p.subtasks)) {
+              for (const s of p.subtasks) {
+                if (!s || !s.id || !s.title) continue;
+                await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+                  body: JSON.stringify({action:'add', group:grp, item:{...s, parentId:p.id}, operator:'migration'})});
+              }
+            }
+          } catch(e) { console.warn('[migration]', grp, p.id, e); }
+        }
+      }
+      if (uploaded > 0) {
+        localStorage.setItem('pm_pp_uploaded_v1', '1');
+        console.info('[init] 已上傳 ' + uploaded + ' 筆 planning/pr 資料到 GAS');
+        showToast('企劃/媒體公關資料已同步到雲端');
+        _cache.planning = null; _cache.pr = null;
+      }
+    }, 3000);
+  }
   // 一次性清除：若 pm_activities 被 GAS 污染（內含專案物件特徵：assignee 欄位），清空之
   if (!localStorage.getItem('pm_act_clean_v1')) {
     try {
