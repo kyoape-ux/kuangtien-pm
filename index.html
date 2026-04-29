@@ -3166,7 +3166,6 @@ function closeEditModal() {
 }
 async function submitEditTask(e) {
   e.preventDefault();
-  if (!API_URL) { showToast('尚未設定 API 網址'); return; }
   const btn = document.getElementById('ef-submit-btn');
   btn.textContent = '更新中…'; btn.disabled = true;
   const efStatus = document.getElementById('ef-status').value;
@@ -3186,23 +3185,14 @@ async function submitEditTask(e) {
     collab:    document.getElementById('ef-collab').value.trim(),
     note:      document.getElementById('ef-note').value.trim()
   };
-  try {
-    const res = await fetch(API_URL, {
-      method:'POST', mode:'cors',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'update', group: currentGroup, item })
-    });
-    const result = await res.json();
-    if (result.ok) {
-      closeEditModal();
-      _cache[currentGroup] = null;
-      await renderAll();
-      showToast('項目已更新！');
-    } else {
-      showToast('' + (result.error||'更新失敗'));
-    }
-  } catch(err) {
-    showToast('網路錯誤：' + err.message);
+  const result = await gasWrite({ action:'update', group: currentGroup, item });
+  if (result.ok) {
+    closeEditModal();
+    _cache[currentGroup] = null;
+    await renderAll();
+    showToast('項目已更新！');
+  } else {
+    showToast('' + (result.error||'更新失敗'));
   }
   btn.textContent = '儲存更新'; btn.disabled = false;
 }
