@@ -3893,18 +3893,19 @@ async function renderCmd() {
   if (gl) gl.innerHTML = Object.entries(groupData).map(([k, s]) => {
     const pct = s.total ? Math.round(s.done / s.total * 100) : 0;
     const overdueRatio = s.total ? s.overdue / s.total : 0;
-    const healthColor = s.overdue > 3 || overdueRatio > 0.2 ? '#ef4444'
-      : s.overdue > 0 ? '#f59e0b' : '#22c55e';
+    // 健康燈號：以「待跟進比例」呈現，移除紅色，最差只用琥珀
+    const healthColor = s.overdue > 3 || overdueRatio > 0.2 ? '#f59e0b'
+      : s.overdue > 0 ? '#fbbf24' : '#22c55e';
     return `<div class="cmd-group-row" onclick="switchMainTab('${k}')">
       <div>
         <div style="display:flex;align-items:center;gap:6px">
           <div class="cmd-group-name">${s.name}</div>
-          <div class="cmd-health" style="background:${healthColor}" title="${s.overdue?'逾期'+s.overdue+'件':'正常'}"></div>
+          <div class="cmd-health" style="background:${healthColor}" title="${s.overdue?'待跟進 '+s.overdue+' 件':'進度良好'}"></div>
         </div>
         <div class="cmd-grp-stats">
           <span class="cmd-grp-stat">進行中 ${s.inProgress}</span>
           <span class="cmd-grp-stat">待執行 ${s.total-s.done-s.inProgress>=0?s.total-s.done-s.inProgress:0}</span>
-          ${s.overdue?`<span class="cmd-grp-stat warn">逾期 ${s.overdue}</span>`:''}
+          ${s.overdue?`<span class="cmd-grp-stat warn">待跟進 ${s.overdue}</span>`:''}
         </div>
       </div>
       <div class="cmd-prog-wrap" style="margin-top:0"><div class="cmd-prog-fill" style="width:${pct}%;background:${s.color}"></div></div>
