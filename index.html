@@ -4112,10 +4112,11 @@ async function renderEventsView() {
     const activeTab = _evActiveTab[a.id] || 'tasks';
 
     let cntClass='future', cntNum='?', cntLabel='';
+    const dateLabel = d ? `${d.getMonth()+1}/${d.getDate()}` : '';
     if (diff === null) { cntNum='?'; cntLabel='未設定'; }
-    else if (diff === 0) { cntClass='today'; cntNum='今天'; }
-    else if (diff > 0)   { cntClass='future'; cntNum=`T-${diff}`; cntLabel=`${diff}天後`; }
-    else                 { cntClass='past';   cntNum=`+${-diff}d`; cntLabel=`${-diff}天前`; }
+    else if (diff === 0) { cntClass='today'; cntNum=dateLabel; cntLabel='今天'; }
+    else if (diff > 0)   { cntClass='future'; cntNum=dateLabel; cntLabel=`${diff}天後`; }
+    else                 { cntClass='past';   cntNum=dateLabel; cntLabel=`${-diff}天前`; }
 
     const tasks     = a.tasks || [];
     const tasksDone = tasks.filter(t => t.status === 'done').length;
