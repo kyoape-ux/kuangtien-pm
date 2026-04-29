@@ -4063,9 +4063,9 @@ async function saveResult() {
   await _gasAct('update', a);
 }
 
-function renderEventsView() {
+async function renderEventsView() {
   const container = document.getElementById('events-list'); if (!container) return;
-  let acts = getActivities();
+  let acts = await getActivities();
   const sf = document.getElementById('ev-filter-status')?.value || '';
   const cf = document.getElementById('ev-filter-cat')?.value    || '';
   if (sf) acts = acts.filter(a => a.status === sf);
