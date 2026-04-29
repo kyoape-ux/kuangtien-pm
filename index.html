@@ -2241,8 +2241,31 @@ async function testActivitiesSync() {
 
   if (allPass) {
     localStorage.setItem('pm_act_sync_enabled', '1');
+
+    // T7: 把目前 localStorage 內的活動全部推上 GAS（讓既有資料跨裝置可見）
+    showLoading(true);
+    const localActs = JSON.parse(localStorage.getItem('pm_activities') || '[]');
+    let uploaded = 0, uploadFail = 0;
+    for (const act of localActs) {
+      if (!act || !act.id) continue;
+      try {
+        const r = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({action:'update', group:'activities', item:act, operator:OPERATOR||'sync-init'})});
+        const j = await r.json();
+        if (j.ok) uploaded++; else uploadFail++;
+      } catch(e) { uploadFail++; }
+    }
+    log.push(`✅ T7 既有活動上傳：${uploaded} 筆成功${uploadFail?` / ${uploadFail} 筆失敗`:''}`);
+
+    // 重新從 GAS 拉一次，確保 cache 是同步後的狀態
     _activitiesCache = null;
-    alert(`🎉 全部測試通過！\n\n${log.join('\n')}\n\n✅ 活動跨裝置同步已自動啟用。\n往後新增/編輯/刪除活動會即時同步到 Google Sheets。`);
+    showLoading(false);
+
+    alert(`🎉 全部測試通過！\n\n${log.join('\n')}\n\n✅ 活動跨裝置同步已自動啟用。\n${uploaded?`本機 ${uploaded} 筆活動已上傳，其他裝置現在可看到。\n`:''}往後新增/編輯/刪除活動會即時同步到 Google Sheets。`);
+
+    // 切到活動頁讓使用者立即看到結果
+    if (currentMainTab !== 'events') switchMainTab('events');
+    else { _activitiesCache = null; renderEventsView(); }
   } else {
     localStorage.removeItem('pm_act_sync_enabled');
     alert(`⚠ 部分測試未通過\n\n${log.join('\n')}\n\n活動同步維持關閉以保護資料。請依說明更新 GAS 後重新測試。`);
