@@ -3434,18 +3434,14 @@ async function executeBatchImport() {
       sourceType:'ticket',supNum:base.supNum,collab:base.collab,note:base.note
     };
   });
-  try {
-    const res=await fetch(API_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({action:'batchAdd',group:currentGroup,items,operator:OPERATOR||'import'})});
-    const result=await res.json();
-    btn.textContent='確認批次匯入';btn.disabled=false;
-    if(result.ok){
-      closeImportModal();_cache[currentGroup]=null;await renderAll();
-      showToast(`批次匯入完成！共 ${result.added||items.length} 筆`);
-    } else {
-      showToast('匯入失敗：'+(result.error||'未知錯誤'));
-    }
-  } catch(e){btn.textContent='確認批次匯入';btn.disabled=false;showToast('網路錯誤：'+e.message);}
+  const result=await gasWrite({action:'batchAdd',group:currentGroup,items,operator:OPERATOR||'import'});
+  btn.textContent='確認批次匯入';btn.disabled=false;
+  if(result.ok){
+    closeImportModal();_cache[currentGroup]=null;await renderAll();
+    showToast(`批次匯入完成！共 ${result.added||items.length} 筆`);
+  } else {
+    showToast('匯入失敗：'+(result.error||'未知錯誤'));
+  }
 }
 
 /* ══ MULTI SELECT ══ */
