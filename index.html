@@ -2135,6 +2135,120 @@ async function cleanupGasPollution() {
   alert(`清理結果\n\n${report.join('\n')}\n\n總計刪除：${totalDel} 筆${totalFail?`\n失敗：${totalFail} 筆`:''}`);
 }
 window.cleanupGasPollution = cleanupGasPollution;
+
+/* ── 端對端測試：驗證 GAS 是否支援活動跨裝置同步 ── */
+async function testActivitiesSync() {
+  if (typeof PM_ROLE !== 'undefined' && PM_ROLE !== 'leader') {
+    showToast('需要組長權限'); return;
+  }
+  if (!API_URL) { showToast('未設定 API'); return; }
+
+  const log = [];
+  const push = (ok, msg) => log.push((ok?'✅':'❌') + ' ' + msg);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const testId = '__test_act_' + Date.now();
+  let allPass = true;
+  let probe;
+
+  showLoading(true);
+
+  // T1: GET 活動列表並確認回傳活動結構（非專案）
+  try {
+    const res = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('回傳非陣列');
+    const polluted = data.some(x => x && (x.assignee || x.endDate || x.startDate));
+    if (polluted) { push(false, 'T1 GET 活動：回傳專案結構（GAS 尚未支援 activities）'); allPass = false; }
+    else          { push(true,  `T1 GET 活動：成功（目前 ${data.length} 筆）`); }
+  } catch(e) {
+    push(false, 'T1 GET 活動：' + e.message); allPass = false;
+  }
+
+  // 若 T1 失敗則直接跳過後續寫入測試（避免污染）
+  if (!allPass) {
+    showLoading(false);
+    alert(`測試結果（中止）：\n\n${log.join('\n')}\n\n⚠ 請先依說明更新 GAS 的 Apps Script 程式碼，新增 activities 工作表與 handleActivities 處理函式。\n\n測試未通過，活動跨裝置同步維持關閉以保護資料。`);
+    return;
+  }
+
+  // T2: POST add 測試活動
+  try {
+    const item = {id:testId, title:'__SYNC_TEST__', date:'2099-12-31', status:'planning', category:'測試', tasks:[{id:'tt1',label:'探針',status:'pending'}], result:null};
+    const res = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'add', group:'activities', item, operator:'sync-test'})});
+    const r = await res.json();
+    if (!r.ok) throw new Error(r.error || 'GAS 回傳失敗');
+    push(true, 'T2 POST add：寫入成功');
+  } catch(e) { push(false, 'T2 POST add：' + e.message); allPass = false; }
+
+  await sleep(400);
+
+  // T3: GET 確認測試活動已存在
+  try {
+    const res = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+    const data = await res.json();
+    probe = (data || []).find(x => x && x.id === testId);
+    if (!probe) throw new Error('找不到剛剛寫入的測試活動');
+    if (probe.title !== '__SYNC_TEST__') throw new Error('title 不一致：' + probe.title);
+    if (!Array.isArray(probe.tasks) || probe.tasks.length !== 1) throw new Error('tasks 結構未保留');
+    push(true, 'T3 GET 驗證：找到測試活動且結構完整（含 tasks 陣列）');
+  } catch(e) { push(false, 'T3 GET 驗證：' + e.message); allPass = false; }
+
+  // T4: POST update 測試活動
+  try {
+    const updated = {id:testId, title:'__SYNC_TEST_V2__', date:'2099-12-31', status:'in-progress', category:'測試', tasks:[{id:'tt1',status:'done'},{id:'tt2',status:'pending'}], result:{reg:99}};
+    const res = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'update', group:'activities', item:updated, operator:'sync-test'})});
+    const r = await res.json();
+    if (!r.ok) throw new Error(r.error || 'GAS 回傳失敗');
+    await sleep(400);
+    const res2 = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+    const data = await res2.json();
+    const found = (data || []).find(x => x && x.id === testId);
+    if (!found) throw new Error('update 後讀不到');
+    if (found.title !== '__SYNC_TEST_V2__') throw new Error('update 未生效');
+    if (!found.result || found.result.reg !== 99) throw new Error('result 物件未保留');
+    push(true, 'T4 POST update：更新成功且 result 物件保留');
+  } catch(e) { push(false, 'T4 POST update：' + e.message); allPass = false; }
+
+  // T5: 確認 design / media 沒被污染
+  try {
+    let polluted = 0;
+    for (const grp of ['design','media']) {
+      const res = await fetch(`${API_URL}?group=${grp}`, {cache:'no-cache'});
+      const data = await res.json();
+      if (Array.isArray(data) && data.some(x => x && x.id === testId)) polluted++;
+    }
+    if (polluted > 0) throw new Error(`測試活動洩漏到 ${polluted} 個專案工作表！`);
+    push(true, 'T5 隔離驗證：design/media 工作表未被污染');
+  } catch(e) { push(false, 'T5 隔離驗證：' + e.message); allPass = false; }
+
+  // T6: 刪除測試活動
+  try {
+    const res = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'batchDelete', group:'activities', ids:[testId], operator:'sync-test'})});
+    const r = await res.json();
+    if (!r.ok) throw new Error(r.error || 'GAS 回傳失敗');
+    await sleep(400);
+    const res2 = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+    const data = await res2.json();
+    if ((data||[]).find(x => x && x.id === testId)) throw new Error('刪除後仍存在');
+    push(true, 'T6 batchDelete：清理成功');
+  } catch(e) { push(false, 'T6 batchDelete：' + e.message); allPass = false; }
+
+  showLoading(false);
+
+  if (allPass) {
+    localStorage.setItem('pm_act_sync_enabled', '1');
+    _activitiesCache = null;
+    alert(`🎉 全部測試通過！\n\n${log.join('\n')}\n\n✅ 活動跨裝置同步已自動啟用。\n往後新增/編輯/刪除活動會即時同步到 Google Sheets。`);
+  } else {
+    localStorage.removeItem('pm_act_sync_enabled');
+    alert(`⚠ 部分測試未通過\n\n${log.join('\n')}\n\n活動同步維持關閉以保護資料。請依說明更新 GAS 後重新測試。`);
+  }
+}
+window.testActivitiesSync = testActivitiesSync;
 function checkSetup() {
   if (!API_URL) {
     document.getElementById('setup-banner').style.display = 'flex';
