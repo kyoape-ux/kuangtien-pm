@@ -2067,7 +2067,7 @@ function _isActivityShape(x) {
   return false;
 }
 
-/* ── 一次性清理：刪除 GAS 中被誤寫的活動資料 ── */
+/* ── 搬家工具：把誤入專案組的活動還原到活動管理 ── */
 async function cleanupGasPollution() {
   if (typeof PM_ROLE !== 'undefined' && PM_ROLE !== 'leader') {
     showToast('需要組長權限'); return;
@@ -2079,8 +2079,9 @@ async function cleanupGasPollution() {
   for (const grp of GAS_SUPPORTED_GROUPS) {
     try {
       const res  = await fetch(`${API_URL}?group=${grp}`, {cache:'no-cache'});
-      if (!res.ok) throw new Error('HTTP '+res.status);
+      if (!res.ok) continue;
       const data = await res.json();
+      if (data && data.error) continue; // 該組 GAS 還沒支援，略過
       if (!Array.isArray(data)) continue;
       findings[grp] = data.filter(_isActivityShape);
     } catch(e) {
@@ -2091,51 +2092,89 @@ async function cleanupGasPollution() {
   showLoading(false);
 
   const total = Object.values(findings).reduce((s,a)=>s+a.length, 0);
-  if (!total) { alert('✅ 掃描完成：沒有發現需要清理的活動污染資料'); return; }
+  if (!total) { alert('✅ 掃描完成：沒有發現誤入專案組的活動'); return; }
 
   const lines = [];
   for (const [grp, items] of Object.entries(findings)) {
     if (!items.length) continue;
-    lines.push(`【${grp}】共 ${items.length} 筆`);
-    items.slice(0, 8).forEach(x => lines.push(`  • ${x.title || '(無標題)'}　[id:${x.id||'?'}]`));
+    lines.push(`【${grp}】共 ${items.length} 筆活動誤入：`);
+    items.slice(0, 8).forEach(x => lines.push(`  • ${x.title || '(無標題)'}`));
     if (items.length > 8) lines.push(`  …等共 ${items.length} 筆`);
   }
   const preview = lines.join('\n');
 
-  if (!confirm(`掃描結果（將從 Google Sheets 刪除以下活動污染資料）：\n\n${preview}\n\n⚠️ 此操作會直接從伺服器刪除，無法復原。\n是否確認執行？`)) {
-    showToast('已取消清理'); return;
+  if (!confirm(`掃描結果：\n\n${preview}\n\n將執行：\n1. 把這 ${total} 筆轉換為活動格式\n2. 加入「活動管理」\n3. 從原本的專案組刪除\n\n是否確認執行？`)) {
+    showToast('已取消'); return;
   }
 
   showLoading(true);
-  let totalDel = 0, totalFail = 0;
+  let recovered = 0, deleted = 0;
+  const localActs = JSON.parse(localStorage.getItem('pm_activities') || '[]');
+  const localIds = new Set(localActs.map(a => a && a.id).filter(Boolean));
   const report = [];
+
   for (const [grp, items] of Object.entries(findings)) {
     if (!items.length) continue;
-    const ids = items.map(x => x.id).filter(Boolean);
-    if (!ids.length) { report.push(`${grp}: 略過（無有效 id）`); continue; }
-    try {
-      const res = await fetch(API_URL, {
-        method:'POST', mode:'cors',
-        headers:{'Content-Type':'text/plain'},
-        body: JSON.stringify({action:'batchDelete', group:grp, ids, operator:OPERATOR||'cleanup'})
-      });
-      const r = await res.json();
-      if (r.ok) {
-        totalDel += ids.length;
-        report.push(`✅ ${grp}: 已刪除 ${ids.length} 筆`);
+
+    // 1. 轉換為活動格式並合併到本機活動
+    for (const p of items) {
+      const act = {
+        id:       p.id || (Date.now().toString(36) + Math.random().toString(36).slice(2,5)),
+        title:    p.title || '',
+        category: p.category || '其他',
+        host:     p.assignee || '',
+        location: p.unit || '',
+        date:     p.startDate || p.endDate || '',
+        status:   p.status || 'planning',
+        tasks:    [],
+        result:   null,
+        note:     p.note || ''
+      };
+      if (!localIds.has(act.id)) {
+        localActs.push(act);
+        localIds.add(act.id);
       } else {
-        totalFail += ids.length;
-        report.push(`❌ ${grp}: 失敗（${r.error||'unknown'}）`);
+        // 已存在：以較完整的版本覆蓋
+        const idx = localActs.findIndex(x => x && x.id === act.id);
+        if (idx >= 0) localActs[idx] = {...localActs[idx], ...act};
       }
-      _cache[grp] = null;
-    } catch(e) {
-      totalFail += ids.length;
-      report.push(`❌ ${grp}: 網路錯誤（${e.message}）`);
+      // 同步上傳到 GAS activities 工作表（若 GAS 已支援）
+      try {
+        await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({action:'update', group:'activities', item:act, operator:'recover'})});
+      } catch(e) {}
+      recovered++;
+    }
+
+    // 2. 從專案組刪除
+    const ids = items.map(p => p.id).filter(Boolean);
+    if (ids.length) {
+      try {
+        const res = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({action:'batchDelete', group:grp, ids, operator:'recover'})});
+        const r = await res.json();
+        if (r.ok) {
+          deleted += ids.length;
+          report.push(`✅ ${grp}: 移出 ${ids.length} 筆`);
+        } else {
+          report.push(`❌ ${grp}: 刪除失敗（${r.error||'unknown'}）`);
+        }
+        _cache[grp] = null;
+      } catch(e) {
+        report.push(`❌ ${grp}: 網路錯誤`);
+      }
     }
   }
+
+  // 寫回本機活動
+  localStorage.setItem('pm_activities', JSON.stringify(localActs));
+  _activitiesCache = null;
+
   showLoading(false);
   await renderAll();
-  alert(`清理結果\n\n${report.join('\n')}\n\n總計刪除：${totalDel} 筆${totalFail?`\n失敗：${totalFail} 筆`:''}`);
+
+  alert(`修復完成 🎉\n\n${report.join('\n')}\n\n還原到活動管理：${recovered} 筆\n從專案組移除：${deleted} 筆\n\n稍後將切換到活動管理頁。`);
+  if (typeof switchMainTab === 'function') switchMainTab('events');
 }
 window.cleanupGasPollution = cleanupGasPollution;
 
