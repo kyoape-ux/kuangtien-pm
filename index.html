@@ -2838,7 +2838,7 @@ async function renderStats() {
     <div class="kpi-card kpi-teal" onclick="setMode('all');switchView('list')"><div class="kpi-num">${totalEff}</div><div class="kpi-label">工作總量</div><div class="kpi-sub">主任務 ${totalMain} ／子任務 ${totalSub}</div></div>
     <div class="kpi-card kpi-amber" onclick="setMode('active');switchView('list')"><div class="kpi-num">${inProg}</div><div class="kpi-label">執行中</div><div class="kpi-sub">討論中 ${discussion} 件</div></div>
     <div class="kpi-card kpi-green" onclick="setMode('completed');switchView('list')"><div class="kpi-num">${compRate}%</div><div class="kpi-label">完成率</div><div class="kpi-sub">完成 ${completed}/${totalEff} 件</div></div>
-    <div class="kpi-card kpi-coral" onclick="setMode('active');switchView('list')"><div class="kpi-num">${overdue}</div><div class="kpi-label">逾期未完成</div><div class="kpi-sub">${overdue?'需關注':'目前無逾期'}</div></div>
+    <div class="kpi-card kpi-amber" onclick="setMode('active');switchView('list')"><div class="kpi-num">${overdue}</div><div class="kpi-label">待跟進</div><div class="kpi-sub">${overdue?'需要關注':'進度良好'}</div></div>
     <div class="kpi-card kpi-purple"><div class="kpi-num">${avgProg}%</div><div class="kpi-label">整體平均進度</div><div class="kpi-sub">支援單接案 ${ticketCnt} 件</div></div>`;
   const chartDefs=[
     {key:'assignee',id:'chart-assignee',type:'doughnut',getData:()=>{const m={};effectiveItems.forEach(p=>{const a=p.assignee||'未指派';m[a]=(m[a]||0)+1;});const l=Object.keys(m).sort((a,b)=>m[b]-m[a]);return{labels:l,data:l.map(k=>m[k])};},opts:{cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#8B92A9',font:{size:11},boxWidth:10,padding:8}}}}},
