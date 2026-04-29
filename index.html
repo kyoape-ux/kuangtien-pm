@@ -2868,28 +2868,20 @@ async function quickAddItem(){
     startDate:'',endDate,status:'pending',progress:'0',
     sourceType:'self',supNum:'',collab:'',note:''
   };
-  try{
-    const res=await fetch(API_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',group:currentGroup,item})});
-    const r=await res.json();
-    if(!r.ok){showToast('新增失敗');inp.disabled=false;inp.focus();return;}
-    // 批次新增子任務
-    if(subChunks.length){
-      const subItems=subChunks.map((sc,i)=>{
-        const sp=sc.split(/[\/／]/).map(p=>p.trim());
-        return{id:'T'+(Date.now()+i+1),parentId:mainId,category,title:sp[0]||'子任務'+(i+1),
-          assignee:sp[1]||assignee,unit:'',startDate:'',endDate:parseQuickDate(sp[2]||''),
-          status:'pending',progress:'0',sourceType:'self',supNum:'',collab:'',note:''};
-      });
-      await fetch(API_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},
-        body:JSON.stringify({action:'batchAdd',group:currentGroup,items:subItems})});
-    }
-    inp.value='';await refreshList();
-    showToast(`已新增${subChunks.length?'（含 '+subChunks.length+' 個子任務）':''}`);
-    openEditModal(mainId);
-  }catch(e){
-    console.error('quickAdd error:',e);
-    showToast('連線失敗（請確認 Apps Script 已重新部署）');
+  const r=await gasWrite({action:'add',group:currentGroup,item});
+  if(!r.ok){showToast('新增失敗');inp.disabled=false;inp.focus();return;}
+  if(subChunks.length){
+    const subItems=subChunks.map((sc,i)=>{
+      const sp=sc.split(/[\/／]/).map(p=>p.trim());
+      return{id:'T'+(Date.now()+i+1),parentId:mainId,category,title:sp[0]||'子任務'+(i+1),
+        assignee:sp[1]||assignee,unit:'',startDate:'',endDate:parseQuickDate(sp[2]||''),
+        status:'pending',progress:'0',sourceType:'self',supNum:'',collab:'',note:''};
+    });
+    await gasWrite({action:'batchAdd',group:currentGroup,items:subItems});
   }
+  inp.value='';await refreshList();
+  showToast(`已新增${subChunks.length?'（含 '+subChunks.length+' 個子任務）':''}`);
+  openEditModal(mainId);
   inp.disabled=false;inp.focus();
 }
 
