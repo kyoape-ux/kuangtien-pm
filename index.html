@@ -3885,18 +3885,7 @@ let _activitiesCache = null;
 
 async function getActivities() {
   if (_activitiesCache !== null) return _activitiesCache;
-  if (API_URL) {
-    try {
-      const res  = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
-      if (!res.ok) throw new Error('HTTP '+res.status);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        localStorage.setItem('pm_activities', JSON.stringify(data));
-        _activitiesCache = data; return data;
-      }
-      throw new Error('invalid');
-    } catch(e) { console.warn('[activities] GAS fetch failed, using localStorage', e); }
-  }
+  // 活動資料僅用 localStorage（GAS 不支援 activities 群組，避免讀到錯誤的專案資料）
   _activitiesCache = JSON.parse(localStorage.getItem('pm_activities') || '[]');
   return _activitiesCache;
 }
