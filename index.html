@@ -4045,9 +4045,9 @@ function addResLink() {
 }
 function removeResLink(i) { _resLinks.splice(i,1); _renderResLinks(); }
 
-function saveResult() {
+async function saveResult() {
   const id = document.getElementById('res-ev-id').value;
-  const acts = getActivities();
+  const acts = await getActivities();
   const a = acts.find(x => x.id === id); if (!a) return;
   const reg    = document.getElementById('res-reg').value;
   const attend = document.getElementById('res-attend').value;
@@ -4060,6 +4060,7 @@ function saveResult() {
                sat:sat?parseFloat(sat):null, note, links:[..._resLinks] };
   saveActivities(acts);
   closeResultModal(); renderEventsView(); showToast('成果已儲存');
+  await _gasAct('update', a);
 }
 
 function renderEventsView() {
