@@ -3671,6 +3671,7 @@ function switchMainTab(t) {
   } else {
     // Group tab – restore group elements then delegate to existing view logic
     currentGroup = t;
+    _cache[t] = null; // 強制重新向 GAS 拉取，確保切換後資料最新
     updateStatusSelects();
     switchView(currentView);
   }
