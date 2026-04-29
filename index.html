@@ -3694,14 +3694,13 @@ function switchMainTab(t) {
 
   if (t === 'cmd') {
     _hideGroupElements();
-    if (cmdView) { cmdView.style.display = 'block'; _activitiesCache = null; renderCmd(); }
+    if (cmdView) { cmdView.style.display = 'block'; renderCmd(); }
   } else if (t === 'events') {
     _hideGroupElements();
-    if (eventsView) { eventsView.style.display = 'block'; _activitiesCache = null; renderEventsView(); }
+    if (eventsView) { eventsView.style.display = 'block'; renderEventsView(); }
   } else {
-    // Group tab – restore group elements then delegate to existing view logic
+    // Group tab – 使用快取即時切換；要拉最新資料請按右上「重新整理」
     currentGroup = t;
-    _cache[t] = null; // 強制重新向 GAS 拉取，確保切換後資料最新
     updateStatusSelects();
     switchView(currentView);
   }
