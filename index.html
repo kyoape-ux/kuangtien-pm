@@ -2055,10 +2055,10 @@ function updateSheetsLink() {
 
 /* ── 偵測活動形狀的物件（提取為共用邏輯，方便測試） ── */
 function _isActivityShape(x) {
-  if (!x || typeof x !== 'object') return false;
-  // 活動特徵：有 tasks 陣列 或 result 物件，且沒有 assignee/endDate（專案必有欄位）
-  const hasActFields = (Array.isArray(x.tasks) && x.tasks.length >= 0)
-                    || (x.result && typeof x.result === 'object' && !Array.isArray(x.result));
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return false;
+  // 活動特徵：有 tasks 陣列 或 result 物件，且沒有 assignee/endDate/startDate（專案必有欄位）
+  const hasActFields = Array.isArray(x.tasks)
+                    || !!(x.result && typeof x.result === 'object' && !Array.isArray(x.result));
   const hasProjectFields = !!(x.assignee || x.endDate || x.startDate);
   return hasActFields && !hasProjectFields;
 }
