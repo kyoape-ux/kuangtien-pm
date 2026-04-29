@@ -2221,7 +2221,7 @@ function _localWrite(body, grp) {
 // 過濾掉混進專案資料中的活動物件（GAS 早期錯誤寫入造成的污染）
 function _filterOutActivities(arr) {
   if (!Array.isArray(arr)) return [];
-  return arr.filter(x => !_isActivityShape(x));
+  return arr.filter(x => x && typeof x === 'object' && !Array.isArray(x) && !_isActivityShape(x));
 }
 async function fetchProjects(group) {
   if (!API_URL || !GAS_SUPPORTED_GROUPS.includes(group)) {
