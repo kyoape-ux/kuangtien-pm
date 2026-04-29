@@ -4218,7 +4218,7 @@ async function renderEventsView() {
       let wc='', wl='';
       if (t.taskDate) {
         const tdiff = Math.ceil((new Date(t.taskDate) - today) / 86400000);
-        if (tdiff < 0 && !isDone) { wc='overdue';   wl=`逾期 ${-tdiff}天`; }
+        if (tdiff < 0 && !isDone) { wc='overdue';   wl=`待跟進`; }
         else if (tdiff === 0)     { wc='today-task'; wl='今天'; }
         else if (tdiff <= 7)      { wc='upcoming';   wl=`${tdiff}天後`; }
         else wl = t.taskDate;
