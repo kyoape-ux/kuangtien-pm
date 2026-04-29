@@ -2052,6 +2052,88 @@ function updateSheetsLink() {
   if (SHEETS_URL && PM_ROLE !== 'guest') { btn.href = SHEETS_URL; btn.style.display = ''; }
   else btn.style.display = 'none';
 }
+
+/* ── 偵測活動形狀的物件（提取為共用邏輯，方便測試） ── */
+function _isActivityShape(x) {
+  if (!x || typeof x !== 'object') return false;
+  // 活動特徵：有 tasks 陣列 或 result 物件，且沒有 assignee/endDate（專案必有欄位）
+  const hasActFields = (Array.isArray(x.tasks) && x.tasks.length >= 0)
+                    || (x.result && typeof x.result === 'object' && !Array.isArray(x.result));
+  const hasProjectFields = !!(x.assignee || x.endDate || x.startDate);
+  return hasActFields && !hasProjectFields;
+}
+
+/* ── 一次性清理：刪除 GAS 中被誤寫的活動資料 ── */
+async function cleanupGasPollution() {
+  if (typeof PM_ROLE !== 'undefined' && PM_ROLE !== 'leader') {
+    showToast('需要組長權限'); return;
+  }
+  if (!API_URL) { showToast('未設定 API'); return; }
+
+  showLoading(true);
+  const findings = {};
+  for (const grp of GAS_SUPPORTED_GROUPS) {
+    try {
+      const res  = await fetch(`${API_URL}?group=${grp}`, {cache:'no-cache'});
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      if (!Array.isArray(data)) continue;
+      findings[grp] = data.filter(_isActivityShape);
+    } catch(e) {
+      console.warn('[cleanup] fetch failed', grp, e);
+      findings[grp] = [];
+    }
+  }
+  showLoading(false);
+
+  const total = Object.values(findings).reduce((s,a)=>s+a.length, 0);
+  if (!total) { alert('✅ 掃描完成：沒有發現需要清理的活動污染資料'); return; }
+
+  const lines = [];
+  for (const [grp, items] of Object.entries(findings)) {
+    if (!items.length) continue;
+    lines.push(`【${grp}】共 ${items.length} 筆`);
+    items.slice(0, 8).forEach(x => lines.push(`  • ${x.title || '(無標題)'}　[id:${x.id||'?'}]`));
+    if (items.length > 8) lines.push(`  …等共 ${items.length} 筆`);
+  }
+  const preview = lines.join('\n');
+
+  if (!confirm(`掃描結果（將從 Google Sheets 刪除以下活動污染資料）：\n\n${preview}\n\n⚠️ 此操作會直接從伺服器刪除，無法復原。\n是否確認執行？`)) {
+    showToast('已取消清理'); return;
+  }
+
+  showLoading(true);
+  let totalDel = 0, totalFail = 0;
+  const report = [];
+  for (const [grp, items] of Object.entries(findings)) {
+    if (!items.length) continue;
+    const ids = items.map(x => x.id).filter(Boolean);
+    if (!ids.length) { report.push(`${grp}: 略過（無有效 id）`); continue; }
+    try {
+      const res = await fetch(API_URL, {
+        method:'POST', mode:'cors',
+        headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({action:'batchDelete', group:grp, ids, operator:OPERATOR||'cleanup'})
+      });
+      const r = await res.json();
+      if (r.ok) {
+        totalDel += ids.length;
+        report.push(`✅ ${grp}: 已刪除 ${ids.length} 筆`);
+      } else {
+        totalFail += ids.length;
+        report.push(`❌ ${grp}: 失敗（${r.error||'unknown'}）`);
+      }
+      _cache[grp] = null;
+    } catch(e) {
+      totalFail += ids.length;
+      report.push(`❌ ${grp}: 網路錯誤（${e.message}）`);
+    }
+  }
+  showLoading(false);
+  await renderAll();
+  alert(`清理結果\n\n${report.join('\n')}\n\n總計刪除：${totalDel} 筆${totalFail?`\n失敗：${totalFail} 筆`:''}`);
+}
+window.cleanupGasPollution = cleanupGasPollution;
 function checkSetup() {
   if (!API_URL) {
     document.getElementById('setup-banner').style.display = 'flex';
