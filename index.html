@@ -4018,8 +4018,16 @@ function saveActivities(list) {
 }
 
 async function _gasAct(action, item, id) {
-  // GAS 不支援 activities 群組，停用以避免污染 design 工作表
-  return;
+  // 必須先通過「活動同步測試」才會啟用 GAS 寫入（避免污染 design/media 工作表）
+  if (!API_URL) return;
+  if (localStorage.getItem('pm_act_sync_enabled') !== '1') return;
+  try {
+    const body = action === 'batchDelete'
+      ? {action, group:'activities', ids:[id], operator: OPERATOR||'system'}
+      : {action, group:'activities', item, operator: OPERATOR||'system'};
+    await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify(body)});
+  } catch(e) { console.warn('[activities] GAS sync failed', e); }
 }
 
 function _genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
