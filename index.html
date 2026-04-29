@@ -1995,58 +1995,47 @@ async function submitAddTask(e) {
     collab:   document.getElementById('af-collab').value.trim(),
     note:     document.getElementById('af-note').value.trim()
   };
-  try {
-    const res = await fetch(API_URL, {
-      method:'POST', mode:'cors',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'add', group: currentGroup, item })
-    });
-    const result = await res.json();
-    if (result.ok) {
-      // 批次新增子項目（一次送出，速度快）
-      const subRowEls = document.querySelectorAll('#af-subtask-rows [data-sridx]');
-      const subItems = [];
-      for (const el of subRowEls) {
-        const idx = el.dataset.sridx;
-        const subTitle = document.getElementById(`sr-title-${idx}`)?.value.trim();
-        if (!subTitle) continue;
-        const srStatus = document.getElementById(`sr-status-${idx}`)?.value || 'pending';
-        subItems.push({
-          id: 'T' + Date.now() + Math.random().toString(36).slice(2,6),
-          parentId: id,
-          category: document.getElementById('af-category').value,
-          title: subTitle,
-          assignee: document.getElementById(`sr-assignee-${idx}`)?.value.trim() || '',
-          unit: document.getElementById('af-unit').value.trim(),
-          startDate: '',
-          endDate: document.getElementById(`sr-endDate-${idx}`)?.value || '',
-          status: srStatus,
-          progress: String(getProgress(srStatus)),
-          sourceType: document.getElementById('af-sourceType').value,
-          supNum: '', collab: '', note: ''
-        });
-      }
-      if (subItems.length > 0) {
-        await fetch(API_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-          body: JSON.stringify({ action:'batchAdd', group: currentGroup, items: subItems, operator: OPERATOR||'admin' }) });
-      }
-      closeAddModal();
-      _cache[currentGroup] = null;
-      await renderAll();
-      // 若是子任務，自動展開父任務列表
-      if (savedParentId) {
-        const sl = document.getElementById('sl-' + savedParentId);
-        const ti = document.getElementById('ti-' + savedParentId);
-        if (sl) { sl.style.display = ''; if (ti) ti.classList.add('open'); }
-        showToast('子任務已新增！');
-      } else {
-        showToast(`任務已新增！${subAdded ? ` 含 ${subAdded} 個子項目` : ''}`);
-      }
-    } else {
-      showToast('' + (result.error||'新增失敗'));
+  const result = await gasWrite({ action:'add', group: currentGroup, item });
+  if (result.ok) {
+    // 批次新增子項目
+    const subRowEls = document.querySelectorAll('#af-subtask-rows [data-sridx]');
+    const subItems = [];
+    for (const el of subRowEls) {
+      const idx = el.dataset.sridx;
+      const subTitle = document.getElementById(`sr-title-${idx}`)?.value.trim();
+      if (!subTitle) continue;
+      const srStatus = document.getElementById(`sr-status-${idx}`)?.value || 'pending';
+      subItems.push({
+        id: 'T' + Date.now() + Math.random().toString(36).slice(2,6),
+        parentId: id,
+        category: document.getElementById('af-category').value,
+        title: subTitle,
+        assignee: document.getElementById(`sr-assignee-${idx}`)?.value.trim() || '',
+        unit: document.getElementById('af-unit').value.trim(),
+        startDate: '',
+        endDate: document.getElementById(`sr-endDate-${idx}`)?.value || '',
+        status: srStatus,
+        progress: String(getProgress(srStatus)),
+        sourceType: document.getElementById('af-sourceType').value,
+        supNum: '', collab: '', note: ''
+      });
     }
-  } catch(err) {
-    showToast('網路錯誤：' + err.message);
+    if (subItems.length > 0) {
+      await gasWrite({ action:'batchAdd', group: currentGroup, items: subItems, operator: OPERATOR||'admin' });
+    }
+    closeAddModal();
+    _cache[currentGroup] = null;
+    await renderAll();
+    if (savedParentId) {
+      const sl = document.getElementById('sl-' + savedParentId);
+      const ti = document.getElementById('ti-' + savedParentId);
+      if (sl) { sl.style.display = ''; if (ti) ti.classList.add('open'); }
+      showToast('子任務已新增！');
+    } else {
+      showToast(`任務已新增！${subAdded ? ` 含 ${subAdded} 個子項目` : ''}`);
+    }
+  } else {
+    showToast('' + (result.error||'新增失敗'));
   }
   btn.textContent = '新增'; btn.disabled = false;
 }
