@@ -3973,18 +3973,25 @@ async function submitEventForm(e) {
   if (syncedItem) await _gasAct(id ? 'update' : 'add', syncedItem);
 }
 
-function toggleEventTask(actId, taskId) {
-  const acts = getActivities();
+async function toggleEventTask(actId, taskId) {
+  const acts = await getActivities();
   const a = acts.find(x => x.id === actId);
   if (!a) return;
   const t = a.tasks.find(x => x.id === taskId);
-  if (t) { t.status = t.status === 'done' ? 'pending' : 'done'; saveActivities(acts); renderEventsView(); }
+  if (t) {
+    t.status = t.status === 'done' ? 'pending' : 'done';
+    saveActivities(acts);
+    renderEventsView();
+    await _gasAct('update', a);
+  }
 }
 
-function deleteEvent(id) {
+async function deleteEvent(id) {
   if (!confirm('確定要刪除這個活動嗎？此操作無法復原。')) return;
-  saveActivities(getActivities().filter(x => x.id !== id));
+  const acts = await getActivities();
+  saveActivities(acts.filter(x => x.id !== id));
   renderEventsView(); showToast('活動已刪除');
+  await _gasAct('batchDelete', null, id);
 }
 
 let _expandedEvents = new Set();
