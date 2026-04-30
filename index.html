@@ -793,8 +793,8 @@ body.role-guest  .btn-quick-done{display:none!important}
   <input type="password" id="leader-pass-input" placeholder="組長密碼（留空不更改）" style="max-width:160px">
   <input type="password" id="member-pass-input" placeholder="組員密碼（留空不更改）" style="max-width:160px">
   <button class="btn-setup" onclick="saveSetup()">儲存</button>
-  <button class="btn-setup" style="background:#C0313D" onclick="cleanupGasPollution()" title="掃描並從 Google Sheets 中刪除被誤寫入的活動資料">🧹 清理活動污染</button>
-  <button class="btn-setup" style="background:#0F6E56" onclick="testActivitiesSync()" title="端對端測試 GAS 是否支援活動跨裝置同步">🔬 測試活動同步</button>
+  <button class="btn-setup" style="background:#C0313D" onclick="cleanupGasPollution()" title="把誤入專案組的活動搬回活動管理">🧹 搬家活動到活動管理</button>
+  <button class="btn-setup" style="background:#0F6E56" onclick="forceSyncActivities()" title="把本機活動推上 Google Sheets 並從雲端拉回，讓兩邊一致">🔄 立即同步活動</button>
   <button class="btn-setup grey" onclick="document.getElementById('setup-banner').style.display='none'">關閉</button>
 </div>
 
