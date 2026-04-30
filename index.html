@@ -2057,9 +2057,11 @@ function updateSheetsLink() {
 /* ── 偵測活動形狀的物件（提取為共用邏輯，方便測試） ── */
 function _isActivityShape(x) {
   if (!x || typeof x !== 'object' || Array.isArray(x)) return false;
-  // 強訊號 1：活動專屬狀態（專案不會用 planning）
+  // 強訊號 1：id 以 ACT_ 開頭 → 是活動暫存（v3 跨裝置同步格式）
+  if (x.id && typeof x.id === 'string' && x.id.indexOf('ACT_') === 0) return true;
+  // 強訊號 2：活動專屬狀態（專案不會用 planning）
   if (x.status === 'planning') return true;
-  // 強訊號 2：有 tasks 陣列 或 result 物件，且沒有專案必有欄位
+  // 強訊號 3：有 tasks 陣列 或 result 物件，且沒有專案必有欄位
   const hasActFields = Array.isArray(x.tasks)
                     || !!(x.result && typeof x.result === 'object' && !Array.isArray(x.result));
   const hasProjectFields = !!(x.assignee || x.endDate || x.startDate);
