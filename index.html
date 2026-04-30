@@ -2178,7 +2178,80 @@ async function cleanupGasPollution() {
 }
 window.cleanupGasPollution = cleanupGasPollution;
 
-/* ── 端對端測試：驗證 GAS 是否支援活動跨裝置同步 ── */
+/* ── 立即同步活動：本機 ⇄ 雲端雙向同步並啟用之後的自動同步 ── */
+async function forceSyncActivities() {
+  if (typeof PM_ROLE !== 'undefined' && PM_ROLE !== 'leader') {
+    showToast('需要組長權限'); return;
+  }
+  if (!API_URL) { showToast('未設定 API'); return; }
+
+  showLoading(true);
+
+  // ── Step 1：探測 GAS 是否支援 activities ──
+  let probeOk = false;
+  let remote  = [];
+  try {
+    const res = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data && data.error) throw new Error('GAS：' + data.error);
+    if (!Array.isArray(data)) throw new Error('回傳格式異常');
+    // 偵測污染（GAS 未升級會回傳專案資料）
+    const polluted = data.some(x => x && (x.assignee || x.endDate || x.startDate));
+    if (polluted) throw new Error('GAS 尚未升級（回傳專案結構）');
+    remote = data;
+    probeOk = true;
+  } catch(e) {
+    showLoading(false);
+    alert(`❌ GAS 探測失敗\n\n${e.message}\n\n請先確認：\n1. Apps Script 已部署 v3.1 或 v3.2 程式碼\n2. 部署時版本選了「新版本」\n3. 試算表底下有 activities 工作表分頁`);
+    return;
+  }
+
+  // ── Step 2：合併本機與雲端（以 id 為鍵，較新 updatedAt 優先；無時戳則保留兩邊都有的版本）──
+  const local = JSON.parse(localStorage.getItem('pm_activities') || '[]');
+  const map = new Map();
+  for (const a of local)  if (a && a.id) map.set(a.id, a);
+  for (const a of remote) if (a && a.id) {
+    const cur = map.get(a.id);
+    // 雲端優先（雲端是權威，避免某裝置殘留舊資料覆蓋）
+    map.set(a.id, cur ? {...cur, ...a} : a);
+  }
+  const merged = Array.from(map.values());
+
+  // ── Step 3：把合併後的全部資料推上 GAS（update 動作會自動 add 或覆蓋）──
+  let pushed = 0, failed = 0;
+  for (const a of merged) {
+    if (!a || !a.id) continue;
+    try {
+      const r = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({action:'update', group:'activities', item:a, operator:OPERATOR||'force-sync'})});
+      const j = await r.json();
+      if (j.ok) pushed++; else failed++;
+    } catch(e) { failed++; }
+  }
+
+  // ── Step 4：重新從 GAS 拉一次（取最終一致的雲端版本）──
+  let final = merged;
+  try {
+    const res2 = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+    const data2 = await res2.json();
+    if (Array.isArray(data2)) final = data2;
+  } catch(e) {}
+
+  // ── Step 5：寫回本機，啟用自動同步旗標 ──
+  localStorage.setItem('pm_activities', JSON.stringify(final));
+  localStorage.setItem('pm_act_sync_enabled', '1');
+  _activitiesCache = null;
+
+  showLoading(false);
+  await renderAll();
+  if (typeof switchMainTab === 'function') switchMainTab('events');
+
+  alert(`✅ 同步完成 🎉\n\n本機：${local.length} 筆\n雲端原有：${remote.length} 筆\n推送：${pushed} 筆${failed?` / 失敗 ${failed} 筆`:''}\n最終共 ${final.length} 筆活動已就位。\n\n📌 其他裝置只要硬重整（Cmd+Shift+R）即可看到一樣的資料。\n📌 之後新增/編輯/刪除活動會自動同步。`);
+}
+window.forceSyncActivities = forceSyncActivities;
+
+/* ── 端對端測試（保留供未來除錯使用） ── */
 async function testActivitiesSync() {
   if (typeof PM_ROLE !== 'undefined' && PM_ROLE !== 'leader') {
     showToast('需要組長權限'); return;
