@@ -4279,26 +4279,79 @@ const EV_STATUS_MAP = {
 /* ── 活動資料：localStorage + GAS 雙寫同步 ── */
 let _activitiesCache = null;
 
+/* ══ 活動跨裝置同步 ══
+   策略：把活動編碼成 design 工作表中 id 以 ACT_ 為前綴的列，
+   讀取時挑出 ACT_ 列還原為活動。這樣不需更新 GAS 即可跨裝置同步。
+   過濾邏輯：_isActivityShape 偵測 ACT_ 前綴 → _filterOutActivities 排除 → 美編 tab 看不到
+*/
+const ACT_PREFIX = 'ACT_';
+
+function _activityToProjectRow(act) {
+  return {
+    id: ACT_PREFIX + (act.id || (Date.now().toString(36)+Math.random().toString(36).slice(2,5))),
+    parentId: '',
+    category: act.category || '',
+    title: act.title || '',
+    assignee: act.host || '',
+    unit: act.location || '',
+    startDate: act.date || '',
+    endDate: act.date || '',
+    status: act.status || 'planning',
+    progress: '0',
+    sourceType: 'activity',
+    supNum: '',
+    collab: '',
+    note: JSON.stringify({
+      tasks: Array.isArray(act.tasks) ? act.tasks : [],
+      result: act.result || null,
+      origNote: act.note || ''
+    })
+  };
+}
+
+function _projectRowToActivity(row) {
+  if (!row || !row.id || typeof row.id !== 'string' || !row.id.startsWith(ACT_PREFIX)) return null;
+  let extra = {};
+  try { extra = JSON.parse(row.note || '{}'); } catch(e) {}
+  return {
+    id: row.id.slice(ACT_PREFIX.length),
+    title:    row.title || '',
+    category: row.category || '',
+    host:     row.assignee || '',
+    location: row.unit || '',
+    date:     row.startDate || row.endDate || '',
+    status:   row.status || 'planning',
+    tasks:    Array.isArray(extra.tasks) ? extra.tasks : [],
+    result:   extra.result || null,
+    note:     extra.origNote || ''
+  };
+}
+
 async function getActivities() {
   if (_activitiesCache !== null) return _activitiesCache;
-  // 嘗試從 GAS 拉跨裝置同步資料（需 GAS 已支援 activities 群組）
+  // 從 design 撈 ACT_ 前綴的列還原成活動（不需 GAS 升級即可跨裝置同步）
   if (API_URL) {
     try {
-      const res = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+      const res = await fetch(`${API_URL}?group=design`, {cache:'no-cache'});
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          // 安全檢查：確保 GAS 回傳的不是污染的專案資料
-          const isPolluted = data.some(x => x && (x.assignee || x.endDate || x.startDate));
-          if (!isPolluted) {
-            localStorage.setItem('pm_activities', JSON.stringify(data));
-            _activitiesCache = data;
-            return data;
-          }
-          console.warn('[activities] GAS 回傳專案結構，視為尚未支援活動，改用本地資料');
+          const acts = data
+            .filter(p => p && p.id && typeof p.id === 'string' && p.id.startsWith(ACT_PREFIX))
+            .map(_projectRowToActivity)
+            .filter(Boolean);
+          // 合併本機資料：以雲端為主，本機獨有的保留
+          const local = JSON.parse(localStorage.getItem('pm_activities') || '[]');
+          const map = new Map();
+          for (const a of local)  if (a && a.id) map.set(a.id, a);
+          for (const a of acts)   if (a && a.id) map.set(a.id, a); // 雲端覆蓋本機
+          const merged = Array.from(map.values());
+          localStorage.setItem('pm_activities', JSON.stringify(merged));
+          _activitiesCache = merged;
+          return merged;
         }
       }
-    } catch(e) { console.warn('[activities] GAS 同步失敗，改用本地資料', e); }
+    } catch(e) { console.warn('[activities] 雲端讀取失敗，改用本地', e); }
   }
   _activitiesCache = JSON.parse(localStorage.getItem('pm_activities') || '[]');
   return _activitiesCache;
@@ -4310,16 +4363,26 @@ function saveActivities(list) {
 }
 
 async function _gasAct(action, item, id) {
-  // 必須先通過「活動同步測試」才會啟用 GAS 寫入（避免污染 design/media 工作表）
+  // 把活動以 ACT_ 前綴編碼後寫入 design 工作表（無需 GAS 升級）
   if (!API_URL) return;
-  if (localStorage.getItem('pm_act_sync_enabled') !== '1') return;
   try {
-    const body = action === 'batchDelete'
-      ? {action, group:'activities', ids:[id], operator: OPERATOR||'system'}
-      : {action, group:'activities', item, operator: OPERATOR||'system'};
-    await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify(body)});
-  } catch(e) { console.warn('[activities] GAS sync failed', e); }
+    if (action === 'batchDelete') {
+      await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({action:'batchDelete', group:'design', ids:[ACT_PREFIX+id], operator: OPERATOR||'system'})});
+      _cache.design = null;
+      return;
+    }
+    // add / update：先 update，找不到 id 就改 add
+    const row = _activityToProjectRow(item);
+    const r1 = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'update', group:'design', item:row, operator: OPERATOR||'system'})});
+    const j1 = await r1.json();
+    if (!j1.ok && j1.error && String(j1.error).indexOf('找不到') >= 0) {
+      await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({action:'add', group:'design', item:row, operator: OPERATOR||'system'})});
+    }
+    _cache.design = null;
+  } catch(e) { console.warn('[activities] sync failed', e); }
 }
 
 function _genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
