@@ -2180,7 +2180,7 @@ async function cleanupGasPollution() {
 }
 window.cleanupGasPollution = cleanupGasPollution;
 
-/* ── 立即同步活動：本機 ⇄ 雲端雙向同步並啟用之後的自動同步 ── */
+/* ── 立即同步活動：本機 ⇄ 雲端（design 工作表）雙向同步 ── */
 async function forceSyncActivities() {
   if (typeof PM_ROLE !== 'undefined' && PM_ROLE !== 'leader') {
     showToast('需要組長權限'); return;
@@ -2189,61 +2189,70 @@ async function forceSyncActivities() {
 
   showLoading(true);
 
-  // ── Step 1：探測 GAS 是否支援 activities ──
-  let probeOk = false;
-  let remote  = [];
+  // ── Step 1：從 design 撈出 ACT_ 前綴的列還原為活動 ──
+  let remote = [];
   try {
-    const res = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+    const res = await fetch(`${API_URL}?group=design`, {cache:'no-cache'});
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (data && data.error) throw new Error('GAS：' + data.error);
     if (!Array.isArray(data)) throw new Error('回傳格式異常');
-    // 偵測污染（GAS 未升級會回傳專案資料）
-    const polluted = data.some(x => x && (x.assignee || x.endDate || x.startDate));
-    if (polluted) throw new Error('GAS 尚未升級（回傳專案結構）');
-    remote = data;
-    probeOk = true;
+    remote = data
+      .filter(p => p && p.id && typeof p.id === 'string' && p.id.startsWith(ACT_PREFIX))
+      .map(_projectRowToActivity)
+      .filter(Boolean);
   } catch(e) {
     showLoading(false);
-    alert(`❌ GAS 探測失敗\n\n${e.message}\n\n請先確認：\n1. Apps Script 已部署 v3.1 或 v3.2 程式碼\n2. 部署時版本選了「新版本」\n3. 試算表底下有 activities 工作表分頁`);
+    alert(`❌ 雲端讀取失敗\n\n${e.message}\n\n請檢查網路或 API 設定。`);
     return;
   }
 
-  // ── Step 2：合併本機與雲端（以 id 為鍵，較新 updatedAt 優先；無時戳則保留兩邊都有的版本）──
+  // ── Step 2：合併本機與雲端 ──
   const local = JSON.parse(localStorage.getItem('pm_activities') || '[]');
   const map = new Map();
   for (const a of local)  if (a && a.id) map.set(a.id, a);
   for (const a of remote) if (a && a.id) {
     const cur = map.get(a.id);
-    // 雲端優先（雲端是權威，避免某裝置殘留舊資料覆蓋）
     map.set(a.id, cur ? {...cur, ...a} : a);
   }
   const merged = Array.from(map.values());
 
-  // ── Step 3：把合併後的全部資料推上 GAS（update 動作會自動 add 或覆蓋）──
+  // ── Step 3：把合併後的活動全部編碼成 ACT_ 列推上 design ──
   let pushed = 0, failed = 0;
   for (const a of merged) {
     if (!a || !a.id) continue;
+    const row = _activityToProjectRow(a);
     try {
       const r = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
-        body: JSON.stringify({action:'update', group:'activities', item:a, operator:OPERATOR||'force-sync'})});
+        body: JSON.stringify({action:'update', group:'design', item:row, operator:OPERATOR||'force-sync'})});
       const j = await r.json();
-      if (j.ok) pushed++; else failed++;
+      if (!j.ok && j.error && String(j.error).indexOf('找不到') >= 0) {
+        const r2 = await fetch(API_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({action:'add', group:'design', item:row, operator:OPERATOR||'force-sync'})});
+        const j2 = await r2.json();
+        if (j2.ok) pushed++; else failed++;
+      } else if (j.ok) pushed++;
+      else failed++;
     } catch(e) { failed++; }
   }
 
-  // ── Step 4：重新從 GAS 拉一次（取最終一致的雲端版本）──
+  // ── Step 4：重新從 design 拉，取最終一致版本 ──
   let final = merged;
   try {
-    const res2 = await fetch(`${API_URL}?group=activities`, {cache:'no-cache'});
+    const res2 = await fetch(`${API_URL}?group=design`, {cache:'no-cache'});
     const data2 = await res2.json();
-    if (Array.isArray(data2)) final = data2;
+    if (Array.isArray(data2)) {
+      final = data2
+        .filter(p => p && p.id && typeof p.id === 'string' && p.id.startsWith(ACT_PREFIX))
+        .map(_projectRowToActivity)
+        .filter(Boolean);
+    }
   } catch(e) {}
 
-  // ── Step 5：寫回本機，啟用自動同步旗標 ──
+  // ── Step 5：寫回本機並啟用自動同步 ──
   localStorage.setItem('pm_activities', JSON.stringify(final));
   localStorage.setItem('pm_act_sync_enabled', '1');
   _activitiesCache = null;
+  _cache.design = null; // 美編 tab 重新拉，過濾掉 ACT_ 列
 
   showLoading(false);
   await renderAll();
