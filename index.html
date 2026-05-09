@@ -2540,6 +2540,22 @@ async function init() {
     });
     localStorage.setItem('pm_gas_clean_v1', '1');
   }
+  // 一次性清除 v2：把 planning/pr localStorage 中混入的 design/media 專屬狀態項目移除
+  if (!localStorage.getItem('pm_gas_clean_v2')) {
+    ['planning','pr'].forEach(g => {
+      const raw = localStorage.getItem('pm_'+g);
+      if (!raw) return;
+      try {
+        const arr = JSON.parse(raw);
+        const cleaned = arr.filter(x => x && !DESIGN_EXCL_STATUSES.has(x.status) && !MEDIA_EXCL_STATUSES.has(x.status));
+        if (cleaned.length !== arr.length) {
+          localStorage.setItem('pm_'+g, JSON.stringify(cleaned));
+          console.info('[init] removed ' + (arr.length - cleaned.length) + ' cross-group items from pm_'+g);
+        }
+      } catch(e) { console.warn('[init] clean v2 parse error', g, e); }
+    });
+    localStorage.setItem('pm_gas_clean_v2', '1');
+  }
   // 一次性遷移：把 localStorage 的 planning / pr 資料推上 GAS（GAS v3.2 後才支援這兩組）
   if (!localStorage.getItem('pm_pp_uploaded_v1') && API_URL) {
     setTimeout(async () => {
