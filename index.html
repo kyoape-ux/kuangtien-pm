@@ -2491,9 +2491,16 @@ function _filterOutActivities(arr) {
   if (!Array.isArray(arr)) return [];
   return arr.filter(x => x && typeof x === 'object' && !Array.isArray(x) && !_isActivityShape(x));
 }
+// 排除其他組專屬狀態，防止 GAS 回傳跨組污染資料
+function _guardGroupFilter(items, group) {
+  if (group === 'design') return items.filter(x => !MEDIA_EXCL_STATUSES.has(x.status));
+  if (group === 'media')  return items.filter(x => !DESIGN_EXCL_STATUSES.has(x.status));
+  // planning / pr：排除 design 與 media 專屬狀態
+  return items.filter(x => !DESIGN_EXCL_STATUSES.has(x.status) && !MEDIA_EXCL_STATUSES.has(x.status));
+}
 async function fetchProjects(group) {
   if (!API_URL || !GAS_SUPPORTED_GROUPS.includes(group)) {
-    return _filterOutActivities(JSON.parse(localStorage.getItem('pm_'+group)||'[]'));
+    return _guardGroupFilter(_filterOutActivities(JSON.parse(localStorage.getItem('pm_'+group)||'[]')), group);
   }
   try {
     setConn('sync');
@@ -2501,14 +2508,14 @@ async function fetchProjects(group) {
     if (!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    const clean = _filterOutActivities(data);
+    const clean = _guardGroupFilter(_filterOutActivities(data), group);
     localStorage.setItem('pm_'+group, JSON.stringify(clean));
     setConn('ok');
     return clean;
   } catch(e) {
     console.warn('fetch failed', e);
     setConn('err');
-    return _filterOutActivities(JSON.parse(localStorage.getItem('pm_'+group)||'[]'));
+    return _guardGroupFilter(_filterOutActivities(JSON.parse(localStorage.getItem('pm_'+group)||'[]')), group);
   }
 }
 async function getProjects() {
