@@ -2065,8 +2065,10 @@ async function submitAddTask(e) {
         supNum: '', collab: '', note: ''
       });
     }
+    let subAdded = 0;
     if (subItems.length > 0) {
-      await gasWrite({ action:'batchAdd', group: currentGroup, items: subItems, operator: OPERATOR||'admin' });
+      const subRes = await gasWrite({ action:'batchAdd', group: currentGroup, items: subItems, operator: OPERATOR||'admin' });
+      if (subRes && subRes.ok) subAdded = subRes.added || subItems.length;
     }
     closeAddModal();
     _cache[currentGroup] = null;
