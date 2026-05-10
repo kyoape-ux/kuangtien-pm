@@ -2534,12 +2534,47 @@ function _filterOutActivities(arr) {
 function _guardGroupFilter(items, group) {
   if (group === 'design') return items.filter(x => !MEDIA_EXCL_STATUSES.has(x.status));
   if (group === 'media')  return items.filter(x => !DESIGN_EXCL_STATUSES.has(x.status));
-  // planning / pr：排除 design 與 media 專屬狀態
   return items.filter(x => !DESIGN_EXCL_STATUSES.has(x.status) && !MEDIA_EXCL_STATUSES.has(x.status));
+}
+// GAS 同時存有「帶 subtasks 陣列的母項目」與「帶 parentId 的扁平子任務」兩種格式
+// 此函式統一正規化成巢狀結構，並去除重複
+function _normalizeProjects(arr) {
+  if (!Array.isArray(arr)) return [];
+  const parentMap = {};   // id → parent item
+  const orphanSubs = [];  // 帶 parentId 但母項目可能已含 subtasks 的子任務
+  // 第一輪：收集母項目（無 parentId）
+  arr.forEach(x => {
+    if (!x || !x.id) return;
+    if (!x.parentId) {
+      if (!parentMap[x.id]) {
+        parentMap[x.id] = { ...x, subtasks: [] };
+      } else {
+        // 已存在（重複）：合併，保留最新欄位但不覆蓋 subtasks
+        parentMap[x.id] = { ...parentMap[x.id], ...x, subtasks: parentMap[x.id].subtasks };
+      }
+      // 若原始資料就有 subtasks 陣列，先放入（後面再去重）
+      if (Array.isArray(x.subtasks)) {
+        x.subtasks.forEach(s => { if (s && s.id) orphanSubs.push({ ...s, parentId: x.id }); });
+      }
+    } else {
+      orphanSubs.push(x);
+    }
+  });
+  // 第二輪：把所有子任務（包含從 subtasks 展開的）合併進母項目，依 ID 去重
+  orphanSubs.forEach(s => {
+    if (!s || !s.id || !s.parentId) return;
+    const p = parentMap[s.parentId];
+    if (!p) return;
+    if (!p.subtasks.find(x => x.id === s.id)) {
+      p.subtasks.push(s);
+    }
+  });
+  return Object.values(parentMap);
 }
 async function fetchProjects(group) {
   if (!API_URL || !GAS_SUPPORTED_GROUPS.includes(group)) {
-    return _guardGroupFilter(_filterOutActivities(JSON.parse(localStorage.getItem('pm_'+group)||'[]')), group);
+    const raw = _filterOutActivities(JSON.parse(localStorage.getItem('pm_'+group)||'[]'));
+    return _guardGroupFilter(_normalizeProjects(raw), group);
   }
   try {
     setConn('sync');
@@ -2547,14 +2582,15 @@ async function fetchProjects(group) {
     if (!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    const clean = _guardGroupFilter(_filterOutActivities(data), group);
+    const clean = _guardGroupFilter(_normalizeProjects(_filterOutActivities(data)), group);
     localStorage.setItem('pm_'+group, JSON.stringify(clean));
     setConn('ok');
     return clean;
   } catch(e) {
     console.warn('fetch failed', e);
     setConn('err');
-    return _guardGroupFilter(_filterOutActivities(JSON.parse(localStorage.getItem('pm_'+group)||'[]')), group);
+    const raw = _filterOutActivities(JSON.parse(localStorage.getItem('pm_'+group)||'[]'));
+    return _guardGroupFilter(_normalizeProjects(raw), group);
   }
 }
 async function getProjects() {
