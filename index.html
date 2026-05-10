@@ -2655,6 +2655,15 @@ async function init() {
     await renderAll();
   }
   showLoading(false);
+  // 背景預載入其他組別，消除 tab 切換 lag
+  const _allGroups = ['design','media','planning','pr'];
+  setTimeout(() => {
+    _allGroups.filter(g => g !== currentGroup).forEach(g => {
+      if (!_cache[g]) {
+        fetchProjects(g).then(data => { if (!_cache[g]) _cache[g] = data; }).catch(()=>{});
+      }
+    });
+  }, 800);
 }
 function showLoading(v) { document.getElementById('loading').style.display = v ? 'flex' : 'none'; }
 async function manualRefresh() {
