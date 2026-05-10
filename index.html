@@ -4023,6 +4023,54 @@ function removeSubtaskRow(idx) {
   }
 }
 
+// WBS 智能展開
+function wbsSuggest() {
+  const title = (document.getElementById('af-title')?.value || '').trim();
+  if (!title) { showToast('請先輸入項目標題'); return; }
+  // 比對模板
+  const lower = title.toLowerCase();
+  let matched = WBS_TEMPLATES.find(t => t.keys.some(k => lower.includes(k.toLowerCase())));
+  if (!matched) {
+    // 預設通用模板
+    matched = { tasks:['需求確認','計畫規劃','素材製作','執行','審核確認','結案報告'] };
+  }
+  // 清除現有子項目
+  const container = document.getElementById('af-subtask-rows');
+  container.innerHTML = '';
+  _subtaskRowCount = 0;
+  document.getElementById('af-subtask-empty').style.display = 'none';
+  // 填入建議子項目
+  matched.tasks.forEach(taskTitle => {
+    const idx = _subtaskRowCount++;
+    const stOpts = (STATUS_OPTIONS[currentGroup]||STATUS_OPTIONS.media)
+      .map(o=>`<option value="${o.v}"${o.v==='pending'?' selected':''}>${o.l}</option>`).join('');
+    const inputStyle = `padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:'Noto Sans TC',sans-serif;outline:none;width:100%`;
+    const row = document.createElement('div');
+    row.id = `sr-${idx}`; row.dataset.sridx = idx;
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 80px 110px 100px 30px;gap:6px;margin-bottom:6px;align-items:center';
+    row.innerHTML = `
+      <input id="sr-title-${idx}" value="${taskTitle}" style="${inputStyle}" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+      <input id="sr-assignee-${idx}" placeholder="負責人" style="${inputStyle}" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+      <input id="sr-endDate-${idx}" type="date" style="${inputStyle}" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+      <select id="sr-status-${idx}" style="${inputStyle};background:#fff;cursor:pointer">${stOpts}</select>
+      <button type="button" onclick="removeSubtaskRow(${idx})" style="padding:5px 7px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:6px;font-size:11px;cursor:pointer;color:var(--coral);line-height:1;font-family:'Noto Sans TC',sans-serif"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button>`;
+    container.appendChild(row);
+  });
+  showToast(`✨ 已展開 ${matched.tasks.length} 個 WBS 子任務，可自行編輯`);
+}
+
+// 僅重繪甘特（不重新拉資料），用於篩選輸入
+function renderGanttOnly() {
+  const projects = _cache[currentGroup] || [];
+  renderGantt(projects);
+}
+// 甘特收合切換
+function ganttToggle(id) {
+  if (_ganttCollapsed.has(id)) _ganttCollapsed.delete(id);
+  else _ganttCollapsed.add(id);
+  renderGanttOnly();
+}
+
 /* ══ QUICK COMPLETE ══ */
 async function quickComplete(id) {
   const item = _itemMap[id];
