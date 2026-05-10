@@ -298,7 +298,12 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .due-pill.active{background:var(--coral);color:white;border-color:var(--coral);box-shadow:0 2px 8px rgba(255,107,107,.3)}
 
 /* ── GANTT ── */
-.gantt-container{padding:0 24px 40px;overflow-x:auto}
+.gantt-toolbar{padding:12px 24px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gantt-search{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'Noto Sans TC',sans-serif;outline:none;width:220px;background:white;color:var(--text)}
+.gantt-search:focus{border-color:var(--teal)}
+.gantt-search::placeholder{color:var(--text-dim)}
+.gantt-tb-label{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.gantt-container{padding:12px 24px 40px;overflow-x:auto}
 .gantt-wrap{min-width:900px;background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden}
 .gantt-head{display:flex;border-bottom:1px solid var(--border);background:#FAFAFA}
 .g-label-col{width:220px;flex-shrink:0;padding:10px 16px;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px;text-transform:uppercase;border-right:1px solid var(--border)}
@@ -309,7 +314,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .g-row{display:flex;border-bottom:1px solid var(--border);min-height:44px;align-items:center}
 .g-row:last-child{border-bottom:none}
 .g-row:hover{background:#FAFAFA}
-.g-row-label{width:220px;flex-shrink:0;padding:8px 16px;border-right:1px solid var(--border);background:#FAFAFA}
+.g-row-label{width:220px;flex-shrink:0;padding:8px 10px 8px 12px;border-right:1px solid var(--border);background:#FAFAFA;display:flex;align-items:center;gap:4px}
+.g-collapse-btn{flex-shrink:0;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;color:var(--text-muted);transition:all .15s;user-select:none;font-size:10px}
+.g-collapse-btn:hover{background:var(--surface3);color:var(--text)}
+.g-row-info{min-width:0;flex:1}
 .g-row-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .g-row-meta{font-size:10px;color:var(--text-muted);margin-top:1px}
 .g-timeline{flex:1;position:relative;height:44px}
