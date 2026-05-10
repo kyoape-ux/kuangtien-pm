@@ -2462,7 +2462,8 @@ function setConn(state) {
 
 /* ══ DATA ══ */
 // GAS 後端目前只支援這兩組；企劃/媒體公關僅用 localStorage
-const GAS_SUPPORTED_GROUPS = ['design', 'media', 'planning', 'pr'];
+// planning / pr 的 GAS 後端不支援分組過濾，會回傳 design 資料造成污染，改用 localStorage
+const GAS_SUPPORTED_GROUPS = ['design', 'media'];
 
 /* ── 統一寫入函式：GAS 支援的組別走 GAS；其餘直接寫 localStorage ── */
 async function gasWrite(body) {
