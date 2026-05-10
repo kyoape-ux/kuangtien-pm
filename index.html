@@ -2638,6 +2638,15 @@ async function init() {
     localStorage.setItem('pm_gas_clean_v2', '1');
     localStorage.setItem('pm_gas_clean_v3', '1');
   }
+  // v4 一次性砍掉重做：四組全雲端後，design/planning/pr 的本機快取全清空
+  // 保留 media（資料未受污染）。下次啟動會直接從 GAS 拉乾淨資料。
+  if (!localStorage.getItem('pm_gas_clean_v4')) {
+    ['design','planning','pr'].forEach(g => {
+      localStorage.removeItem('pm_'+g);
+      console.info(`[init v4] 清空 pm_${g}`);
+    });
+    localStorage.setItem('pm_gas_clean_v4', '1');
+  }
   // 一次性清除：若 pm_activities 被 GAS 污染（內含專案物件特徵：assignee 欄位），清空之
   if (!localStorage.getItem('pm_act_clean_v1')) {
     try {
